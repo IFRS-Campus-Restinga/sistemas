@@ -11,6 +11,8 @@ from django.conf import settings
 
 GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_SECRET
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
 @api_view(['POST'])
 def login(request):
     token = request.data.get('token', None)
@@ -37,22 +39,22 @@ def login(request):
         if created:
             if email.endswith("@aluno.restinga.ifrs.edu.br"):
                 group, _ = Group.objects.get_or_create(name='aluno')
-            elif email.endswith('@restinga.ifrs.edu.br'):
+            else:
                 group, _ = Group.objects.get_or_create(name='servidor')
-            
-            user.groups.add(group)
 
-        # Gera tokens JWT
+            user.group = group
+            user.save()
+
+        # Gera token com dados personalizados
         refresh = RefreshToken.for_user(user)
+        refresh['email'] = user.email
+        refresh['first_name'] = user.first_name
+        refresh['last_name'] = user.last_name
+        refresh['group'] = user.group.name
+
         return Response({
             'refresh': str(refresh),
             'access': str(refresh.access_token),
-            'user': {
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'email': user.email,
-                'group': user.groups.first().name if user.groups.exists() else None
-            }
         })
 
     except ValueError:
