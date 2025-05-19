@@ -1,21 +1,22 @@
-import requests
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.tokens import RefreshToken
 from google_auth.models import CustomUser
 from django.conf import settings
 
-GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_SECRET
+GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_ID
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
-    token = request.data.get('token', None)
+    token = request.data.get('credential', None)
 
     if not token:
         return Response({'message': 'Token necessário'}, status=status.HTTP_400_BAD_REQUEST)
@@ -30,8 +31,7 @@ def login(request):
         if not email.endswith("@restinga.ifrs.edu.br") and not email.endswith("@aluno.restinga.ifrs.edu.br"):
             return Response({'message': 'Email não pertence à instituição'}, status=status.HTTP_403_FORBIDDEN)
 
-        user, created = CustomUser.objects.get_or_create(username=email, defaults={
-            "email": email,
+        user, created = CustomUser.objects.get_or_create(email=email, defaults={
             "first_name": first_name,
             "last_name": last_name
         })
@@ -57,7 +57,7 @@ def login(request):
             'access': str(refresh.access_token),
         })
 
-    except ValueError:
-        return Response({'message': 'Token inválido'}, status=status.HTTP_400_BAD_REQUEST)
+    except ValueError as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
