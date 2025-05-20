@@ -18,50 +18,13 @@
     height: 100%;
 }
 
-.ul {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-}
-
-.li,
-.liSelected {
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    margin-right: 10px;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.li:hover,
-.liSelected:hover {
-    transform: scale(1.03);
-    cursor: pointer;
-}
-
-.liSelected {
-    border: 2px solid #006b3f;
-}
-
-.divLi {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .span {
     display: flex;
     align-items: center;
     gap: 15px;
-}
-
-.img {
-    width: 50px;
-    height: 50px
+    font-size: 12px;
+    color: #767676;
+    font-family: 'Roboto';
 }
 
 .h2,
@@ -78,7 +41,13 @@
 
 .optionP {
     width: 100%;
+    display: flex;
+    justify-content: center;
     text-align: center;
+
+    &:hover {
+        cursor: pointer;
+    }
 }
 
 .loginOptions {
@@ -88,6 +57,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 15px;
 }
 
 .visitorOptions {
@@ -100,29 +70,5 @@
 
 .horizontalHr {
     border: 1px solid #ccc;
-    width: 50%;
-}
-
-.visitorForm {
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-}
-
-.label {
-    width: 80%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Roboto';
-    color: #767676;
-    font-size: 12px;
-}
-
-.optionP:hover {
-    cursor: pointer;
 }

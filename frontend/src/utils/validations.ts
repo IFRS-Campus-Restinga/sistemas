@@ -13,7 +13,7 @@ export const validatePassword = (password: string) => {
 
     if (password.length === 0) return 'Campo obrigatório'
 
-    if (passwordRegex.test(password)) return 'A senha deve conter ao menos: 1 letra maíuscula, 1 número, 1 caractere especial e no mínimo 8 dígitos'
+    if (!passwordRegex.test(password)) return 'A senha deve conter ao menos: 1 letra maíuscula, 1 número, 1 caractere especial e no mínimo 8 dígitos'
 
     return null
 }
