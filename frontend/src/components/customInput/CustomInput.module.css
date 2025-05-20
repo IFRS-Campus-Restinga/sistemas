@@ -1,0 +1,27 @@
+.input,
+.errorInput {
+    width: 100%;
+    padding: 5px;
+    font-family: 'Roboto';
+    color: #7d7d7d;
+    border: 1px solid transparent;
+    border-radius: 5px;
+}
+
+.input:focus,
+.errorInput:focus {
+    outline: none;
+}
+
+.input {
+    border-color: #ccc;
+}
+
+.errorInput {
+    border-color: red;
+}
+
+.errorMessage {
+    color: red;
+    font-size: 12px;
+}
