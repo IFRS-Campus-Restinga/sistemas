@@ -23,6 +23,9 @@ SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx
 
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('OAUTHLIB_INSECURE_TRANSPORT', '0')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -59,7 +62,10 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            f'{BASE_DIR}/backend/google_auth/templates',  # Para o Google Auth
+            os.path.join(BASE_DIR, 'dependencias_app', 'templates_email')  # Para templates de e-mail
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

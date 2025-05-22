@@ -3,14 +3,14 @@ import type { visitorAccountProps } from '../pages/login/Login'
 
 interface AuthParams {
     credential?: string
-    accessGroup: 'Aluno' | 'Servidor' | 'Convidado'
+    group: 'Aluno' | 'Servidor' | 'Convidado'
 }
 
 const AuthService = {
     createAccount: async (visitorData: visitorAccountProps) => {
         const params = {
             ...visitorData,
-            accessGroup: 'Convidado'
+            group: 'Convidado'
         }
         const res = await api.post('/auth/convidado/createAccount/', params)
 
@@ -20,7 +20,7 @@ const AuthService = {
     },
 
     googleLogin: async (params: AuthParams) => {
-        const res = await api.post('/login/', params)
+        const res = await api.post('/auth/login/', params)
 
         if (res.status !== 200) return new Error(res.data.message)
 

@@ -57,7 +57,7 @@ const Login = () => {
     const handleSuccess = async (response: CredentialResponse) => {
         setIsDisabled(true)
 
-        const req = AuthService.googleLogin({ credential: response.credential, accessGroup: loginGroup })
+        const req = AuthService.googleLogin({ credential: response.credential, group: loginGroup })
 
         toast.promise(
             req,
@@ -69,7 +69,8 @@ const Login = () => {
         );
 
         setIsDisabled(false)
-        setAccessRequested(true)
+
+        if (loginGroup !== 'Aluno') setAccessRequested(true)
     }
 
     const handleError = () => {

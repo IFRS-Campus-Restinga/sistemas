@@ -15,8 +15,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def login(request):
+def login_with_google(request):
     token = request.data.get('credential', None)
+    group_name = request.data.get('group', None)
 
     if not token:
         return Response({'message': 'Token necessário'}, status=status.HTTP_400_BAD_REQUEST)
@@ -36,11 +37,14 @@ def login(request):
             "last_name": last_name
         })
 
+        if not user.is_active:
+            return Response({'Você não possui permissão para fazer login, contate o administrador, para ter sua conta ativada'}, status=status.HTTP_401_UNAUTHORIZED)
+
         if created:
-            if email.endswith("@aluno.restinga.ifrs.edu.br"):
-                group, _ = Group.objects.get_or_create(name='aluno')
-            else:
-                group, _ = Group.objects.get_or_create(name='servidor')
+            group, _ = Group.objects.get_or_create(name=group_name)
+
+            if group_name != 'Aluno':
+                user.is_active = False
 
             user.group = group
             user.save()
@@ -61,3 +65,4 @@ def login(request):
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

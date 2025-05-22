@@ -18,5 +18,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('google_auth.urls'))
+    path('django-admin/', include('google_auth.urls')),
+    path('auth/', include('google_auth.urls'))
 ]
