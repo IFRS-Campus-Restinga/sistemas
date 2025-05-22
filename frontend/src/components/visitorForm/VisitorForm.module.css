@@ -29,6 +29,12 @@
     font-weight: 500;
 }
 
+.formGroup {
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+
 .inputGroupContainer {
     display: flex;
     flex-direction: column;

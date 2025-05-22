@@ -46,8 +46,6 @@ class CustomUser(AbstractUser):
     password = None
     username = None
     groups = None
-    last_name = None
-    first_name = None
 
     objects = CustomUserManager()
 

@@ -1,7 +1,7 @@
 import styles from './VisitorForm.module.css'
 import { useEffect, useState } from 'react'
 import type { visitorAccountErrorProps, visitorAccountProps } from '../../pages/login/Login'
-import { comparePasswords, validateEmail, validatePassword } from '../../utils/validations'
+import { comparePasswords, validateEmail, validateName, validatePassword } from '../../utils/authValidations'
 import CustomButton from '../customButton/CustomButton'
 import CustomInput from '../customInput/CustomInput'
 import visible from '../../assets/eye-show-svgrepo-com.svg'
@@ -38,6 +38,34 @@ const VisitorForm = ({ createAccount, setCreateAccount, formData, setFormData, e
                     onBlur={() => setErrors({ ...errors, email: validateEmail(formData.email) })}
                 />
             </label>
+            {
+                createAccount ? (
+                    <div className={styles.formGroup}>
+                        <label className={styles.label}>
+                            Nome
+                            <CustomInput
+                                type="text"
+                                max={30}
+                                value={formData.first_name}
+                                error={errors.first_name}
+                                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                                onBlur={() => setErrors({ ...errors, first_name: validateName(formData.first_name) })}
+                            />
+                        </label>
+                        <label className={styles.label}>
+                            Sobrenome
+                            <CustomInput
+                                type="text"
+                                max={30}
+                                value={formData.last_name}
+                                error={errors.last_name}
+                                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                                onBlur={() => setErrors({ ...errors, last_name: validateName(formData.last_name) })}
+                            />
+                        </label>
+                    </div>
+                ) : null
+            }
             <label className={styles.label}>
                 Senha
                 <div className={styles.inputGroupContainer}>

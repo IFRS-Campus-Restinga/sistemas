@@ -6,14 +6,15 @@ interface CustomInputProps {
     type: string
     onChange: (e: any) => void
     onBlur: (e?: any) => void
-    min?: string
+    min?: number
+    max?: number
 }
 
-const CustomInput = ({ value, error, type, min, onBlur, onChange }: CustomInputProps) => {
+const CustomInput = ({ value, error, type, min, max, onBlur, onChange }: CustomInputProps) => {
 
     return (
         <div className={styles.inputContainer}>
-            <input className={error ? styles.errorInput : styles.input} type={type} value={value} min={min} onBlur={onBlur} onChange={onChange} />
+            <input className={error ? styles.errorInput : styles.input} type={type} value={value} min={min} onBlur={onBlur} onChange={onChange} max={max} />
             {
                 error !== null ? (
                     <p className={styles.errorMessage}>{error}</p>

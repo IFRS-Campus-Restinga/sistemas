@@ -5,6 +5,17 @@
     margin: auto;
 }
 
+.sectionMessage {
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    height: 65%;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
 .hr {
     display: flex;
     flex-direction: column;

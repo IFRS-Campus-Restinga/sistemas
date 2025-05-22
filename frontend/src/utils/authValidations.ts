@@ -23,3 +23,9 @@ export const comparePasswords = (password1: string, password2: string) => {
 
     return null
 }
+
+export const validateName = (name: string) => {
+    if (name.trim() === '') return 'Campo obrigatório'
+
+    return null
+}
