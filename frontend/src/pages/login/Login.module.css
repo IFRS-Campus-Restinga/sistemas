@@ -1,8 +1,11 @@
 .section {
     width: 65%;
-    height: 65%;
+    height: 80%;
     display: flex;
     margin: auto;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 10px;
 }
 
 .sectionMessage {

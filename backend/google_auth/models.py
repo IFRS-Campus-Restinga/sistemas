@@ -38,7 +38,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     date_joined = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=False)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     permissions = models.ManyToManyField(Permission)
 

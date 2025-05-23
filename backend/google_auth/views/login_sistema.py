@@ -4,6 +4,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status, serializers
+from django.shortcuts import get_object_or_404
+from django.http import Http404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.tokens import RefreshToken
 from google_auth.models import *
@@ -79,34 +81,69 @@ def login_with_google(request):
     
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def create_account_visitor(request):
+def login(request):
+    try:
+        user = get_object_or_404(CustomUser, email=request.data.get('email', None))
 
+        password = Password.objects.get(user=user)
+
+        if not password.check_password(request.data.get('password', None)):
+            return Response({'message': 'Usuário ou senha incorretos'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        refresh = RefreshToken.for_user(user)
+        refresh['first_name'] = user.first_name
+        refresh['last_name'] = user.last_name
+        refresh['group'] = user.group.name
+        refresh['permissions'] = [perm.name for perm in user.permissions.all()]
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
+
+    except Http404 as e:
+        return Response({'message': 'Usuário não existe'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_account_visitor(request):
     try:
         data = request.data
         password = data.pop('password')
 
-        group = Group.objects.get(name=data.group)
+        user = CustomUser.objects.get(email=data.get('email', None))
 
-        if group.DoesNotExist:
+        if user:
+            return Response({'message': 'Email já cadastrado!'}, status=status.HTTP_400_BAD_REQUEST)
+
+        group = Group.objects.get(name=data.get('group', None))
+        permission = Permission.objects.get(name='Convidado')
+
+        if not group:
             return Response({'Grupo de acesso inválido'}, status=status.HTTP_400_BAD_REQUEST)
+
+        data['group'] = group.id
+        data['permissions'] = [permission.id]
 
         serializer_user = Custom_User_Serializer(data=data)
 
         if not serializer_user.is_valid():
             raise serializers.ValidationError(serializer_user.errors)
-
-        serializer_user.instance.group = group
-        serializer_user.instance.is_active = False
-
+        
         serializer_user.save()
-
-        serializer_password = Password_Serializer(data={'user': serializer_user.instance, 'password': password})
+        
+        serializer_password = Password_Serializer(data={'user': serializer_user.instance.id, 'password': password})
 
         if not serializer_password.is_valid():
             raise serializers.ValidationError(serializer_password.errors)
         
+        serializer_password.save()
 
-    
+        return Response({'message': 'Conta criada com sucesso'}, status=status.HTTP_201_CREATED)
+    except serializers.ValidationError as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

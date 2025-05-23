@@ -1,0 +1,17 @@
+.section {
+    display: flex;
+    width: 65%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    margin: auto;
+}
+
+.button {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #006b3f;
+    color: white;
+    border: none;
+}

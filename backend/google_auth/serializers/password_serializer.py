@@ -1,12 +1,20 @@
 import re
 from rest_framework import serializers
 from google_auth.models import Password
+from django.contrib.auth.hashers import make_password
 
 
-class Password_Serializer(serializers.ModelSerializer):  # Use ModelSerializer ao invés de Serializer
+class Password_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Password
         fields = '__all__'
+
+    def save(self, **kwargs):
+        if 'password' in self.validated_data:
+            raw_password = self.validated_data['password']
+            self.validated_data['password'] = make_password(raw_password)
+
+        return super().save(**kwargs)
 
     def validate_password(self, value):
         if len(value) < 8:
