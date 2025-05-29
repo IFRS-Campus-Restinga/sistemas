@@ -9,7 +9,7 @@ from django.http import Http404
 from django.contrib.auth.models import Group
 from rest_framework_simplejwt.tokens import RefreshToken
 from google_auth.models import *
-from google_auth.serializers.custom_user_serializer import Custom_User_Serializer
+from google_auth.serializers.custom_user_serializer import CustomUserSerializer
 from google_auth.serializers.password_serializer import Password_Serializer
 from django.conf import settings
 
@@ -32,13 +32,14 @@ def login_with_google(request):
         email = idinfo.get("email")
         first_name = idinfo.get("given_name", "")
         last_name = idinfo.get("family_name", "")
+        profile_picture = idinfo.get("picture", "")
 
         user, created = CustomUser.objects.get_or_create(email=email, defaults={
             "first_name": first_name,
             "last_name": last_name
         })
 
-        if user:
+        if not created:
             password = Password.objects.filter(user=user).first()
             if not user.is_active:
                 return Response({'message':'Você não possui permissão para fazer login, contate o administrador, para ter sua conta ativada'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -49,10 +50,10 @@ def login_with_google(request):
         if created:
             group = Group.objects.get(name=group_name)
             permission = ''
-            if group_name == 'Aluno' or group_name == 'Servidor':
-                permission = Permission.objects.get(name='Membro')
+            if group_name == 'aluno' or group_name == 'servidor':
+                permission = Permission.objects.get(name='membro')
             else:
-                permission = Permission.objects.get(name='Convidado')
+                permission = Permission.objects.get(name='visitante')
 
 
             user.permissions.add(permission)
@@ -60,19 +61,30 @@ def login_with_google(request):
             user.group = group
             user.save()
 
-            return Response({'first_login': True}, status=status.HTTP_201_CREATED)
+            return Response({'is_active': user.is_active}, status=status.HTTP_201_CREATED)
 
         # Gera token com dados personalizados
         refresh = RefreshToken.for_user(user)
+        refresh['id'] = str(user.id)
         refresh['first_name'] = user.first_name
         refresh['last_name'] = user.last_name
         refresh['group'] = user.group.name
         refresh['permissions'] = [perm.name for perm in user.permissions.all()]
+        refresh['profile_picture_src'] = profile_picture
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+        response = Response({'access_token': str(refresh.access_token), 'first_login': user.first_login})
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=3600 * 24 * 7,
+            path="/"
+        )
+
+        return response
 
     except ValueError as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -96,10 +108,19 @@ def login(request):
         refresh['group'] = user.group.name
         refresh['permissions'] = [perm.name for perm in user.permissions.all()]
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_200_OK)
+        response = Response({'access_token': str(refresh.access_token), 'first_login': user.first_login})
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+            max_age=3600 * 24 * 7,
+            path="/"
+        )
+
+        return response
 
     except Http404 as e:
         return Response({'message': 'Usuário não existe'}, status=status.HTTP_404_NOT_FOUND)
@@ -113,13 +134,13 @@ def create_account_visitor(request):
         data = request.data
         password = data.pop('password')
 
-        user = CustomUser.objects.get(email=data.get('email', None))
+        user = CustomUser.objects.filter(email=data.get('email', None)).first()
 
         if user:
             return Response({'message': 'Email já cadastrado!'}, status=status.HTTP_400_BAD_REQUEST)
 
         group = Group.objects.get(name=data.get('group', None))
-        permission = Permission.objects.get(name='Convidado')
+        permission = Permission.objects.get(name='visitante')
 
         if not group:
             return Response({'Grupo de acesso inválido'}, status=status.HTTP_400_BAD_REQUEST)
@@ -127,7 +148,7 @@ def create_account_visitor(request):
         data['group'] = group.id
         data['permissions'] = [permission.id]
 
-        serializer_user = Custom_User_Serializer(data=data)
+        serializer_user = CustomUserSerializer(data=data)
 
         if not serializer_user.is_valid():
             raise serializers.ValidationError(serializer_user.errors)

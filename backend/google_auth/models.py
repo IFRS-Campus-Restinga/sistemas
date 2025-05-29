@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager, Group
 from django.core.validators import MinLengthValidator
 from django.contrib.auth.hashers import check_password, make_password
+from google_auth.enums.categories import Categories
 
 class Permission(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -31,7 +32,6 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
-
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
@@ -41,6 +41,7 @@ class CustomUser(AbstractUser):
     is_active = models.BooleanField(default=False)
     group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True, blank=True)
     permissions = models.ManyToManyField(Permission)
+    first_login = models.BooleanField(default=True)
 
     last_login = None
     password = None
@@ -57,7 +58,7 @@ class CustomUser(AbstractUser):
     
 class Password(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    password = models.CharField(max_length=128, validators=[MinLengthValidator(8)])
+    password = models.CharField(max_length=128)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='custom_password')
 
     def set_password(self, raw_password):
@@ -65,3 +66,9 @@ class Password(models.Model):
 
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
+    
+class StudentAdditionalInfos(models.Model):
+    category = models.CharField(choices=Categories.choices, max_length=15, null=False, blank=False)
+    birth_date = models.DateField()
+    telephone_number = models.CharField(max_length=13, null=False, blank=False)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

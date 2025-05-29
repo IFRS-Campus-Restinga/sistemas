@@ -5,8 +5,8 @@ import employee from '../../assets/user-suit-svgrepo-com.svg'
 import check from '../../assets/check-circle-svgrepo-com.svg'
 
 interface LoginGroupListProps {
-    loginGroup: 'Aluno' | 'Servidor' | 'Convidado'
-    changeLoginGroup: (group: 'Aluno' | 'Servidor' | 'Convidado') => void
+    loginGroup: 'aluno' | 'servidor' | 'convidado'
+    changeLoginGroup: (group: 'aluno' | 'servidor' | 'convidado') => void
 }
 
 const LoginGroupList = ({ changeLoginGroup, loginGroup }: LoginGroupListProps) => {
@@ -14,45 +14,45 @@ const LoginGroupList = ({ changeLoginGroup, loginGroup }: LoginGroupListProps) =
     return (
         <div className={styles.div}>
             <ul className={styles.ul}>
-                <li className={loginGroup === 'Aluno' ? styles.liSelected : styles.li}
-                    onClick={() => changeLoginGroup('Aluno')}>
+                <li className={loginGroup === 'aluno' ? styles.liSelected : styles.li}
+                    onClick={() => changeLoginGroup('aluno')}>
                     <div className={styles.divLi}>
                         <span className={styles.span}>
-                            <img className={styles.img} src={student} alt="Aluno" />
+                            <img className={styles.img} src={student} alt="aluno" />
                             <h2 className={styles.h2}>Aluno</h2>
                         </span>
                         {
-                            loginGroup === 'Aluno' ? (
+                            loginGroup === 'aluno' ? (
                                 <img className={styles.img} src={check} alt="marcado" />
                             ) : null
                         }
                     </div>
                     <p className={styles.p}>Selecione este grupo de acesso caso seja aluno da instituição</p>
                 </li>
-                <li className={loginGroup === 'Servidor' ? styles.liSelected : styles.li}
-                    onClick={() => changeLoginGroup('Servidor')}>
+                <li className={loginGroup === 'servidor' ? styles.liSelected : styles.li}
+                    onClick={() => changeLoginGroup('servidor')}>
                     <div className={styles.divLi}>
                         <span className={styles.span}>
-                            <img className={styles.img} src={employee} alt="Servidor" />
+                            <img className={styles.img} src={employee} alt="servidor" />
                             <h2 className={styles.h2}>Servidor</h2>
                         </span>
                         {
-                            loginGroup === 'Servidor' ? (
+                            loginGroup === 'servidor' ? (
                                 <img className={styles.img} src={check} alt="marcado" />
                             ) : null
                         }
                     </div>
                     <p className={styles.p}>Selecione este grupo de acesso caso seja servidor de qualquer área da instituição</p>
                 </li>
-                <li className={loginGroup === 'Convidado' ? styles.liSelected : styles.li}
-                    onClick={() => changeLoginGroup('Convidado')}>
+                <li className={loginGroup === 'convidado' ? styles.liSelected : styles.li}
+                    onClick={() => changeLoginGroup('convidado')}>
                     <div className={styles.divLi}>
                         <span className={styles.span}>
-                            <img className={styles.img} src={visitor} alt="Convidado" />
+                            <img className={styles.img} src={visitor} alt="convidado" />
                             <h2 className={styles.h2}>Convidado</h2>
                         </span>
                         {
-                            loginGroup === 'Convidado' ? (
+                            loginGroup === 'convidado' ? (
                                 <img className={styles.img} src={check} alt="marcado" />
                             ) : null
                         }

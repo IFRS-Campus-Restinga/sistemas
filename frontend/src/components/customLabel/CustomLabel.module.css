@@ -1,0 +1,8 @@
+.label {
+    font-family: 'Roboto';
+    font-weight: 500;
+    color: #767676;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}

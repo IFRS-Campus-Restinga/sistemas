@@ -1,20 +1,19 @@
-import type { Axios, AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
 import api from '../../config/apiConfig'
 import type { visitorAccountProps, visitorLoginProps } from '../pages/login/Login'
 import { extractError } from '../utils/handleAxiosError';
 
 interface AuthParams {
     credential?: string
-    group: 'Aluno' | 'Servidor' | 'Convidado'
+    group: 'aluno' | 'servidor' | 'convidado'
 }
 
 type LoginSuccessResponse = {
-    access: string;
-    refresh: string;
+    access_token: string;
 };
 
 type LoginFirstLoginResponse = {
-    first_login: true;
+    is_active: false;
 };
 
 type LoginResponse = LoginSuccessResponse | LoginFirstLoginResponse;
@@ -23,7 +22,7 @@ const AuthService = {
     createAccount: async (visitorData: visitorAccountProps): Promise<AxiosResponse<LoginFirstLoginResponse>> => {
         const params = {
             ...visitorData,
-            group: 'Convidado'
+            group: 'convidado'
         }
 
         try {
@@ -38,7 +37,7 @@ const AuthService = {
 
     login: async (params: visitorLoginProps): Promise<AxiosResponse<LoginResponse>> => {
         try {
-            const res = await api.post('/auth/login/', params)
+            const res = await api.post('/auth/account/login/', params)
 
             return res
         } catch (error: any) {

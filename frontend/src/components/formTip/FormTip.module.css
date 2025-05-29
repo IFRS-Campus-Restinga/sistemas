@@ -1,0 +1,40 @@
+.tipContainer {
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.tipIcon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 2px solid #006b3f;
+    font-size: 20px;
+    color: #006b3f;
+    font-family: 'Roboto';
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+
+    &:hover {
+        cursor: pointer
+    }
+}
+
+.tip {
+    white-space: pre-line;
+    background-color: white;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+    font-family: 'Roboto';
+    font-size: 12px;
+    width: 200px;
+    position: absolute;
+    font-weight: 600;
+    top: 100%;
+    padding: 10px;
+    border-radius: 8px;
+}

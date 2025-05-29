@@ -41,13 +41,14 @@ export interface JwtPayload {
     permissions: string[];
     first_name?: string;
     last_name?: string;
+    profile_picture_src: string
 }
 
 
 const Login = () => {
     const redirect = useNavigate()
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
-    const [loginGroup, setLoginGroup] = useState<'Aluno' | 'Servidor' | 'Convidado'>('Aluno')
+    const [loginGroup, setLoginGroup] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
     const [loginWithExternalAccount, setLoginWithExternalAccount] = useState<boolean>(false)
     const [createAccount, setCreateAccount] = useState<boolean>(false)
     const [isDisabled, setIsDisabled] = useState<boolean>(false)
@@ -66,10 +67,10 @@ const Login = () => {
         passwordConfirmation: ''
     })
 
-    const changeGroup = (group: 'Aluno' | 'Servidor' | 'Convidado') => {
+    const changeGroup = (group: 'aluno' | 'servidor' | 'convidado') => {
         setLoginGroup(group)
 
-        if (group === 'Aluno' || group === 'Servidor') {
+        if (group === 'aluno' || group === 'servidor') {
             setLoginWithExternalAccount(false)
             setCreateAccount(false)
             setVisitorAccountData({
@@ -99,11 +100,10 @@ const Login = () => {
                 try {
                     const res = await req;
 
-                    if ('first_login' in res.data) {
+                    if ('is_active' in res.data) {
                         setAccessRequested(true)
                     } else {
-                        sessionStorage.setItem('access', res.data.access)
-                        sessionStorage.setItem('refresh', res.data.refresh)
+                        sessionStorage.setItem('access', res.data.access_token)
 
                         setErrors({
                             email: null,
@@ -113,12 +113,12 @@ const Login = () => {
                             passwordConfirmation: null
                         });
 
-                        const permissions = jwtDecode<JwtPayload>(res.data.access).permissions
+                        const permissions = jwtDecode<JwtPayload>(res.data.access_token).permissions
 
                         for (let permission of permissions) {
-                            if (permission === 'Admin') redirect(`/Admin/home`)
-                            if (permission === 'Membro') redirect(`/Membro/home`)
-                            if (permission === 'Convidado') redirect(`/Convidado/home`)
+                            if (permission === 'admin') redirect(`/admin/home`)
+                            if (permission === 'membro') redirect(`/membro/home`)
+                            if (permission === 'convidado') redirect(`/convidado/home`)
                         }
                     }
 
@@ -147,7 +147,6 @@ const Login = () => {
         e.preventDefault()
 
         setIsDisabled(true)
-        setAccessRequested(true)
 
         if (!validateRegisterForm()) return
 
@@ -155,7 +154,15 @@ const Login = () => {
             const req = AuthService.createAccount(visitorAccountData)
 
             toast.promise(
-                req,
+                (async () => {
+                    try {
+                        await req;
+
+                        setAccessRequested(true)
+                    } finally {
+                        setIsDisabled(false);
+                    }
+                })(),
                 {
                     pending: 'Criando conta...',
                     success: 'Conta criada com sucesso',
@@ -183,11 +190,10 @@ const Login = () => {
                     try {
                         const res = await req;
 
-                        if ('first_login' in res.data) {
+                        if ('is_active' in res.data) {
                             setAccessRequested(true)
                         } else {
-                            sessionStorage.setItem('access', res.data.access)
-                            sessionStorage.setItem('refresh', res.data.refresh)
+                            sessionStorage.setItem('access', res.data.access_token)
 
                             setErrors({
                                 email: null,
@@ -197,12 +203,14 @@ const Login = () => {
                                 passwordConfirmation: null
                             });
 
-                            const permissions = jwtDecode<JwtPayload>(res.data.access).permissions
+                            const permissions = jwtDecode<JwtPayload>(res.data.access_token).permissions
+
+                            console.log(permissions)
 
                             for (let permission of permissions) {
-                                if (permission === 'Admin') redirect(`/Admin/home`)
-                                if (permission === 'Membro') redirect(`/Membro/home`)
-                                if (permission === 'Convidado') redirect(`/Convidado/home`)
+                                if (permission === 'admin') redirect(`/admin/home`)
+                                if (permission === 'membro') redirect(`/membro/home`)
+                                if (permission === 'visitante') redirect(`/visitante/home`)
                             }
                         }
 
@@ -212,8 +220,8 @@ const Login = () => {
                     }
                 })(),
                 {
-                    pending: 'Criando conta...',
-                    success: 'Conta criada com sucesso!',
+                    pending: 'Entrando...',
+                    success: 'Login finalizado com sucesso!',
                     error: {
                         render({ data }: any) {
                             return data.message || 'Erro ao autenticar'
@@ -308,7 +316,7 @@ const Login = () => {
                         <div className={styles.loginOptions}>
                             <h2 className={styles.h2}>Faça seu Login</h2>
                             {
-                                loginGroup === 'Convidado' && !isDisabled ? (
+                                loginGroup === 'convidado' && !isDisabled ? (
                                     <div className={styles.visitorOptions}>
                                         <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
 

@@ -25,13 +25,37 @@ SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
-os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = os.getenv('OAUTHLIB_INSECURE_TRANSPORT', '0')
+LOGIN_URL = os.getenv('LOGIN_URL')
+LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URI')
 
+
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+CSRF_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+]
+
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 
@@ -43,27 +67,23 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
-    'google_auth'
+    'rest_framework_simplejwt',
+    # project apps
+    'google_auth',
+    'apps_manager',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:5173",
-    "http://localhost:5173",
-]
-
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -72,11 +92,11 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             f'{BASE_DIR}/backend/google_auth/templates',  # Para o Google Auth
-            os.path.join(BASE_DIR, 'dependencias_app', 'templates_email')  # Para templates de e-mail
+            os.path.join(BASE_DIR, 'notifications_app', 'templates_email')  # Para templates de e-mail
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [
+            'context_processors': [ 
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -122,19 +142,21 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ],
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # tempo igual ao do sistema emissor
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,  # tem que ser IGUAL ao do App1
+    'SIGNING_KEY': SECRET_KEY,
 }
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 
 AUTH_USER_MODEL = 'google_auth.CustomUser' 
 
