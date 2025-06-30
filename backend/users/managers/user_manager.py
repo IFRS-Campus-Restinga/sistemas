@@ -1,7 +1,6 @@
-from django.db import models
-from django.contrib.auth.models import BaseUserManager, Permission
-from django.db.models import Q
 import uuid
+from django.db.models import Q
+from django.contrib.auth.models import BaseUserManager, Permission
     
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.http import Http404
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view
 from fs_auth_middleware.decorators import has_every_permission
@@ -35,16 +35,14 @@ def list_groups(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
-
-@api_view(['PUT'])
-@has_every_permission(['add_group', 'change_group', 'change_permission'])
-def create(request):
+@api_view(['GET'])
+@has_every_permission(['view_group'])
+def get_group(request, group_id):
     try:
-        group = GroupService.create(request.data.get('name', None))
+        group = GroupService.get_group_data(group_id, request)
 
-        return Response({'message': 'Grupo registrado com sucesso'}, status=status.HTTP_201_CREATED)
-    except serializers.ValidationError as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(group, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -6,10 +6,20 @@ class FormatGroupData:
         formatted_name = instance.name.replace('_', ' ').title()
 
         return {
-            'id': instance.id,
+            'id': instance.uuid_map.uuid,
             'Nome': formatted_name,
         }
     
     @staticmethod
-    def details_format(instance: Group):
-        return
+    def details_format(group: Group):
+        return {
+            'id': group.uuid_map.uuid,
+            'name': group.name,
+            'permissions': [
+                {
+                    'id': perm.uuid_map.uuid,
+                    'name': perm.name
+                }
+                for perm in group.permissions.all()
+            ]
+        }

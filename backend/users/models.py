@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from users.managers.user_manager import CustomUserManager
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Permission, Group
 from users.enums.categories import Categories
 
 class CustomUser(AbstractUser):
@@ -37,3 +37,11 @@ class StudentAdditionalInfos(models.Model):
     telephone_number = models.CharField(max_length=13, null=False, blank=False)
     registration = models.CharField(max_length=30, null=False, blank=False)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+class GroupUUIDMap(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE, related_name="uuid_map")
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+
+class PermissionUUIDMap(models.Model):
+    permission = models.OneToOneField(Permission, on_delete=models.CASCADE, related_name="uuid_map")
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)

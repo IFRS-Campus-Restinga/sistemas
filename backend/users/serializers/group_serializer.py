@@ -9,7 +9,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ["name", "permissions"]
+        fields = '__all__'
 
     def to_representation(self, instance):
         request = self.context.get('request')

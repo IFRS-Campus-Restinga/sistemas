@@ -12,7 +12,7 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+""" 
 from django.contrib import admin
 from django.urls import path, include
 from users.views.login_django_admin import *
@@ -20,8 +20,15 @@ from users.views.login_django_admin import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('django-admin/', include('users.urls')),
-    path('user/', include('users.urls')),
-    path('auth/', include('users.urls')),
 
+    # auth & session
+    path('auth/', include('users.urls')),
+    path('session/', include('users.urls')),
+
+    # user, group & permission data
+    path('user/', include('users.urls')),
+    path('group/', include('users.urls')),
+
+    # system data
     path('system/', include('systems.urls')),
 ]

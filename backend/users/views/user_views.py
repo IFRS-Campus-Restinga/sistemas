@@ -1,13 +1,12 @@
 import jwt
-from jwt.exceptions import ExpiredSignatureError
 import uuid
+from jwt.exceptions import ExpiredSignatureError
 from fs_auth_middleware.decorators import has_any_permission
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from rest_framework import status, serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.pagination import PageNumberPagination
 from users.models import CustomUser
 from users.services.user_service import UserService
@@ -50,7 +49,7 @@ def list_users_by_group(request, group_name):
             users = CustomUser.objects.get_by_group(group_name)
 
         if not users:
-            return Response([], status=status.HTTP_200_OK)
+            return Response({'results': []}, status=status.HTTP_200_OK)
 
         paginator = PageNumberPagination()
         paginator.page_size = 10

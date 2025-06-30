@@ -1,6 +1,5 @@
 from users.models import CustomUser
 
-
 class FormatUserData:
     @staticmethod
     def list_format(instance: CustomUser):
@@ -8,8 +7,8 @@ class FormatUserData:
 
         return {
             "id": instance.id,
+            "nome": f"{instance.first_name}{instance.last_name}" if instance.first_name else "-",
             "email": instance.email,
-            "username": f"{instance.first_name}{instance.last_name}" if instance.first_name else "-",
             "ativo": "Ativo" if instance.is_active else "Inativo",
         }
     
