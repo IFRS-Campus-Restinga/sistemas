@@ -1,55 +1,86 @@
 import styles from './CustomHeader.module.css'
 import logoIFRSBranco from '../../assets/logo-ifrs-branco.png'
-import { jwtDecode } from 'jwt-decode'
-import type { JwtPayload } from '../../pages/login/Login'
 import { useEffect, useState } from 'react'
 import gear from '../../assets/gear-svgrepo-com.svg'
+import Dropdown from '../dropdown/Dropdown'
+import AuthService from '../../services/authService'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
+import { useClearUser, useUser } from '../../store/userHooks'
 
-interface UserData {
-    first_name?: string
-    last_name?: string
-    profile_picture?: string
+interface CustomHeaderProps {
+    navBar: React.ReactNode
 }
 
-const CustomHeader = () => {
-    const [user, setUser] = useState<UserData>()
+const CustomHeader = ({navBar}: CustomHeaderProps) => {
+    const redirect = useNavigate()
+    const user = useUser()
+    const clearUser = useClearUser()
+    const [profilePicture, setProfilePicture] = useState<string | null>()
+
+    const logout = async () => {
+        const req = AuthService.logout()
+
+        toast.promise(
+            (async () => {
+                try {
+                    await req;
+                } finally {
+                    sessionStorage.clear()
+                    clearUser()
+                    redirect('/')
+                }
+            })(),
+            {
+                pending: 'Deconectando...',
+                error: {
+                    render({ data }: any) {
+                        return data.message || 'Erro sair da conta'
+                    }
+                }
+            }
+        )
+    }
 
     useEffect(() => {
-        const token = sessionStorage.getItem('access')
-
-        if (token) {
-            setUser({
-                first_name: jwtDecode<JwtPayload>(token).first_name,
-                last_name: jwtDecode<JwtPayload>(token).last_name,
-                profile_picture: jwtDecode<JwtPayload>(token).profile_picture_src
-            })
-        }
-    }, [])
+        setProfilePicture(sessionStorage.getItem('profilePicture'))
+    }, [user])
 
     return (
         <header className={styles.header}>
-            <img src={logoIFRSBranco} alt="ifrs" className={styles.logo} />
-            {
-                user ? (
-                    <div className={styles.userMenu}>
-                        <span className={styles.greetings}>
-                            Bem vindo,
-                            <p className={styles.username}>
-                                {user.first_name} {user.last_name}
-                            </p>
-                        </span>
-                        {
-                            user.profile_picture ? (
-                                <img src={user.profile_picture} alt="foto_de_perfil" className={styles.accountOptions} />
-                            ) : user.first_name ? (
-                                <div className={styles.accountOptions}>{user.first_name[0]}</div>
-                            ) : (
-                                <img src={gear} className={styles.accountOptions} />
-                            )
-                        }
-                    </div>
-                ) : null
-            }
+            <div className={styles.headerContainer}>
+                <img src={logoIFRSBranco} alt="ifrs" className={styles.logo} />
+                {
+                    !Object.values(user).every((value) => value === null) ? (
+                        <div className={styles.userMenu}>
+                            <span className={styles.greetings}>
+                                Bem vindo,
+                                <p className={styles.username}>
+                                    {user.username}
+                                </p>
+                            </span>
+                            {
+                                profilePicture ? (
+                                    <Dropdown
+                                        dropdownChildren={<img src={profilePicture} alt="foto_de_perfil" className={styles.accountOptions} />}
+                                        items={[
+                                            {
+                                                title: 'Logout',
+                                                onClick: logout
+                                            }
+                                        ]}
+                                    />
+                                ) : user.username ? (
+                                    <div className={styles.accountOptions}>{user.username[0]}</div>
+                                ) : (
+                                    <img src={gear} className={styles.accountOptions} />
+                                )
+                            }
+                        </div>
+                    ) : null
+                }
+            </div>
+            {navBar}
         </header>
     )
 }

@@ -1,9 +1,11 @@
 import styles from './CustomSelect.module.css'
 
-export interface OptionProps {
-    title: string
-    value: string
+export type OptionProps<Key extends string = 'value'> = {
+  title: string
+} & {
+  [K in Key]: string
 }
+
 
 interface CustomSelectProps {
     options: OptionProps[]

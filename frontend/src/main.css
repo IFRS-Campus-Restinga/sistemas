@@ -6,3 +6,27 @@
     padding: 0;
     box-sizing: border-box;
 }
+
+/* WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+  background: transparent;       /* fundo da barra */
+  position: fixed;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2); /* cor do "ponteiro" da barra */
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+scrollbar-width: thin;
+}
+
+/* Remove os botões (setas) */
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}

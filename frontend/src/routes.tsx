@@ -6,7 +6,9 @@ import BaseVisitor from './pages/base/Visitor/BaseVisitor'
 import HomeAdmin from './pages/base/Admin/home/HomeAdmin'
 import HomeMember from './pages/base/Member/home/HomeMember'
 import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
-import NewSystem from './pages/base/Admin/newSystem/NewSystem'
+import CreateSystem from './pages/base/Admin/createSystem/CreateSystem'
+import ListUsers from './pages/base/Admin/listUsers/ListUsers'
+import ListGroups from './pages/base/Admin/listGroups/ListGroups'
 
 const routes = createBrowserRouter([
     {
@@ -14,35 +16,51 @@ const routes = createBrowserRouter([
         element: <Login />
     },
     {
-        path: '/admin',
+        path: '/auth/admin/',
         element: <BaseAdmin />,
         children: [
             {
-                path: '/admin/home',
+                path: 'home',
                 element: <HomeAdmin />
             },
             {
-                path: '/admin/sistemas/cadastro',
-                element: <NewSystem />
+                path: 'aluno/list',
+                element: <ListUsers />
+            },
+            {
+                path: 'servidor/list',
+                element: <ListUsers />
+            },
+            {
+                path: 'convidado/list',
+                element: <ListUsers />
+            },
+            {
+                path: 'grupos/',
+                element: <ListGroups/>
+            },
+            {
+                path: 'sistemas/cadastro',
+                element: <CreateSystem />
             }
         ]
     },
     {
-        path: '/membro',
+        path: '/auth/membro',
         element: <BaseMember />,
         children: [
             {
-                path: '/membro/home',
+                path: 'home',
                 element: <HomeMember />
             }
         ]
     },
     {
-        path: '/visitante',
+        path: '/auth/visitante',
         element: <BaseVisitor />,
         children: [
             {
-                path: '/visitante/home',
+                path: 'home',
                 element: <HomeVisitor />
             }
         ]

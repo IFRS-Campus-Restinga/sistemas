@@ -7,9 +7,9 @@ import VisitorForm from "../../components/visitorForm/VisitorForm"
 import AuthService from "../../services/authService"
 import { toast, ToastContainer } from "react-toastify"
 import { useNavigate } from "react-router-dom"
-import { jwtDecode } from "jwt-decode"
 import CustomLoading from "../../components/customLoading/CustomLoading"
-import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/authValidations"
+import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/validations/authValidations"
+import { useSetUser } from "../../store/userHooks"
 
 export interface visitorAccountProps {
     first_name: string
@@ -38,7 +38,6 @@ export interface visitorLoginErrorProps {
 
 export interface JwtPayload {
     group: string;
-    permissions: string[];
     first_name?: string;
     last_name?: string;
     profile_picture_src: string
@@ -46,6 +45,7 @@ export interface JwtPayload {
 
 
 const Login = () => {
+    const setUser = useSetUser()
     const redirect = useNavigate()
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
     const [loginGroup, setLoginGroup] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
@@ -103,7 +103,9 @@ const Login = () => {
                     if ('is_active' in res.data) {
                         setAccessRequested(true)
                     } else {
-                        sessionStorage.setItem('access', res.data.access_token)
+                        setUser(res.data.user)
+
+                        if (res.data.user.profile_picture) sessionStorage.setItem('profilePicture', res.data.user.profile_picture)
 
                         setErrors({
                             email: null,
@@ -113,13 +115,16 @@ const Login = () => {
                             passwordConfirmation: null
                         });
 
-                        const permissions = jwtDecode<JwtPayload>(res.data.access_token).permissions
+                        if (res.data.user.groups) {
+                            const groups = res.data.user.groups
 
-                        for (let permission of permissions) {
-                            if (permission === 'admin') redirect(`/admin/home`)
-                            if (permission === 'membro') redirect(`/membro/home`)
-                            if (permission === 'convidado') redirect(`/convidado/home`)
+                            for (let group of groups) {
+                                if (group === 'admin') redirect(`/auth/admin/home`)
+                                if (group === 'membro') redirect(`/auth/membro/home`)
+                                if (group === 'visit') redirect(`/auth/visit/home`)
+                            }
                         }
+
                     }
 
                     return res;
@@ -128,7 +133,6 @@ const Login = () => {
                 }
             })(),
             {
-                pending: 'Solicitando Login...',
                 success: 'Solicitação finalizada com sucesso!',
                 error: {
                     render({ data }: { data: any }) {
@@ -147,7 +151,7 @@ const Login = () => {
         e.preventDefault()
 
         setIsDisabled(true)
-
+        console.log(validateRegisterForm())
         if (!validateRegisterForm()) return
 
         if ('first_name' in visitorAccountData) {
@@ -164,7 +168,6 @@ const Login = () => {
                     }
                 })(),
                 {
-                    pending: 'Criando conta...',
                     success: 'Conta criada com sucesso',
                     error: {
                         render({ data }: any) {
@@ -193,7 +196,7 @@ const Login = () => {
                         if ('is_active' in res.data) {
                             setAccessRequested(true)
                         } else {
-                            sessionStorage.setItem('access', res.data.access_token)
+                            setUser(res.data.user)
 
                             setErrors({
                                 email: null,
@@ -203,14 +206,14 @@ const Login = () => {
                                 passwordConfirmation: null
                             });
 
-                            const permissions = jwtDecode<JwtPayload>(res.data.access_token).permissions
+                            if (res.data.user.groups) {
+                                const groups = res.data.user.groups
 
-                            console.log(permissions)
-
-                            for (let permission of permissions) {
-                                if (permission === 'admin') redirect(`/admin/home`)
-                                if (permission === 'membro') redirect(`/membro/home`)
-                                if (permission === 'visitante') redirect(`/visitante/home`)
+                                for (let group of groups) {
+                                    if (group === 'admin') redirect(`auth/admin/home`)
+                                    if (group === 'membro') redirect(`auth/membro/home`)
+                                    if (group === 'visit') redirect(`auth/visit/home`)
+                                }
                             }
                         }
 
@@ -220,7 +223,6 @@ const Login = () => {
                     }
                 })(),
                 {
-                    pending: 'Entrando...',
                     success: 'Login finalizado com sucesso!',
                     error: {
                         render({ data }: any) {
@@ -256,7 +258,6 @@ const Login = () => {
 
         return Object.values(newErrors).every((error) => error === null)
     }
-
 
     const validateRegisterForm = () => {
         let newErrors: visitorAccountErrorProps = {
@@ -296,7 +297,7 @@ const Login = () => {
 
 
     return (
-        <Base>
+        <Base navBar={<></>}>
             <ToastContainer />
             {
                 accessRequested ? (

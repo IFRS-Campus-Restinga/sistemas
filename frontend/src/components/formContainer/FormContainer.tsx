@@ -3,7 +3,7 @@ import styles from './FormContainer.module.css'
 
 interface FormContainerProps {
     title: string
-    formTip: string
+    formTip?: string
     children: React.ReactNode
 }
 
@@ -13,7 +13,11 @@ const FormContainer = ({ title, formTip, children }: FormContainerProps) => {
         <section className={styles.section}>
             <div className={styles.formHeader}>
                 <h2>{title}</h2>
-                <FormTip tip={formTip} />
+                {
+                    formTip ? (
+                        <FormTip tip={formTip} />
+                    ) : null
+                }
             </div>
             <hr className={styles.formLine} />
             <div className={styles.formContainer}>

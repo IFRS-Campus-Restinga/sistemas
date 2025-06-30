@@ -1,8 +1,14 @@
 .header {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    width: 100%;
+}
+
+.headerContainer {
     width: 100%;
     background-color: #006b3f;
     height: 50px;
-    position: fixed;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -39,7 +45,7 @@
 }
 
 .accountOptions {
-    width: 50px;
+    width: 40px;
     height: 40px;
     border-radius: 50%;
     border: 1px solid white;
@@ -48,6 +54,7 @@
     align-items: center;
     font-family: 'Roboto';
     color: white;
+    position: relative;
 
     &:hover {
         cursor: pointer;

@@ -2,19 +2,22 @@ import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    withCredentials: true
+    withCredentials: true,
 });
 
-api.interceptors.request.use(
-    (config) => {
-        const token = sessionStorage.getItem("access_token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token);
         }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+    });
+    failedQueue = [];
+};
 
 api.interceptors.response.use(
     response => response,
@@ -24,25 +27,25 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
 
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then(() => api(originalRequest))
+                    .catch(err => Promise.reject(err));
+            }
+
+            isRefreshing = true;
+
             try {
-                // tenta renovar com o cookie
-                const res = await axios.post(
-                    `${import.meta.env.VITE_API_URL}/api/token/refresh/`,
-                    null,
-                    { withCredentials: true }
-                );
-
-                const newAccessToken = res.data.access;
-                sessionStorage.setItem("access_token", newAccessToken);
-
-                // atualiza header e refaz a requisição original (ex: validate-token)
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                await api.get('auth/token/refresh/');
+                processQueue(null);
                 return api(originalRequest);
-
             } catch (refreshError) {
-                console.error("Erro ao renovar token", refreshError);
-                // logout ou redirecionamento
+                processQueue(refreshError, null);
                 return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
             }
         }
 
@@ -50,6 +53,5 @@ api.interceptors.response.use(
     }
 );
 
-
-
 export default api;
+

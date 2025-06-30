@@ -1,7 +1,7 @@
 import styles from './VisitorForm.module.css'
 import { useEffect, useState } from 'react'
 import type { visitorAccountErrorProps, visitorAccountProps, visitorLoginErrorProps, visitorLoginProps } from '../../pages/login/Login'
-import { comparePasswords, validateEmail, validateName, validatePassword } from '../../utils/authValidations'
+import { comparePasswords, validateEmail, validateName, validatePassword } from '../../utils/validations/authValidations'
 import CustomButton from '../customButton/CustomButton'
 import CustomInput from '../customInput/CustomInput'
 import visible from '../../assets/eye-show-svgrepo-com.svg'

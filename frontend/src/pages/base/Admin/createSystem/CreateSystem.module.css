@@ -1,0 +1,13 @@
+.systemFormContainer {
+    width: 60%;
+    display: flex;
+    margin: auto;
+    justify-content: center;
+}
+
+.formContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}

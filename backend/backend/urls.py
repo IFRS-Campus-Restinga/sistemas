@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from google_auth.views.login_django_admin import *
+from users.views.login_django_admin import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('django-admin/', include('google_auth.urls')),
-    path('auth/', include('google_auth.urls')),
-    path('manager/', include('apps_manager.urls'))
+    path('django-admin/', include('users.urls')),
+    path('user/', include('users.urls')),
+    path('auth/', include('users.urls')),
+
+    path('system/', include('systems.urls')),
 ]

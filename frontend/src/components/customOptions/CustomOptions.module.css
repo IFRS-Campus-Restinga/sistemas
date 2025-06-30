@@ -1,0 +1,24 @@
+.optionsContainer {
+    background-color: white;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    border-radius: 5px;
+    position: absolute;
+    top: 100%;
+    z-index: 10
+}
+
+.customOption {
+    list-style: none;
+    font-family: 'Roboto';
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    color: #767676;
+
+    &:hover {
+        cursor: pointer;
+        transition: all ease-in-out 0.3s;
+        background-color: #f2f2f2;
+    }
+}

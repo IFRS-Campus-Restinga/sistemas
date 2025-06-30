@@ -2,6 +2,7 @@ import type { AxiosResponse } from 'axios';
 import api from '../../config/apiConfig'
 import type { visitorAccountProps, visitorLoginProps } from '../pages/login/Login'
 import { extractError } from '../utils/handleAxiosError';
+import type { UserState } from '../store/userSlice';
 
 interface AuthParams {
     credential?: string
@@ -9,7 +10,7 @@ interface AuthParams {
 }
 
 type LoginSuccessResponse = {
-    access_token: string;
+    user: UserState;
 };
 
 type LoginFirstLoginResponse = {
@@ -26,7 +27,7 @@ const AuthService = {
         }
 
         try {
-            const res = await api.post('/auth/convidado/createAccount/', params)
+            const res = await api.post('/user/account/create/', params)
 
             return res
         } catch (error: any) {
@@ -37,7 +38,7 @@ const AuthService = {
 
     login: async (params: visitorLoginProps): Promise<AxiosResponse<LoginResponse>> => {
         try {
-            const res = await api.post('/auth/account/login/', params)
+            const res = await api.post('/auth/login/', params)
 
             return res
         } catch (error: any) {
@@ -55,6 +56,15 @@ const AuthService = {
         }
     },
 
+    logout: async () => {
+        try {
+            const res = await api.post('/auth/token/logout/')
+
+            return res
+        } catch (error) {
+            throw extractError(error)
+        }
+    }
 
 }
 
