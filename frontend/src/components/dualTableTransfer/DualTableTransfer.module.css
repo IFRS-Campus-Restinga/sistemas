@@ -1,6 +1,13 @@
+.tablesContainer {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 20px;
+}
+
 .tableContainer {
     width: 100%;
-    max-height: 250px;
+    height: 300px;
     overflow-y: scroll;
     overflow-x: hidden; 
     position: relative;
@@ -8,10 +15,8 @@
 }
 
 .table {
-    width: 100%;
-    height: 100%;
-    font-family: 'Roboto';
     border-collapse: collapse;
+    width: 100%
 }
 
 .thead {
@@ -53,6 +58,7 @@
     width: auto;
     text-align: center;
     padding: 3px;
+    font-family: 'Roboto';
 }
 
 .td {
@@ -61,26 +67,11 @@
     font-weight: 500;
 }
 
-.actions {
-    display: flex;
-    gap: 4px;
-    width: 100%;
-    margin-right: 5px;
-    justify-content: center;
-}
-
 .action {
-    padding: 3px;
-    display: flex;
-    border-radius: 50%;
-    border: 1px solid #767676;
-    background-color: transparent;
-    width: 20px;
-    height: 20px;
+    width: 15px;
+    height: 15px;
 
     &:hover {
         cursor: pointer;
-        transform: scale(1.05);
-        transition: all ease-in-out 0.3s;
     }
 }

@@ -1,0 +1,35 @@
+.searchBarContainer {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    background-color: #006b3f;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.searchInput, .searchInput:focus {
+    border: none;
+    font-family: 'Roboto';
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: transparent;
+    outline: none;
+}
+
+.actionsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.action {
+    width: 15px;
+    height: 15px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}

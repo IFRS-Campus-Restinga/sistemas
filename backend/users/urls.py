@@ -11,7 +11,7 @@ urlpatterns = [
     path('account/create/', create_account_visitor),
     path('login/google/', login_with_google),
     
-    path('login/', admin_login, name='google_login'),
+    path('admin/login/', admin_login, name='google_login'),
     path('google-callback/', google_callback, name='google_callback'),
 
     path('token/refresh/', refresh_token),
@@ -26,4 +26,5 @@ urlpatterns = [
     path('list/', list_groups),
     path('get/<str:group_id>/', get_group),
     path('get/<str:group_id>/permissions/not_assigned/', get_not_assigned_permissions),
+    path('edit/<str:group_id>/', edit_group)
 ]

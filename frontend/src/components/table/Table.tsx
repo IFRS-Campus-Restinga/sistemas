@@ -25,7 +25,6 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
         redirect(`${itemId}/${action}`, {state: itemId})
     }
 
-
     return (
         <div className={styles.tableContainer}>
             {

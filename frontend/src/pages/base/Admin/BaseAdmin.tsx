@@ -69,24 +69,20 @@ const BaseAdmin = () => {
                             dropdownTitle: 'Usuários & Acesso', dropdownIcon: userIcon, items: [
                                 {
                                     title: 'Alunos',
-                                    link: '/admin/aluno/list',
+                                    link: '/session/admin/aluno/list',
                                 },
                                 {
                                     title: 'Servidores',
-                                    link: '/admin/servidor/list',
+                                    link: '/session/admin/servidor/list',
                                 },
                                 {
                                     title: 'Convidados',
-                                    link: '/admin/convidado/list',
+                                    link: '/session/admin/convidado/list',
                                 },
                                 {
                                     title: 'Grupos',
-                                    link: '/admin/grupos',
+                                    link: '/session/admin/grupos',
                                 },
-                                {
-                                    title: 'Permissões',
-                                    link: '/admin/permissoes'
-                                }
                             ]
                         },
                         {
@@ -95,15 +91,15 @@ const BaseAdmin = () => {
                         {
                             dropdownTitle: 'Gerenciamento Acadêmico', dropdownIcon: books, items: [
                                 {
-                                    link: '/admin/cursos',
+                                    link: '/session/admin/cursos',
                                     title: 'Cursos'
                                 },
                                 {
-                                    link: '/admin/disciplinas',
+                                    link: '/session/admin/disciplinas',
                                     title: 'Disciplinas'
                                 },
                                 {
-                                    link: '/admin/ppcs',
+                                    link: '/session/admin/ppcs',
                                     title: "Proj. Pedag. Curso (PPC)"
                                 }
                             ]

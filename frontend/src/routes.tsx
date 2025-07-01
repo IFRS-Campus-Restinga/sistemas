@@ -9,6 +9,7 @@ import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
 import CreateSystem from './pages/base/Admin/createSystem/CreateSystem'
 import ListUsers from './pages/base/Admin/listUsers/ListUsers'
 import ListGroups from './pages/base/Admin/listGroups/ListGroups'
+import EditGroup from './pages/base/Admin/editGroup/EditGroup'
 
 const routes = createBrowserRouter([
     {
@@ -16,7 +17,7 @@ const routes = createBrowserRouter([
         element: <Login />
     },
     {
-        path: '/auth/admin/',
+        path: '/session/admin/',
         element: <BaseAdmin />,
         children: [
             {
@@ -38,6 +39,10 @@ const routes = createBrowserRouter([
             {
                 path: 'grupos/',
                 element: <ListGroups/>
+            },
+            {
+                path: 'grupos/:grupoId/edit/',
+                element: <EditGroup/>
             },
             {
                 path: 'sistemas/cadastro',

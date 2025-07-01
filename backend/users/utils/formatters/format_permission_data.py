@@ -7,5 +7,5 @@ class FormatPermissionData:
 
         return {
             'id': instance.uuid_map.uuid,
-            'Nome': formatted_name,
+            'name': formatted_name,
         }

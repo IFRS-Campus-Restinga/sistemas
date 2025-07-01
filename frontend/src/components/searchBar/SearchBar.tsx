@@ -1,12 +1,14 @@
 import styles from './SearchBar.module.css'
+import search from '../../assets/search-alt-svgrepo-com-white.svg'
+import clear from '../../assets/close-svgrepo-com-white.svg'
 
 interface SearchBarProps {
     searchParam: string
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void
+    setSearch: React.Dispatch<React.SetStateAction<string>>
     onSearch: (param: string) => void
 }
 
-const SearchBar = ({ onSearch, onChange, searchParam }: SearchBarProps) => {
+const SearchBar = ({ onSearch, setSearch, searchParam }: SearchBarProps) => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
@@ -18,13 +20,15 @@ const SearchBar = ({ onSearch, onChange, searchParam }: SearchBarProps) => {
         <div className={styles.searchBarContainer}>
             <input
                 type="text"
+                name={'searchInput'}
                 value={searchParam}
-                onChange={onChange}
+                onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
+                className={styles.searchInput}
             />
             <div className={styles.actionsContainer}>
-                <img src="" alt="Buscar" onClick={() => onSearch(searchParam)} />
-                <img src="" alt="Outro botão" />
+                <img src={search} className={styles.action} alt="Buscar" onClick={() => onSearch(searchParam)} />
+                <img src={clear} className={styles.action} alt="Limpar campo" onClick={() => setSearch('')}/>
             </div>
         </div>
     )

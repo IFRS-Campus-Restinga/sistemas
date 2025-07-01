@@ -21,14 +21,22 @@ class GroupService:
         return group
     
     @staticmethod
-    def set_group_permissions(group_name: str, permissions_uuids: list[str]):
-        group = get_object_or_404(Group, name=group_name)
+    def set_group_data(group_data, group_id: str):
+        group = get_object_or_404(Group, uuid_map__uuid=group_id)
+
+        group_name = group_data['name']
+        permissions_uuids = [perm['id'] for perm in group_data['permissions']]
 
         permissions = Permission.objects.filter(
             uuid_map__uuid__in=permissions_uuids
-        )
+        ).values_list('id', flat=True)
 
-        group.permissions.set(permissions)
+        serializer = GroupSerializer(instance=group, data={'name': group_name, 'permissions': permissions})
+
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+
+        serializer.save()
 
     @staticmethod
     def get_group_data(group_id: str, request):

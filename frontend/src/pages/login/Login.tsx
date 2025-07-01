@@ -119,9 +119,9 @@ const Login = () => {
                             const groups = res.data.user.groups
 
                             for (let group of groups) {
-                                if (group === 'admin') redirect(`/auth/admin/home`)
-                                if (group === 'membro') redirect(`/auth/membro/home`)
-                                if (group === 'visit') redirect(`/auth/visit/home`)
+                                if (group === 'admin') redirect(`/session/admin/home`)
+                                if (group === 'membro') redirect(`/session/membro/home`)
+                                if (group === 'visit') redirect(`/session/visit/home`)
                             }
                         }
 
@@ -210,9 +210,9 @@ const Login = () => {
                                 const groups = res.data.user.groups
 
                                 for (let group of groups) {
-                                    if (group === 'admin') redirect(`auth/admin/home`)
-                                    if (group === 'membro') redirect(`auth/membro/home`)
-                                    if (group === 'visit') redirect(`auth/visit/home`)
+                                    if (group === 'admin') redirect(`/session/admin/home`)
+                                    if (group === 'membro') redirect(`/session/membro/home`)
+                                    if (group === 'visit') redirect(`/session/visit/home`)
                                 }
                             }
                         }

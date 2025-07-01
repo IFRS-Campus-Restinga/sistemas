@@ -46,3 +46,17 @@ def get_group(request, group_id):
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['PUT'])
+@has_every_permission(['change_group'])
+def edit_group(request, group_id):
+    try:
+        GroupService.set_group_data(request.data, group_id)
+
+        return Response({'message': 'Grupo atualizado com sucesso'}, status=status.HTTP_200_OK)
+    except serializers.ValidationError as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
