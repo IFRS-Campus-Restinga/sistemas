@@ -7,6 +7,8 @@ import AuthService from '../../services/authService'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { useClearUser, useUser } from '../../store/userHooks'
+import { hasGroup } from '../../utils/hasGroup'
+import { checkGroup } from '../../utils/checkGroup'
 
 interface CustomHeaderProps {
     navBar: React.ReactNode
@@ -49,7 +51,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
     return (
         <header className={styles.header}>
             <div className={styles.headerContainer}>
-                <img src={logoIFRSBranco} alt="ifrs" className={styles.logo} />
+                <img src={logoIFRSBranco} alt="ifrs" className={styles.logo} onClick={() => redirect(`/session/${checkGroup(user.groups!)}/home/`)}/>
                 {
                     !Object.values(user).every((value) => value === null) ? (
                         <div className={styles.userMenu}>

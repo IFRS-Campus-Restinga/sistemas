@@ -5,7 +5,7 @@ from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from users.models import CustomUser
 from systems.models.system import System
-from rest_framework_simplejwt.tokens import RefreshToken
+from groups.service import GroupService
 from django.conf import settings
 
 class TokenValidationError(Exception):
@@ -13,12 +13,17 @@ class TokenValidationError(Exception):
 
 class TokenMetadataService:
     @staticmethod
-    def get(user: CustomUser) -> dict:
+    def get(user: CustomUser, system: System | None) -> dict:
 
-        return {
-            'groups': [group.name for group in user.groups.all()],
-            'permissions': CustomUser.objects.get_permissions(str(user.id))
-        }
+        if system:
+            return {
+                'groups': GroupService.get_by_user_and_system(user, system)
+            }
+        else:
+            return {
+                'groups': [group.name for group in user.groups.all()],
+                'permissions': CustomUser.objects.get_permissions(str(user.id))
+            }
     
 class TokenValidationService:
     @staticmethod
@@ -62,19 +67,22 @@ class TokenService:
     @staticmethod
     def pair_token(user: str | CustomUser, system_id: str | None = None) -> tuple[str, str, CustomUser]:
         """Retorna um par de tokens (refresh/access) sendo o access token opcionalmente assinado com a SECRET_KEY do sistema de destino caso informado"""
-        if not isinstance(user, CustomUser):
-            user = get_object_or_404(CustomUser, pk=uuid.UUID(user))
-        
-        metadata = TokenMetadataService.get(user)
-        now = datetime.now(timezone.utc)
 
         secret = settings.SECRET_KEY
+        system = None
+        now = datetime.now(timezone.utc)        
         refresh_exp = now + timedelta(days=7)
-        
+
+        if not isinstance(user, CustomUser):
+            user = get_object_or_404(CustomUser, pk=uuid.UUID(user))
+
         if system_id:
-            secret = get_object_or_404(System, pk=uuid.UUID(system_id)).secret_key
+            system = get_object_or_404(System, pk=uuid.UUID(system_id))
+            secret = system.secret_key
 
             refresh_exp = now + timedelta(days=1)
+        
+        metadata = TokenMetadataService.get(user, system)
 
         access_payload = {
             'iat': now,

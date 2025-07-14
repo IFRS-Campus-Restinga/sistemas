@@ -71,6 +71,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     # project apps
     'users',
+    'groups',
+    'permissions',
     'systems',
 ]
 

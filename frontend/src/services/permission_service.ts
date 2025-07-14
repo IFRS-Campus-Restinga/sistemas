@@ -7,11 +7,40 @@ export interface Permissions {
 }
 
 const PermissionService = {
-    exclude: async (groupId: string) => {
+    list: async (page: number = 1) => {
         try {
-            return api.get(`group/get/${groupId}/permissions/not_assigned/`, {
+            return api.get(`api/permission/get/`, {
                 params: {
-                    data_format: 'list'
+                    data_format: 'list',
+                    page
+                }
+            })
+            
+        } catch (error) {
+            throw extractError(error)
+        }
+    },
+
+    listByGroup: async (groupId: string, page: number = 1) => {
+        try {
+            return api.get(`api/permission/get/${groupId}/`, {
+                params: {
+                    data_format: 'list',
+                    page
+                }
+            })
+            
+        } catch (error) {
+            throw extractError(error)
+        }
+    },
+
+    notAssignedTo: async (groupId: string, page: number = 1) => {
+        try {
+            return api.get(`api/permission/get/${groupId}/not_assigned/`, {
+                params: {
+                    data_format: 'list',
+                    page
                 }
             })
             

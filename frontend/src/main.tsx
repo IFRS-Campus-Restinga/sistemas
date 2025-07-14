@@ -14,11 +14,9 @@ if (!GOOGLE_CLIENT) {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT}>
       <Provider store={store}>
         <RouterProvider router={routes} />
       </Provider>
     </GoogleOAuthProvider>
-  </StrictMode>,
 )

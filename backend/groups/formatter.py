@@ -15,11 +15,5 @@ class FormatGroupData:
         return {
             'id': group.uuid_map.uuid,
             'name': group.name,
-            'permissions': [
-                {
-                    'id': perm.uuid_map.uuid,
-                    'name': perm.name
-                }
-                for perm in group.permissions.all()
-            ]
+            'permissions': []
         }

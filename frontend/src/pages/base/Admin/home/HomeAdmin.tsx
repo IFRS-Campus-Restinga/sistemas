@@ -54,7 +54,7 @@ const HomeAdmin = () => {
     return (
         <section className={styles.section}>
             <h2 className={styles.h2}>Bem vindo ADM</h2>
-            <Link to={'/admin/sistemas/cadastro'}>Adicionar novo sistema</Link>
+            <Link to={'/session/admin/sistemas/cadastro'}>Adicionar novo sistema</Link>
             <div className={styles.menuContainer}>
                 {
                     systems.map((system) => (

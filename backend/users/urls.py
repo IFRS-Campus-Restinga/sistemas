@@ -3,8 +3,6 @@ from users.views.auth_views import *
 from users.views.login_django_admin import *
 from users.views.token_views import *
 from users.views.user_views import *
-from users.views.group_views import *
-from users.views.permission_views import *
 
 urlpatterns = [
     path('login/', login),
@@ -21,10 +19,4 @@ urlpatterns = [
 
     # user/
     path('list/<str:group_name>/', list_users_by_group),
-
-    # group/
-    path('list/', list_groups),
-    path('get/<str:group_id>/', get_group),
-    path('get/<str:group_id>/permissions/not_assigned/', get_not_assigned_permissions),
-    path('edit/<str:group_id>/', edit_group)
 ]

@@ -1,6 +1,6 @@
 import uuid
 from rest_framework.decorators import api_view
-from fs_auth_middleware.decorators import has_any_permission, has_every_permission
+from fs_auth_middleware.decorators import has_any_permission, has_every_permission, is_authenticated
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.pagination import PageNumberPagination
@@ -21,17 +21,19 @@ def create_system(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-def get_system_key(request, system_id):
+@is_authenticated()
+def get_system(request, system_id):
     try:
         system = System.objects.get(id=uuid.UUID(system_id))
 
-        return Response({'secret_key': system.secret_key}, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_200_OK)
     except System.DoesNotExist as e:
-        return Response({'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str (e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
+@is_authenticated()
 def menu_list(request):
     try:
         user_id = request.GET.get('user_id', None)

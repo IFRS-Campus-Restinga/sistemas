@@ -26,9 +26,10 @@ urlpatterns = [
     path('session/', include('users.urls')),
 
     # user, group & permission data
-    path('user/', include('users.urls')),
-    path('group/', include('users.urls')),
+    path('api/user/', include('users.urls')),
+    path('api/group/', include('groups.urls')),
+    path('api/permission/', include('permissions.urls')),
 
     # system data
-    path('system/', include('systems.urls')),
+    path('api/system/', include('systems.urls')),
 ]

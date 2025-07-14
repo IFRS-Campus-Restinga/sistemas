@@ -28,6 +28,8 @@ def refresh_token(request):
         )
 
         return response
+    except Http404 as e:
+        return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
     except TokenValidationError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:

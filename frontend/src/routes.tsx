@@ -9,7 +9,7 @@ import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
 import CreateSystem from './pages/base/Admin/createSystem/CreateSystem'
 import ListUsers from './pages/base/Admin/listUsers/ListUsers'
 import ListGroups from './pages/base/Admin/listGroups/ListGroups'
-import EditGroup from './pages/base/Admin/editGroup/EditGroup'
+import GroupForm from './pages/base/Admin/GroupForm/GroupForm'
 
 const routes = createBrowserRouter([
     {
@@ -37,12 +37,16 @@ const routes = createBrowserRouter([
                 element: <ListUsers />
             },
             {
+                path: 'grupos/create/',
+                element: <GroupForm/>
+            },
+            {
                 path: 'grupos/',
                 element: <ListGroups/>
             },
             {
                 path: 'grupos/:grupoId/edit/',
-                element: <EditGroup/>
+                element: <GroupForm/>
             },
             {
                 path: 'sistemas/cadastro',

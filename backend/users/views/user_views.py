@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from users.models import CustomUser
 from users.services.user_service import UserService
+from users.services.token_service import *
 from users.serializers.custom_user_serializer import CustomUserSerializer
 from django.conf import settings
 
@@ -17,11 +18,16 @@ from django.conf import settings
 def get_user_data(request):
     try:
         token = request.COOKIES.get('access_token', None)
+        system = request.COOKIES.get('system', None)
+        secret = settings.SECRET_KEY
 
         if not token:
             return Response({'message': 'Necessário autenticar'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        payload= jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        if system:
+            secret = get_object_or_404(System, pk=uuid.UUID(system)).secret_key
+        
+        payload= jwt.decode(token, secret, algorithms=["HS256"])
         user_id = uuid.UUID(payload.get('user_id'))
 
         user = get_object_or_404(CustomUser, pk=user_id)

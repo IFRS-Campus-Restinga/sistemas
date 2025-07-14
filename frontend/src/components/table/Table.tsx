@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react';
+import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import CustomLoading from '../customLoading/CustomLoading';
 import styles from './Table.module.css'
 import search from '../../assets/search-alt-svgrepo-com.svg';
@@ -15,15 +15,40 @@ interface TableProps {
     loadingContent: boolean
     canView: boolean,
     canEdit: boolean,
-    canDelete: boolean
+    canDelete: boolean,
+    fetchData: (page:  number, param: string) => void
 }
 
-const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, canDelete, canEdit, canView }: TableProps) => {
+const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, canDelete, canEdit, canView, fetchData }: TableProps) => {
     const redirect = useNavigate()
+    const firstRef = useRef(null)
+    const lastRef = useRef(null)
 
     const redirectAction = (itemId: string, action: string = '') => {
         redirect(`${itemId}/${action}`, {state: itemId})
     }
+
+    useEffect(() => {
+        if (!lastRef.current) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+            if (entry.isIntersecting && next && !loadingContent) {
+                setCurrent(prev => prev + 1);
+            }
+            });
+        }, { threshold: 1.0 });
+
+        observer.observe(lastRef.current);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [itemList, next, loadingContent]);
+
+    useEffect(() => {
+        if (current > 1) fetchData(current, '');
+    }, [current]);
 
     return (
         <div className={styles.tableContainer}>

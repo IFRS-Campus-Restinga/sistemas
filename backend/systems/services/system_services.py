@@ -1,4 +1,4 @@
-from users.services.group_service import GroupService
+from groups.service import GroupService
 from systems.serializers.system_serializer import SystemSerializer
 from rest_framework import serializers
 

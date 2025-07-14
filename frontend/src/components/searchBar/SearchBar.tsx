@@ -5,14 +5,14 @@ import clear from '../../assets/close-svgrepo-com-white.svg'
 interface SearchBarProps {
     searchParam: string
     setSearch: React.Dispatch<React.SetStateAction<string>>
-    onSearch: (param: string) => void
+    onSearch: (page: number, param: string) => void
 }
 
 const SearchBar = ({ onSearch, setSearch, searchParam }: SearchBarProps) => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
         if (event.key === 'Enter') {
-            onSearch(searchParam)
+            onSearch(1, searchParam)
         }
     }
 
@@ -27,7 +27,7 @@ const SearchBar = ({ onSearch, setSearch, searchParam }: SearchBarProps) => {
                 className={styles.searchInput}
             />
             <div className={styles.actionsContainer}>
-                <img src={search} className={styles.action} alt="Buscar" onClick={() => onSearch(searchParam)} />
+                <img src={search} className={styles.action} alt="Buscar" onClick={() => onSearch(1, searchParam)} />
                 <img src={clear} className={styles.action} alt="Limpar campo" onClick={() => setSearch('')}/>
             </div>
         </div>

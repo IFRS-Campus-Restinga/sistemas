@@ -25,7 +25,7 @@ export const SystemService = {
 
     list: async (user_id: string, page: number) => {
         try {
-            const res = await api.get('system/menu/', {
+            const res = await api.get('api/system/menu/', {
                 params: {
                     user_id,
                     page

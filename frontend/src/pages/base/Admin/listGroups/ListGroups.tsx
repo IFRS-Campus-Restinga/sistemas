@@ -17,6 +17,7 @@ const ListGroups = () => {
         <ListPage
             title='Grupos'
             fetchData={fetchGroups}
+            registerUrl='/session/admin/grupos/create/'
         />
     )
 }
