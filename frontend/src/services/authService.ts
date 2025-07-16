@@ -6,7 +6,7 @@ import type { UserState } from '../store/userSlice';
 
 interface AuthParams {
     credential?: string
-    group: 'aluno' | 'servidor' | 'convidado'
+    accessProfile: 'aluno' | 'servidor' | 'convidado'
 }
 
 type LoginSuccessResponse = {
@@ -27,7 +27,7 @@ const AuthService = {
         }
 
         try {
-            const res = await api.post('/user/account/create/', params)
+            const res = await api.post('user/account/create/', params)
 
             return res
         } catch (error: any) {
@@ -38,7 +38,7 @@ const AuthService = {
 
     login: async (params: visitorLoginProps): Promise<AxiosResponse<LoginResponse>> => {
         try {
-            const res = await api.post('/session/login/', params)
+            const res = await api.post('session/login/', params)
 
             return res
         } catch (error: any) {
@@ -48,7 +48,7 @@ const AuthService = {
 
     googleLogin: async (params: AuthParams): Promise<AxiosResponse<LoginResponse>> => {
         try {
-            const res = await api.post('/session/login/google/', params)
+            const res = await api.post('session/login/google/', params)
 
             return res
         } catch (error) {
@@ -58,7 +58,7 @@ const AuthService = {
 
     logout: async () => {
         try {
-            const res = await api.post('/session/logout/')
+            const res = await api.post('session/logout/')
 
             return res
         } catch (error) {

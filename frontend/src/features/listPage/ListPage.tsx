@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
-import CustomLoading from "../customLoading/CustomLoading"
-import FormContainer from "../formContainer/FormContainer"
-import SearchBar from "../searchBar/SearchBar"
-import Table from "../table/Table"
+import CustomLoading from '../../components/customLoading/CustomLoading'
+import FormContainer from "../../components/formContainer/FormContainer"
+import SearchBar from "../../components/searchBar/SearchBar"
+import Table from "../../components/table/tablesComponents/Table"
 import styles from './ListPage.module.css'
 import { useNavigate } from "react-router-dom"
 
@@ -10,10 +10,13 @@ interface ListPageProps {
     title: string
     fetchData: (currentPage: number, searchParam: string) => Promise<{ next: number, previous: number, data: Record<string, any>[] }>
     registerUrl: string
+    canEdit: boolean
+    canView: boolean
+    onDelete: (id: string) => void
 }
 
 
-const ListPage = ({ title, fetchData, registerUrl }: ListPageProps) => {
+const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }: ListPageProps) => {
     const navigate = useNavigate()
     const [data, setData] = useState<Record<any, string>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
@@ -43,6 +46,10 @@ const ListPage = ({ title, fetchData, registerUrl }: ListPageProps) => {
         handleSearch(currentPage, searchParam)
     }, [title])
 
+    useEffect(() => {
+        if (searchParam === '') handleSearch(currentPage, searchParam)
+    }, [searchParam])
+
     return (
         <FormContainer title={`Gerenciar ${title}`}>
             <div className={styles.searchContainer}>
@@ -68,9 +75,12 @@ const ListPage = ({ title, fetchData, registerUrl }: ListPageProps) => {
                         current={currentPage} 
                         setCurrent={setCurrentPage} 
                         loadingContent={isLoading} 
-                        canDelete={true}    
-                        canEdit={true}    
-                        canView={true}    
+                        crudActions={{
+                            canEdit: canEdit,
+                            canView: canView,
+                            onDelete: onDelete
+                        }}
+                        searchParam={searchParam}
                     />
                 ) : (
                     <div className={styles.messageContainer}>

@@ -25,11 +25,21 @@ class CustomUserManager(BaseUserManager):
     def get_by_group(self, group_name):
         return self.filter(groups__name=group_name)
     
+    def get_by_access_profile(self, access_profile_name):
+        return self.filter(access_profile=access_profile_name)
+    
     def get_by_group_and_param(self, group_name: str, param: str):
         return self.filter(
                 Q (email__icontains=param) | 
                 Q (first_name__icontains=param) |
                 Q (last_name__icontains=param), groups__name=group_name
+            ).order_by('id')
+    
+    def get_by_access_profile_and_param(self, access_profile_name: str, param: str):
+        return self.filter(
+                Q (email__icontains=param) | 
+                Q (first_name__icontains=param) |
+                Q (last_name__icontains=param), access_profile=access_profile_name
             ).order_by('id')
     
     def get_permissions(self, user_id: str):

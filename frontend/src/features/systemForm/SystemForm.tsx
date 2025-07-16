@@ -1,18 +1,19 @@
 import { useState } from 'react'
-import CustomInput from '../customInput/CustomInput'
-import CustomLabel from '../customLabel/CustomLabel'
+import CustomInput from '../../components/customInput/CustomInput'
+import CustomLabel from '../../components/customLabel/CustomLabel'
 import styles from './SystemForm.module.css'
+import tableStyles from '../../components/table/Table.module.css'
 import { validateMandatoryStringField } from '../../utils/validations/generalValidations'
-import CustomSelect, { type OptionProps } from '../customSelect/CustomSelect'
-import CustomOptions from '../customOptions/CustomOptions'
+import CustomSelect, { type OptionProps } from '../../components/customSelect/CustomSelect'
+import CustomOptions from '../../components/customOptions/CustomOptions'
 import search from '../../assets/search-alt-svgrepo-com.svg'
 import x from '../../assets/close-svgrepo-com.svg'
 import UserService from '../../services/userService'
 import type { SystemFormErrors } from '../../pages/base/Admin/createSystem/CreateSystem'
-import ErrorMessage from '../errorMessage/ErrorMessage'
-import CustomButton from '../customButton/CustomButton'
+import ErrorMessage from '../../components/errorMessage/ErrorMessage'
+import CustomButton from '../../components/customButton/CustomButton'
 import type { System } from '../../services/systemService'
-import DynamicTable from '../dynamicTable/DynamicTable'
+import DynamicTable from '../../components/table/tablesComponents/DynamicTable'
 
 
 interface SystemFormProps {
@@ -54,10 +55,6 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
         }
 
         setOptionsOpen(false)
-    }
-
-    const addGroup = () => {
-        setFormData(prev => ({...prev, groups: [...prev.groups, '']}))
     }
 
     return (
@@ -163,6 +160,7 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
                                     }
                                 }}
                             />
+                            {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
                             {
                                 optionsOpen ? (
                                     <CustomOptions
@@ -183,32 +181,30 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
                             }} />
                         </div>
                     </div>
-                    <div className={styles.devTeamContainer}>
-                        <table className={styles.table}>
-                            <thead className={styles.thead}>
-                                    <tr className={styles.tr}>
-                                        <th className={styles.th}>Alunos</th>
-                                        <th className={styles.th}/>
-                                    </tr>
+                    <div className={tableStyles.tableContainer}>
+                        <table className={tableStyles.table}>
+                            <thead className={tableStyles.thead}>
+                                <tr className={tableStyles.tr}>
+                                    <th className={tableStyles.th}>Alunos</th>
+                                    <th className={tableStyles.th}/>
+                                </tr>
                             </thead>
-                            <tbody className={styles.tbody}>
-                                {
-                                    devTeamViewList.map((option, index) => (
-                                        <tr>
-                                            <td className={styles.td}>{option}</td>
-                                            <td className={styles.td}>
-                                                <img src={x} className={styles.remove} alt="remover" onClick={() => removeUser(index)}/>
-                                            </td>
-                                        </tr>
-                                    ))
-                                }
+                            <tbody className={tableStyles.tbody}>
+                                {devTeamViewList.map((option, index) => (
+                                    <tr className={tableStyles.tr}>
+                                        <td className={tableStyles.td}>{option}</td>
+                                        <td className={tableStyles.td}>
+                                            <img src={x} className={tableStyles.remove} alt="remover" onClick={() => removeUser(index)}/>
+                                        </td>
+                                    </tr>
+                                ))}
                             </tbody>
                         </table>
                     </div>
-                    {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
                 </div>
                 <div className={styles.tableFormGroup}>
                     <h2 className={styles.h2}>Grupos de acesso *</h2>
+                    {errors.groups ? <ErrorMessage message={errors.groups}/> : null}
                     <DynamicTable
                         itemTitle='Grupos'
                         items={formData.groups}

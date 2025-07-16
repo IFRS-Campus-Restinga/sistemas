@@ -3,18 +3,20 @@
     box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
     width: 100%;
     border-radius: 5px;
-    position: absolute;
+    position: absolute !important;
     top: 100%;
-    z-index: 10
+    z-index: 100
 }
 
 .customOption {
     list-style: none;
     font-family: 'Roboto';
-    padding: 8px;
+    padding: 5px;
     border: none;
     border-radius: 5px;
     color: #767676;
+    font-size: 12px;
+    font-weight: 600;
 
     &:hover {
         cursor: pointer;

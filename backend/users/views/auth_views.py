@@ -7,16 +7,16 @@ from fs_auth_middleware.decorators import is_authenticated
 @api_view(['POST'])
 def login_with_google(request):
     credential = request.data.get('credential', None)
-    group_name = request.data.get('group', None)
+    access_profile = request.data.get('accessProfile', None)
 
     if not credential:
         return Response({'message': 'Token necessário'}, status=status.HTTP_400_BAD_REQUEST)
     
-    if not group_name:
-        return Response({'message': 'Necessário informar grupo de acesso'}, status=status.HTTP_400_BAD_REQUEST)
+    if not access_profile:
+        return Response({'message': 'Necessário informar perfil de acesso'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        user_data, refresh, access = GoogleLogin.login(credential, group_name)
+        user_data, refresh, access = GoogleLogin.login(credential, access_profile)
 
         response = Response({'user': user_data}, status=status.HTTP_200_OK)
 
@@ -27,7 +27,7 @@ def login_with_google(request):
             secure=False,
             samesite='Lax',
             max_age=3600*24*7,
-            path='/auth/'
+            path='/session/'
         )
 
         response.set_cookie(
@@ -69,7 +69,7 @@ def login(request):
             secure=False,
             samesite="Lax",
             max_age=3600 * 24 * 7,
-            path="/auth/",
+            path="/session/",
             domain='127.0.0.1'
         )
 
@@ -97,13 +97,13 @@ def create_account_visitor(request):
         email = request.data.get('email', None)
         first_name = request.data.get('first_name', None)
         last_name = request.data.get('last_name', None)
-        group_name = request.data.get('group', None)
+        access_profile = request.data.get('accessProfile', None)
         password = request.data.get('password', None)
 
-        if not email or not first_name or not last_name or not group_name or not password:
+        if not email or not first_name or not last_name or not access_profile or not password:
             return Response({'message': 'Dados incompletos'}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = UserService.create_user(email, first_name, last_name, group_name, password)
+        user = UserService.create_user(email, first_name, last_name, access_profile, password)
 
         return Response({'message': 'Conta criada com sucesso'}, status=status.HTTP_201_CREATED)
     except UserValidationException as e:

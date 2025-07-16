@@ -3,6 +3,7 @@ from django.db import models
 from users.managers.user_manager import CustomUserManager
 from django.contrib.auth.models import AbstractUser, Permission, Group
 from users.enums.categories import Categories
+from users.enums.access_profile import AcessProfile
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -12,6 +13,7 @@ class CustomUser(AbstractUser):
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=False)
     first_login = models.BooleanField(default=True)
+    access_profile = models.CharField(choices=AcessProfile.choices, max_length=12)
 
     last_login = None
     password = None

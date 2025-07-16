@@ -36,19 +36,11 @@ export interface visitorLoginErrorProps {
     password: string | null
 }
 
-export interface JwtPayload {
-    group: string;
-    first_name?: string;
-    last_name?: string;
-    profile_picture_src: string
-}
-
-
 const Login = () => {
     const setUser = useSetUser()
     const redirect = useNavigate()
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
-    const [loginGroup, setLoginGroup] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
+    const [accessProfile, setAccessProfile] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
     const [loginWithExternalAccount, setLoginWithExternalAccount] = useState<boolean>(false)
     const [createAccount, setCreateAccount] = useState<boolean>(false)
     const [isDisabled, setIsDisabled] = useState<boolean>(false)
@@ -67,8 +59,8 @@ const Login = () => {
         passwordConfirmation: ''
     })
 
-    const changeGroup = (group: 'aluno' | 'servidor' | 'convidado') => {
-        setLoginGroup(group)
+    const changeAccessProfile = (group: 'aluno' | 'servidor' | 'convidado') => {
+        setAccessProfile(group)
 
         if (group === 'aluno' || group === 'servidor') {
             setLoginWithExternalAccount(false)
@@ -93,7 +85,7 @@ const Login = () => {
     const handleSuccess = async (response: CredentialResponse) => {
         setIsDisabled(true)
 
-        const req = AuthService.googleLogin({ credential: response.credential, group: loginGroup })
+        const req = AuthService.googleLogin({ credential: response.credential, accessProfile: accessProfile })
 
         toast.promise(
             (async () => {
@@ -151,7 +143,6 @@ const Login = () => {
         e.preventDefault()
 
         setIsDisabled(true)
-        console.log(validateRegisterForm())
         if (!validateRegisterForm()) return
 
         if ('first_name' in visitorAccountData) {
@@ -304,7 +295,7 @@ const Login = () => {
                     <section className={styles.sectionMessage}>
                         <h2 className={styles.h2} style={{ textAlign: 'center' }}>Acesso Solicitado com Sucesso!</h2>
                         <p className={styles.p} style={{ textAlign: 'center' }}>
-                            Por questões de segurança, seu acesso como {loginGroup} necessitará de aprovação prévia de um administrador
+                            Por questões de segurança, seu acesso como {accessProfile} necessitará de aprovação prévia de um administrador
                             <br />
                             <br />
                             Você será notificado através do email informado assim que o pedido de acesso for aprovado.
@@ -312,12 +303,12 @@ const Login = () => {
                     </section>
                 ) : (
                     <section className={styles.section}>
-                        <LoginGroupList changeLoginGroup={changeGroup} loginGroup={loginGroup} />
+                        <LoginGroupList changeLoginGroup={changeAccessProfile} loginGroup={accessProfile} />
                         <hr className={styles.hr} />
                         <div className={styles.loginOptions}>
                             <h2 className={styles.h2}>Faça seu Login</h2>
                             {
-                                loginGroup === 'convidado' && !isDisabled ? (
+                                accessProfile === 'convidado' && !isDisabled ? (
                                     <div className={styles.visitorOptions}>
                                         <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
 

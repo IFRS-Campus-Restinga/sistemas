@@ -32,6 +32,10 @@ class CustomUserSerializer(serializers.ModelSerializer):
                 return FormatUserData.search_format(instance)
             case 'details':
                 return FormatUserData.details_format(instance)
+            case 'request':
+                return FormatUserData.request_format(instance)
+            case _:
+                raise serializers.ValidationError('Formato de retorno inválido')
 
 
 

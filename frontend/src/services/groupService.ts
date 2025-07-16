@@ -1,6 +1,6 @@
 import api from "../../config/apiConfig"
 import { extractError } from "../utils/handleAxiosError"
-import { type Permissions } from "./permission_service"
+import { type Permissions } from "./permissionService"
 
 export interface Group {
     id?: string

@@ -10,6 +10,10 @@
     border-radius: 8px;
 }
 
+.title {
+    text-align: center;
+}
+
 .formHeader {
     display: flex;
     width: 100%;

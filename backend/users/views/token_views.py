@@ -13,21 +13,26 @@ def refresh_token(request):
     if not refresh:
         return Response({'message': 'Autenticação necessária'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    try:        
+    try:
         access = TokenService.refresh_token(refresh, system)
 
-        response = Response({'message': 'Token válido'}, status=status.HTTP_200_OK)
+        if system:
+            return Response({
+                'access_token': str(access),
+                'message': 'Token renovado'
+            }, status=status.HTTP_200_OK)
+        else:
+            response = Response({'message': 'Token renovado'}, status=status.HTTP_200_OK)
+            response.set_cookie(
+                key='access_token',
+                value=str(access),
+                httponly=True,
+                secure=False,
+                samesite='Lax',
+                path='/'
+            )
+            return response
 
-        response.set_cookie(
-            key='access_token',
-            value=str(access),
-            httponly=True,
-            secure=False,
-            samesite='Lax',
-            path='/'
-        )
-
-        return response
     except Http404 as e:
         return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
     except TokenValidationError as e:

@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom'
 import UserService from '../../../../services/userService'
-import ListPage from '../../../../components/listPage/ListPage'
+import ListPage from '../../../../features/listPage/ListPage'
 
 const ListUsers = () => {
     const location = useLocation()
@@ -16,10 +16,18 @@ const ListUsers = () => {
         }
     }
 
+    const deleteUser = async (userId: string) => {
+
+    }
+
     return (
         <ListPage
             title={group}
             fetchData={fetchUsers}
+            registerUrl='session/admin/usuarios/create/'
+            onDelete={deleteUser}
+            canEdit={true}
+            canView={true}
         />
     )
 }

@@ -1,25 +1,109 @@
-.section {
-    display: flex;
-    width: 65%;
-    height: 100%;
-    flex-direction: column;
-    justify-content: space-evenly;
-    align-items: center;
-    margin: auto;
-}
-
-.menuContainer {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+.home {
     width: 100%;
     height: 100%;
-    margin: auto;
-    gap: 10px
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
 }
 
-.h2 {
-    font-family: "Roboto";
+.requestsContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 70%;
+    height: 100%;
+    margin-top: 100px;
+}
+
+.request {
+    width: 100%;
+    display: flex;
+    padding: 3px;
+    font-size: 12px;
+    font-family: 'Roboto';
     color: #767676;
+    gap: 8px;
+}
+
+.actions {
+    display: flex;
+}
+
+.action, .icon {
+    width: 10px;
+    height: 10px;
+}
+
+.messageContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.message {
+    font-size: 14px;
+    font-family: 'Roboto';
+    color: #767676;
+    font-weight: 600;
+    border: 1px solid #767676;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+}
+
+.modalContainer {
+    position: absolute;
+    width: 100vw;
+    height: 100vh;
+    top: 0;
+    z-index: 40;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.requestContainer {
+    width: 50%;
+}
+
+.closeButton {
+    display: flex;
+    border: 1px solid white;
+    border-radius: 50%;
+    padding: 8px;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    margin: 0px auto 15px auto;
+}
+
+.icon {
+    width: 15px;
+    height: 15px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.requestParam {
+    font-size: 15px;
+    color: #4a4a4a;
+    font-family: 'Roboto';
+    margin-left: 12px;
+}
+
+.buttonContainer {
+    width: 30%;
+    margin: 20px auto 10px auto;
+    display: flex;
+    justify-content: center;
 }

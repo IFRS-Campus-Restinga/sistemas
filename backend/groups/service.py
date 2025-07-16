@@ -1,3 +1,4 @@
+import uuid
 from django.db.models import Q
 from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
@@ -28,15 +29,15 @@ class GroupService:
     
     @staticmethod
     def edit(group_data, group_id: str):
-        group = get_object_or_404(Group, uuid_map__uuid=group_id)
+        group = get_object_or_404(Group, uuid_map__uuid=uuid.UUID(group_id))
 
         group_name = group_data['name']
-        permissions_uuids = [perm['id'] for perm in group_data['permissions']]
+        permissions_uuids = [uuid.UUID(perm['id']) for perm in group_data['permissions']]
 
         permissions = Permission.objects.filter(
             uuid_map__uuid__in=permissions_uuids
         ).values_list('id', flat=True)
-
+ 
         serializer = GroupSerializer(instance=group, data={'name': group_name, 'permissions': permissions})
 
         if not serializer.is_valid():
@@ -46,7 +47,7 @@ class GroupService:
 
     @staticmethod
     def list(request):
-        groups = Group.objects.filter(name__icontains=request.GET.get('param', ''))
+        groups = Group.objects.filter(name__icontains=request.GET.get('search', ''))
 
         if not groups.exists():
             paginator = GroupPagination()
@@ -62,7 +63,7 @@ class GroupService:
 
     @staticmethod
     def get_group_data(group_id: str, request):
-        group = get_object_or_404(Group, uuid_map__uuid=group_id)
+        group = get_object_or_404(Group, uuid_map__uuid=uuid.UUID(group_id))
 
         serializer = GroupSerializer(instance=group, context={'request': request})
 

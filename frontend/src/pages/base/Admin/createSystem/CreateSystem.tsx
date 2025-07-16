@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import SystemForm from '../../../../components/systemForm/SystemForm'
+import SystemForm from '../../../../features/systemForm/SystemForm'
 import styles from './CreateSystem.module.css'
 import { SystemService, type System } from '../../../../services/systemService'
 import { toast, ToastContainer } from 'react-toastify'

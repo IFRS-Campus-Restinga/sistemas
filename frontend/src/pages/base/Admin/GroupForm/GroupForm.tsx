@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 import GroupService, { type Group } from '../../../../services/groupService'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import { toast, ToastContainer } from 'react-toastify'
-import PermissionService, {type Permissions} from '../../../../services/permission_service'
-import DualTableTransfer from '../../../../components/dualTableTransfer/DualTableTransfer'
+import PermissionService, {type Permissions} from '../../../../services/permissionService'
+import DualTableTransfer from '../../../../components/table/tablesComponents/DualTableTransfer'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
@@ -124,7 +124,7 @@ const GroupForm = () => {
         if (validateForm()) {
             let req
 
-            if (state) req = GroupService.edit(group, state)
+            if (state) req = GroupService.edit({id: state, name: group.name, permissions: permissions}, state)
             else req = GroupService.create(group)
 
             toast.promise(
@@ -183,7 +183,6 @@ const GroupForm = () => {
                                 />
                             </CustomLabel>
                         </div>
-                        <div className={styles.tablesContainer}>
                             <DualTableTransfer
                                 title1="Permissões disponíveis"
                                 title2="Permissões do grupo"
@@ -206,7 +205,6 @@ const GroupForm = () => {
                                 getKey={(perm) => perm.id}
                                 renderItem={(perm) => perm.name}
                             />
-                        </div>
                         <div className={styles.buttonContainer}>
                             <CustomButton text='Salvar Alterações' type='submit'/>
                         </div>

@@ -15,8 +15,12 @@ urlpatterns = [
     path('token/refresh/', refresh_token),
     path('token/pair-token/', pair_token),
     path('logout/', logout),
-    path('data/', get_user_data),
 
     # user/
-    path('list/<str:group_name>/', list_users_by_group),
+    path('data/', get_user_data),
+    path('get/group/<str:group_name>/', list_users_by_group),
+    path('get/access_profile/<str:access_profile_name>/', list_users_by_access_profile),
+    path('request/get/', list_user_requests),
+    path('request/<str:request_id>/approve/', approve_user_request),
+    path('request/<str:request_id>/decline/', decline_user_request),
 ]

@@ -30,7 +30,7 @@ class TokenValidationService:
     def validate_groups(user: CustomUser, token_groups: set[str]):
         groups = set(group.name for group in user.groups.all())
 
-        if groups != token_groups:
+        if not token_groups.issubset(groups):
             raise TokenValidationError("Grupos inválidos")
 
     @staticmethod

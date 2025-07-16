@@ -13,7 +13,7 @@ import GroupForm from './pages/base/Admin/GroupForm/GroupForm'
 
 const routes = createBrowserRouter([
     {
-        path: '/',
+        path: 'session/',
         element: <Login />
     },
     {

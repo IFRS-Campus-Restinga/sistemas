@@ -1,7 +1,7 @@
-import styles from './DualTableTransfer.module.css'
-import doubleArrow from '../../assets/double-arrow-right-svgrepo-com.svg'
+import styles from '../Table.module.css'
+import doubleArrow from '../../../assets/double-arrow-right-svgrepo-com.svg'
 import { useEffect, useRef } from 'react'
-import CustomLoading from '../customLoading/CustomLoading'
+import CustomLoading from '../../customLoading/CustomLoading'
 
 interface DualTableTransferProps<T> {
     title1: string
@@ -11,19 +11,19 @@ interface DualTableTransferProps<T> {
     setList1: React.Dispatch<React.SetStateAction<T[]>>
     setList2: React.Dispatch<React.SetStateAction<T[]>>
     currentList1: number
-    currentList2: number
+    currentList2?: number
     setCurrentList1: React.Dispatch<React.SetStateAction<number>>
-    setCurrentList2: React.Dispatch<React.SetStateAction<number>>
+    setCurrentList2?: React.Dispatch<React.SetStateAction<number>>
     prevList1: number | null
-    prevList2: number | null
+    prevList2?: number | null
     nextList1: number | null
-    nextList2: number | null
+    nextList2?: number | null
     renderItem: (item: T) => React.ReactNode
     getKey: (item: T) => string | number
     fetchData1: (page: number) => void
-    fetchData2: (page: number) => void
+    fetchData2?: (page: number) => void
     loadingList1: boolean
-    loadingList2: boolean
+    loadingList2?: boolean
 }
 
 const DualTableTransfer = <T,>({ 
@@ -114,7 +114,7 @@ const DualTableTransfer = <T,>({
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-            if (entry.isIntersecting && nextList2 && !loadingList2) {
+            if (entry.isIntersecting && nextList2 && !loadingList2 && setCurrentList2) {
                 setCurrentList2(prev => prev + 1);
             }
             });
@@ -126,12 +126,12 @@ const DualTableTransfer = <T,>({
     }, [list2, nextList2, loadingList2]);
 
     useEffect(() => {
-        if (currentList2 > 1) fetchData2(currentList2);
+        if (currentList2 && currentList2 > 1 && fetchData2) fetchData2(currentList2);
     }, [currentList2]);
 
     return (
         <section className={styles.tablesContainer}>
-            <div className={styles.tableContainer}>
+            <div className={styles.dualTableContainer}>
                 {
                     loadingList1 ? (
                         <div className={styles.loadingWindow}>
@@ -143,7 +143,7 @@ const DualTableTransfer = <T,>({
                     <thead className={styles.thead}>
                         <tr className={styles.tr}>
                             <th className={styles.th}>{title1}</th>
-                            <th className={styles.th}/>
+                            <th className={styles.thAction}/>
                         </tr>
                     </thead>
                     <tbody className={styles.tbody}>
@@ -158,7 +158,7 @@ const DualTableTransfer = <T,>({
                                 }
                             >
                                 <td className={styles.td}>{renderItem(item)}</td>
-                                <td className={styles.td}>
+                                <td className={styles.tdAction}>
                                     <img src={doubleArrow} alt="Vincular" className={styles.action} onClick={() => sendToList2(index)}/>
                                 </td>
                             </tr>
@@ -166,7 +166,7 @@ const DualTableTransfer = <T,>({
                     </tbody>
                 </table>
             </div>
-            <div className={styles.tableContainer}>
+            <div className={styles.dualTableContainer}>
                 {
                     loadingList2 ? (
                         <div className={styles.loadingWindow}>
@@ -177,7 +177,7 @@ const DualTableTransfer = <T,>({
                 <table className={styles.table}>
                     <thead className={styles.thead}>
                         <tr className={styles.tr}>
-                            <th className={styles.th}/>
+                            <th className={styles.thAction}/>
                             <th className={styles.th}>{title2}</th>
                         </tr>
                     </thead>
@@ -192,7 +192,7 @@ const DualTableTransfer = <T,>({
                                     null
                                 }
                             >
-                                <td className={styles.td}>
+                                <td className={styles.tdAction}>
                                     <img src={doubleArrow} alt="Desvincular" style={{rotate: '180deg'}} className={styles.action} onClick={() => sendToList1(index)}/>
                                 </td>
                                 <td className={styles.td}>{renderItem(item)}</td>

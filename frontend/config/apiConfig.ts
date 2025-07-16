@@ -38,7 +38,7 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                await api.get('auth/token/refresh/');
+                await api.get('session/token/refresh/');
                 processQueue(null);
                 return api(originalRequest);
             } catch (refreshError) {

@@ -1,10 +1,9 @@
-import styles from './DynamicTable.module.css'
-import X from '../../assets/close-svgrepo-com.svg'
-import CustomInput from '../customInput/CustomInput'
-import type { OptionProps } from '../customSelect/CustomSelect'
-import CustomSelect from '../customSelect/CustomSelect'
-import ErrorMessage from '../errorMessage/ErrorMessage'
-import { useEffect } from 'react'
+import styles from '../Table.module.css'
+import X from '../../../assets/close-svgrepo-com.svg'
+import CustomInput from '../../customInput/CustomInput'
+import type { OptionProps } from '../../customSelect/CustomSelect'
+import CustomSelect from '../../customSelect/CustomSelect'
+import ErrorMessage from '../../errorMessage/ErrorMessage'
 
 interface DynamicTableProps {
     items: string[]
@@ -35,12 +34,16 @@ const DynamicTable = ({ items, itemTitle, ParentRemoveItem, ParentSetItem, paren
 
 
     return (
-        <div className={styles.container}>
+        <div className={styles.dynamicTableContainer}>
             <div className={styles.tableContainer}>
                 <table className={styles.table}>
                     <thead className={styles.thead}>
                         <tr>
-                            <th className={styles.th}>{itemTitle}</th>
+                            <th className={styles.th}>
+                                <p className={styles.tableTitle}>
+                                    {itemTitle}
+                                </p>
+                            </th>
                             <th className={styles.th}/>
                         </tr>
                     </thead>

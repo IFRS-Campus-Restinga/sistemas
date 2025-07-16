@@ -59,7 +59,7 @@ class GoogleLogin(UserAuthenticationService):
             raise UserAuthException('Método de login inválido para esta conta')
 
     @staticmethod
-    def login(credential: str, group_name: str) -> tuple[any, str, str] :
+    def login(credential: str, access_profile: str) -> tuple[any, str, str] :
 
         try:
             idinfo = id_token.verify_oauth2_token(credential, google_requests.Request(), GOOGLE_CLIENT_ID)
@@ -69,11 +69,11 @@ class GoogleLogin(UserAuthenticationService):
             last_name = idinfo.get('family_name', None)
             picture = idinfo.get('picture', None)
 
-            user = UserService.create_user(email, first_name, last_name, group_name)
+            user = UserService.create_user(email, first_name, last_name, access_profile)
 
             GoogleLogin.check_login(user)
 
-            if not user.groups.filter(name=group_name).exists():
+            if not CustomUser.objects.filter(access_profile=access_profile).exists():
                 raise UserValidationException("Grupo de acesso inválido para esta conta")
 
             if not user.is_active:

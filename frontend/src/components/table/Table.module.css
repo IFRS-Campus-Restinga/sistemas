@@ -1,5 +1,14 @@
-.tableContainer {
+.tablesContainer {
     width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.dualTableContainer {
+    width: 100%;
+    min-height: 150px;
     max-height: 250px;
     overflow-y: scroll;
     overflow-x: hidden; 
@@ -7,11 +16,31 @@
     display: block;
 }
 
+.dynamicTableContainer {
+    width: 100%;
+    height: 150px;
+    max-height: 150px;
+    overflow-y: scroll;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.tableContainer {
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: block;
+}
+
 .table {
     width: 100%;
-    height: 100%;
-    font-family: 'Roboto';
     border-collapse: collapse;
+    height: auto;
+    font-family: 'Roboto';
 }
 
 .thead {
@@ -23,6 +52,10 @@
     font-weight: 600;
     font-size: 13px;
     z-index: 10;
+}
+
+.tableTitle {
+    margin: auto;
 }
 
 .thead th {
@@ -55,6 +88,11 @@
     padding: 3px;
 }
 
+.thAction, .tdAction {
+    width: 0;
+    padding: 3px;
+}
+
 .td {
     color: #767676;
     font-size: 12px;
@@ -82,5 +120,43 @@
         cursor: pointer;
         transform: scale(1.05);
         transition: all ease-in-out 0.3s;
+    }
+}
+
+.loadingWindow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.remove {
+    width: 15px;
+    height: 15px;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.addButton {
+    background-color: #006b3f;
+    padding: 5px;
+    border-radius: 50%;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    width: 20px;
+    height: 20px;
+
+    &:hover {
+        cursor: pointer;
     }
 }

@@ -23,3 +23,14 @@ class GroupSerializer(serializers.ModelSerializer):
                 return FormatGroupData.list_format(instance)
             case 'details':
                 return FormatGroupData.details_format(instance)
+    
+    def update(self, instance, validated_data):
+        instance.name = validated_data.get('name', instance.name)
+        instance.save()
+
+        # Remove do grupo apenas as permissões recebidas
+        if 'permissions' in validated_data:
+            permissions_to_remove = validated_data['permissions']
+            instance.permissions.remove(*permissions_to_remove)
+
+        return instance

@@ -41,29 +41,55 @@ def get_user_data(request):
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
+@api_view(['GET'])
+@has_any_permission(['view_customuser'])
+def list_users_by_access_profile(request, access_profile_name):
+    try:
+        return UserService.list_by_access_profile(request, access_profile_name)
+    except serializers.ValidationError as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 @has_any_permission(['view_customuser'])
 def list_users_by_group(request, group_name):
     try:
-        search_param = request.GET.get('search')
-
-        if search_param:
-            users = CustomUser.objects.get_by_group_and_param(group_name, search_param)
-        else:
-            users = CustomUser.objects.get_by_group(group_name)
-
-        if not users:
-            return Response({'results': []}, status=status.HTTP_200_OK)
-
-        paginator = PageNumberPagination()
-        paginator.page_size = 10
-        result_page = paginator.paginate_queryset(users, request)
-
-        serializer = CustomUserSerializer(result_page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+        return UserService.list_by_group(request, group_name)
     except serializers.ValidationError as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['GET'])
+@has_any_permission(['view_customuser'])
+def list_user_requests(request):
+    try:
+        return UserService.get_requests(request)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['PUT'])
+@has_any_permission(['change_customuser'])
+def approve_user_request(request, request_id):
+    try:
+        UserService.approve_request(request.data, request_id)
+
+        return Response({'message': 'Conta ativada com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['DELETE'])
+@has_any_permission(['delete_customuser'])
+def decline_user_request(request, request_id):
+    try:
+        UserService.decline_request(request_id)
+
+        return Response({'message': 'Conta ativada com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

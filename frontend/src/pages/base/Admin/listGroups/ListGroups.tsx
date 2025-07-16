@@ -1,5 +1,5 @@
 import GroupService from '../../../../services/groupService'
-import ListPage from '../../../../components/listPage/ListPage'
+import ListPage from '../../../../features/listPage/ListPage'
 
 const ListGroups = () => {
 
@@ -13,11 +13,18 @@ const ListGroups = () => {
         }
     }
 
+    const deleteGroup = async (groupId: string) => {
+
+    }
+
     return (
         <ListPage
             title='Grupos'
             fetchData={fetchGroups}
             registerUrl='/session/admin/grupos/create/'
+            canEdit={true}
+            canView={true}
+            onDelete={deleteGroup}
         />
     )
 }

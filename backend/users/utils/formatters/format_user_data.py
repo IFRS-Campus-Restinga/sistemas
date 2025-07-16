@@ -22,6 +22,16 @@ class FormatUserData:
             "id": instance.id,
             "title": f"{instance.first_name} {instance.last_name}" if instance.first_name else instance.email
         }
+    
+    @staticmethod
+    def request_format(instance: CustomUser):
+        return {
+            "id": instance.id,
+            "nome": f"{instance.first_name} {instance.last_name}",
+            "email": instance.email,
+            "perfil": instance.access_profile,
+        }
+
     @staticmethod
     def details_format(instance: CustomUser):
         """Recebe uma instância de usuário e a retorna no 
