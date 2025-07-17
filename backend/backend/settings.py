@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'groups',
     'permissions',
     'systems',
+    'calendars',
 ]
 
 MIDDLEWARE = [

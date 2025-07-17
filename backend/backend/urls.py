@@ -32,4 +32,7 @@ urlpatterns = [
 
     # system data
     path('api/system/', include('systems.urls')),
+
+    # calendar & events data
+    path('api/calendar/', include('calendars.urls')),
 ]

@@ -7,9 +7,12 @@ import HomeAdmin from './pages/base/Admin/home/HomeAdmin'
 import HomeMember from './pages/base/Member/home/HomeMember'
 import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
 import CreateSystem from './pages/base/Admin/createSystem/CreateSystem'
-import ListUsers from './pages/base/Admin/listUsers/ListUsers'
-import ListGroups from './pages/base/Admin/listGroups/ListGroups'
-import GroupForm from './pages/base/Admin/GroupForm/GroupForm'
+import UserList from './pages/base/Admin/userList/UserList'
+import GroupList from './pages/base/Admin/groupList/GroupList'
+import GroupForm from './pages/base/Admin/groupForm/GroupForm'
+import CalendarList from './pages/base/Admin/calendarList/CalendarList'
+import CalendarForm from './pages/base/Admin/calendarForm/CalendarForm'
+import Calendar from './pages/base/Admin/calendar/Calendar'
 
 const routes = createBrowserRouter([
     {
@@ -21,20 +24,20 @@ const routes = createBrowserRouter([
         element: <BaseAdmin />,
         children: [
             {
-                path: 'home',
+                path: 'home/',
                 element: <HomeAdmin />
             },
             {
-                path: 'aluno/list',
-                element: <ListUsers />
+                path: 'aluno/',
+                element: <UserList />
             },
             {
-                path: 'servidor/list',
-                element: <ListUsers />
+                path: 'servidor/',
+                element: <UserList />
             },
             {
-                path: 'convidado/list',
-                element: <ListUsers />
+                path: 'convidado/',
+                element: <UserList />
             },
             {
                 path: 'grupos/create/',
@@ -42,15 +45,31 @@ const routes = createBrowserRouter([
             },
             {
                 path: 'grupos/',
-                element: <ListGroups/>
+                element: <GroupList/>
             },
             {
-                path: 'grupos/:grupoId/edit/',
+                path: 'grupos/:groupId/edit/',
                 element: <GroupForm/>
             },
             {
-                path: 'sistemas/cadastro',
+                path: 'sistemas/cadastro/',
                 element: <CreateSystem />
+            },
+            {
+                path: 'calendarios/',
+                element: <CalendarList/>
+            },
+            {
+                path: 'calendarios/create/',
+                element: <CalendarForm/>
+            },
+            {
+                path: 'calendarios/:calendarId/',
+                element: <Calendar/>
+            },
+            {
+                path: 'calendarios/:calendarId/edit/',
+                element: <CalendarForm/>
             }
         ]
     },

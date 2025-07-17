@@ -8,8 +8,8 @@ interface CustomInputProps {
     onChange: (e: any) => void
     onBlur?: (e?: any) => void
     onKeyDown?: (e?: React.KeyboardEvent) => void
-    min?: number
-    max?: number
+    min?: number | string
+    max?: number | string
     placeholder?: string
 }
 
