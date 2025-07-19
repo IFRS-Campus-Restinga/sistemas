@@ -179,16 +179,27 @@ const HomeAdmin = () => {
                                     <img src={x} alt="fechar" className={styles.icon} />
                                 </button>
                                 <FormContainer width='100%' title='Adicionar grupos' formTip="Utilize as tabelas abaixo para vincular grupos ao usuário antes de aprová-lo">
-                                    <form action="" className={styles.form} onSubmit={approveRequest}>
-                                        <CustomLabel title='Nome'>
-                                            <p className={styles.requestParam}>{approvedRequest?.username}</p>
-                                        </CustomLabel>
-                                        <CustomLabel title='Email'>
-                                            <p className={styles.requestParam}>{approvedRequest?.email}</p>
-                                        </CustomLabel>
-                                        <CustomLabel title='Perfil'>
-                                            <p className={styles.requestParam}>{approvedRequest?.accessProfile}</p>
-                                        </CustomLabel>
+                                    <form className={styles.form} onSubmit={approveRequest}>
+                                        <div className={styles.userData}>
+                                            <div className={styles.data}>
+                                                <label className={styles.dataLabel}>
+                                                    Nome
+                                                    <p className={styles.requestParam}>{approvedRequest?.username}</p>
+                                                </label>
+                                            </div>
+                                            <div className={styles.data}>
+                                                <label className={styles.dataLabel}>
+                                                    Email
+                                                    <p className={styles.requestParam}>{approvedRequest?.email}</p>
+                                                </label>
+                                            </div>
+                                            <div className={styles.data}>
+                                                <label className={styles.dataLabel}>
+                                                    Perfil
+                                                    <p className={styles.requestParam}>{approvedRequest?.accessProfile}</p>
+                                                </label>
+                                            </div>
+                                        </div>
                                         <DualTableTransfer
                                             list1={groups}
                                             setList1={setGroups}

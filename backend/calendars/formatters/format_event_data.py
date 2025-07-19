@@ -5,11 +5,11 @@ class FormatEventData:
     def list_format(instance: Event):
         return {
             'id': instance.id,
-            'titulo': instance.title,
-            "inicio": instance.start.strftime('%d/%m/%Y') if instance.start else None,
-            "final": instance.end.strftime('%d/%m/%Y') if instance.end else None,
-            'categoria': instance.category,
-            'tipo': instance.type,
+            'title': instance.title,
+            "start": instance.start,
+            "end": instance.end,
+            'category': instance.category,
+            'type': instance.type,
             'calendar': instance.calendar.id
         }
     

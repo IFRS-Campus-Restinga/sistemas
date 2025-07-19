@@ -94,11 +94,36 @@
     gap: 15px;
 }
 
+.userData {
+    display: flex;
+    gap: 10px;
+}
+
+.dataLabel {
+    color: #4a4a4a;
+    font-family: "Roboto";
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    background-color: #ccc;
+    border-radius: 8px;
+    border: 1px solid #767676;
+    padding: 5px;
+    font-weight: 600;
+}
+
+.data {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
 .requestParam {
     font-size: 15px;
     color: #4a4a4a;
     font-family: 'Roboto';
-    margin-left: 12px;
+    font-weight: 400;
 }
 
 .buttonContainer {

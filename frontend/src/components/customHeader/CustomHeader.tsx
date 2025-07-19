@@ -30,7 +30,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                 } finally {
                     sessionStorage.clear()
                     clearUser()
-                    redirect('/')
+                    redirect('/session')
                 }
             })(),
             {

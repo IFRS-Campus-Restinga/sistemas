@@ -42,9 +42,15 @@
     font-family: 'Roboto';
 }
 
+.title {
+    text-align: center;
+    font-size: 30px;
+}
+
 .h2,
 .p,
-.optionP {
+.optionP,
+.title {
     color: #767676;
     font-family: 'Inter';
 }

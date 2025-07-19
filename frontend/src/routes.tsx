@@ -13,6 +13,7 @@ import GroupForm from './pages/base/Admin/groupForm/GroupForm'
 import CalendarList from './pages/base/Admin/calendarList/CalendarList'
 import CalendarForm from './pages/base/Admin/calendarForm/CalendarForm'
 import Calendar from './pages/base/Admin/calendar/Calendar'
+import EventForm from './pages/base/Admin/eventForm/EventForm'
 
 const routes = createBrowserRouter([
     {
@@ -70,6 +71,14 @@ const routes = createBrowserRouter([
             {
                 path: 'calendarios/:calendarId/edit/',
                 element: <CalendarForm/>
+            },
+            {
+                path: 'calendarios/:calendarId/eventos/create/',
+                element: <EventForm/>
+            },
+            {
+                path: 'calendarios/:calendarId/eventos/:eventId/edit/',
+                element: <EventForm/>
             }
         ]
     },

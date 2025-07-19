@@ -1,0 +1,25 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formGroup {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.textArea {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    min-height: 100px;
+    font-family: "Roboto";
+    padding: 5px;
+    color: #767676;
+
+    &:focus {
+        outline: none;
+    }
+}

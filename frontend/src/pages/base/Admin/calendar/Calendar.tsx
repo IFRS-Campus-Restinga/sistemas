@@ -1,12 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Calendar as BigCalendar, dateFnsLocalizer, type Event as BigEvent } from 'react-big-calendar'
-import { useEffect, useState } from 'react'
+import { Calendar as BigCalendar, dateFnsLocalizer, type Event as BigEvent, type View } from 'react-big-calendar'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { format, parse, startOfWeek, getDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import EventService, { type EventInterface } from '../../../../services/eventService'
 import CalendarService, { type CalendarInterface } from '../../../../services/calendarService'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
+import styles from './Calendar.module.css' // CSS Modules com as classes abaixo
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 
 const locales = {
@@ -16,10 +17,38 @@ const locales = {
 const localizer = dateFnsLocalizer({
   format,
   parse,
-  startOfWeek,
+  startOfWeek: () => 1,
   getDay,
   locales,
 })
+
+const colorMap: Record<string, string> = {
+  'Semana Pedagógica': '#ff00ff',
+  'Feriados e dias não letivos': '#ff0000',
+  'Prazo final para registro de notas e entrega de documentos': '#00ffff',
+  'Dias letivos': '#ffff00',
+  'Recesso Escolar/Férias': '#a9a9a9',
+  'Exames': '#f4a460',
+  'Conselhos de classe': '#5f9ea0',
+  'Vestibular': '#006400',
+  'Fim de etapa': '#00ff00',
+}
+
+const messages = {
+  allDay: 'Dia inteiro',
+  previous: 'Anterior',
+  next: 'Próximo',
+  today: 'Hoje',
+  month: 'Mês',
+  week: 'Semana',
+  day: 'Dia',
+  agenda: 'Agenda',
+  date: 'Data',
+  time: 'Hora',
+  event: 'Evento',
+  noEventsInRange: 'Nenhum evento nesse período.',
+  showMore: (count: number) => `+ ${count} mais`,
+}
 
 interface BigCalendarEvent extends BigEvent {
   id: string
@@ -34,26 +63,35 @@ const Calendar = () => {
   const navigate = useNavigate()
 
   const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
   const [calendar, setCalendar] = useState<CalendarInterface>()
   const [events, setEvents] = useState<BigCalendarEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentView, setCurrentView] = useState<View>('month')
 
-  // Para carregar eventos conforme o intervalo visível do calendário
-  const fetchEvents = async (start: Date, end: Date) => {
+  const fetchCalendar = async () => {
+    try {
+      const res = await CalendarService.get(state)
+      setCalendar(res.data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const fetchEvents = async (start: Date) => {
     setIsLoading(true)
     try {
-      // Como seu backend filtra por mês, vamos enviar mês e ano do start
       const month = start.getMonth() + 1
       const year = start.getFullYear()
 
       const res = await EventService.list(month, year)
-
-      // Mapear os eventos do backend para o formato que o BigCalendar espera
       const mappedEvents = res.data.map((ev: EventInterface) => ({
         id: ev.id,
         title: ev.title,
         start: new Date(ev.start),
-        end: new Date(ev.end),
+        end: new Date(new Date(ev.end).setDate(new Date(ev.end).getDate() + 1)),
         type: ev.type,
         category: ev.category,
         description: ev.description,
@@ -67,12 +105,70 @@ const Calendar = () => {
     }
   }
 
-  const fetchCalendar = async () => {
-    try {
-      const res = await CalendarService.get(state)
-      setCalendar(res.data)
-    } catch (error) {
-      console.error(error)
+  const handleNavigate = (date: Date) => {
+    const start = new Date(calendar!.start) 
+    const end = new Date(calendar!.end)
+
+    console.log(date < end && date > start)
+
+    if (date < end && date > start) setCurrentDate(date)
+  }
+
+  const handleViewChange = (view: View) => {
+    setCurrentView(view)
+  }
+  
+  // Bloqueia seleção em datas anteriores a hoje
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    if (slotInfo.start >= today) {
+      navigate('eventos/create/', {
+        state: {
+          calendarId: state,
+          selectedDate: slotInfo.start.toISOString().split('T')[0],
+        },
+      })
+    }
+  }
+  
+  // Navega para edição do evento
+  const handleSelectEvent = (event: BigCalendarEvent) => {
+    // Se quiser bloquear edição de eventos passados, cheque aqui
+    if (event.start! >= today) {
+      navigate(`eventos/${event.id}/edit/`)
+    }
+  }
+  
+  // Estilo dos eventos, bloqueando interação e mudando cursor em eventos passados
+  const eventStyleGetter = (event: BigCalendarEvent) => {
+    const backgroundColor = colorMap[event.type] || '#3174ad'
+    const isClickable = event.start! >= today
+
+      const style: CSSProperties = {
+        backgroundColor,
+        borderRadius: '5px',
+        color: 'white',
+        border: 'none',
+        padding: '2px 5px',
+        opacity: isClickable ? 1 : 0.5,
+        pointerEvents: isClickable ? 'auto' : 'none',
+        cursor: isClickable ? 'pointer' : 'not-allowed',
+      }
+
+      return {
+        className: isClickable ? styles.clickableEvent : styles.disabledEvent,
+        style,
+      }
+  }
+  
+  // Estiliza dias anteriores bloqueando cursor e mudando visual
+  const dayPropGetter = (date: Date) => {
+    if (date < today) {
+      return {
+        className: styles.disabledDay,
+      }
+    }
+    return {
+      className: styles.enabledDay,
     }
   }
 
@@ -81,87 +177,31 @@ const Calendar = () => {
   }, [state])
 
   useEffect(() => {
-    fetchEvents(new Date(today.getFullYear(), today.getMonth(), 1), new Date())
-  }, [])
-
-  const handleRangeChange = (range: Date[] | { start: Date; end: Date }) => {
-    let start: Date
-    let end: Date
-
-    if (Array.isArray(range)) {
-      start = range[0]
-      end = range[range.length - 1]
-    } else {
-      start = range.start
-      end = range.end
-    }
-
-    fetchEvents(start, end)
-  }
-
-  const handleSelectEvent = (event: BigCalendarEvent) => {
-    // Pode navegar para a tela de edição do evento, por exemplo
-    navigate(`/eventos/${event.id}/editar`)
-  }
-
-  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-    // Só permite criar eventos em datas futuras
-    if (slotInfo.start >= new Date(today.toDateString())) {
-      navigate('/eventos/novo', {
-        state: {
-          calendarId: state,
-          selectedDate: slotInfo.start.toISOString().split('T')[0],
-        },
-      })
-    }
-  }
-
-  const eventStyleGetter = (event: BigCalendarEvent) => {
-        const colorMap: Record<string, string> = {
-            'Semana Pedagógica': '#ff00ff',
-            'Feriados e dias não letivos': '#ff0000',
-            'Prazo final para registro de notas e entrega de documentos': '#00ffff',
-            'Dias letivos': '#ffff00',
-            'Recesso Escolar/Férias': '#a9a9a9',
-            'Exames': '#f4a460',
-            'Conselhos de classe': '#5f9ea0',
-            'Vestibular': '#006400',
-            'Fim de etapa': '#00ff00',
-        }
-
-        const backgroundColor = colorMap[event.type] || '#3174ad'
-
-        const isClickable = event.start! >= new Date(today.toDateString())
-
-        return {
-            style: {
-            backgroundColor,
-            borderRadius: '5px',
-            color: 'white',
-            border: 'none',
-            padding: '2px 5px',
-            cursor: isClickable ? 'pointer' : 'not-allowed',
-            opacity: isClickable ? 1 : 0.5,  // opcional, para visual
-            },
-        }
-    }
-
+    fetchEvents(currentDate)
+  }, [currentDate])
+  
   if (isLoading || !calendar) return <CustomLoading />
-
+  
   return (
-    <FormContainer title={calendar.title} formTip="Clique em um espaço vazio para criar evento ou clique num evento para editar">
+    <FormContainer title={calendar.title} formTip="Clique em uma data para criar um novo evento ou clique num evento para editar">
       <BigCalendar
         localizer={localizer}
+        culture="pt-BR"
         events={events}
         startAccessor="start"
         endAccessor="end"
         style={{ height: 600 }}
-        onRangeChange={handleRangeChange}
+        onNavigate={handleNavigate}
+        view={currentView}
+        onView={handleViewChange}
+        date={currentDate}
         selectable
         onSelectEvent={handleSelectEvent}
         onSelectSlot={handleSelectSlot}
         eventPropGetter={eventStyleGetter}
-        min={today} // bloqueia datas antes de hoje
+        dayPropGetter={dayPropGetter}
+        messages={messages}
+        min={today}
       />
     </FormContainer>
   )

@@ -302,46 +302,49 @@ const Login = () => {
                         </p>
                     </section>
                 ) : (
-                    <section className={styles.section}>
-                        <LoginGroupList changeLoginGroup={changeAccessProfile} loginGroup={accessProfile} />
-                        <hr className={styles.hr} />
-                        <div className={styles.loginOptions}>
-                            <h2 className={styles.h2}>Faça seu Login</h2>
-                            {
-                                accessProfile === 'convidado' && !isDisabled ? (
-                                    <div className={styles.visitorOptions}>
-                                        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+                    <>
+                        <h2 className={styles.title}>HUB de Sistemas do IFRS</h2>
+                        <section className={styles.section}>
+                            <LoginGroupList changeLoginGroup={changeAccessProfile} loginGroup={accessProfile} />
+                            <hr className={styles.hr} />
+                            <div className={styles.loginOptions}>
+                                <h2 className={styles.h2}>Faça seu Login</h2>
+                                {
+                                    accessProfile === 'convidado' && !isDisabled ? (
+                                        <div className={styles.visitorOptions}>
+                                            <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
 
-                                        <span className={styles.span}>
-                                            <hr className={styles.horizontalHr} />
-                                            <p className={styles.optionP} onClick={() => setLoginWithExternalAccount((prev) => !prev)}>Já tem uma conta?</p>
-                                            <hr className={styles.horizontalHr} />
-                                        </span>
-                                        {
-                                            loginWithExternalAccount ? (
-                                                <VisitorForm
-                                                    createAccount={createAccount}
-                                                    setCreateAccount={setCreateAccount}
-                                                    formData={visitorAccountData}
-                                                    setFormData={setVisitorAccountData}
-                                                    errors={errors}
-                                                    setErrors={setErrors}
-                                                    disableButton={isDisabled}
-                                                    onSubmit={createAccount ? handleCreateAccount : handleLogin}
-                                                    passwordConfirmation={passwordConfirmation}
-                                                    setPasswordConfirmation={setPasswordConfirmation}
-                                                />
-                                            ) : null
-                                        }
-                                    </div>
-                                ) : isDisabled ? (
-                                    <CustomLoading />
-                                ) : (
-                                    <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-                                )
-                            }
-                        </div>
-                    </section>
+                                            <span className={styles.span}>
+                                                <hr className={styles.horizontalHr} />
+                                                <p className={styles.optionP} onClick={() => setLoginWithExternalAccount((prev) => !prev)}>Já tem uma conta?</p>
+                                                <hr className={styles.horizontalHr} />
+                                            </span>
+                                            {
+                                                loginWithExternalAccount ? (
+                                                    <VisitorForm
+                                                        createAccount={createAccount}
+                                                        setCreateAccount={setCreateAccount}
+                                                        formData={visitorAccountData}
+                                                        setFormData={setVisitorAccountData}
+                                                        errors={errors}
+                                                        setErrors={setErrors}
+                                                        disableButton={isDisabled}
+                                                        onSubmit={createAccount ? handleCreateAccount : handleLogin}
+                                                        passwordConfirmation={passwordConfirmation}
+                                                        setPasswordConfirmation={setPasswordConfirmation}
+                                                    />
+                                                ) : null
+                                            }
+                                        </div>
+                                    ) : isDisabled ? (
+                                        <CustomLoading />
+                                    ) : (
+                                        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+                                    )
+                                }
+                            </div>
+                        </section>
+                    </>
                 )
             }
         </Base >

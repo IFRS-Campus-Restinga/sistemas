@@ -1,13 +1,32 @@
 import api from "../../config/apiConfig"
 
+export enum EventCategories {
+    EMI = 'Integrado',
+    ProEJA = 'ProEJA',
+    GERAL = 'Geral',
+}
+
+export enum EventTypes {
+    SEMANA_PEDAGOGICA = 'Semana Pedagógica',
+    FERIADOS_N_LETIVO = 'Feriados e dias não letivos',
+    PRAZO_FIM_NOTAS_DOC = 'Prazo final para registro de notas e entrega de documentos',
+    DIAS_LETIVOS = 'Dias letivos',
+    RECESSO_ESC_FERIAS = 'Recesso Escolar/Férias',
+    EXAMES = 'Exames',
+    CONSELHOS_CLASSE = 'Conselhos de classe',
+    VESTIBULAR = 'Vestibular',
+    FIM_ETAPA = 'Fim de etapa',
+}
+
 export interface EventInterface {
     id?: string
     title: string
     start: string
     end: string
-    category: string
-    type: string
-    description: string
+    category: EventCategories
+    type: EventTypes
+    description?: string
+    calendar: string
 }
 
 const EventService = {
