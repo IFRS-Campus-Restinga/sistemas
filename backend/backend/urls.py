@@ -15,24 +15,27 @@ Including another URLconf
 """ 
 from django.contrib import admin
 from django.urls import path, include
-from users.views.login_django_admin import *
+from hub_users.views.login_django_admin import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('django-admin/', include('users.urls')),
+    path('django-admin/', include('hub_users.urls')),
 
     # auth & session
-    path('auth/', include('users.urls')),
-    path('session/', include('users.urls')),
+    path('auth/', include('hub_users.urls')),
+    path('session/', include('hub_users.urls')),
 
     # user, group & permission data
-    path('api/user/', include('users.urls')),
-    path('api/group/', include('groups.urls')),
-    path('api/permission/', include('permissions.urls')),
+    path('api/user/', include('hub_users.urls')),
+    path('api/group/', include('hub_groups.urls')),
+    path('api/permission/', include('hub_permissions.urls')),
 
     # system data
-    path('api/system/', include('systems.urls')),
+    path('api/system/', include('hub_systems.urls')),
 
     # calendar & events data
-    path('api/calendar/', include('calendars.urls')),
+    path('api/calendar/', include('hub_calendars.urls')),
+
+    # academic data (courses, subjects, ppcs, classes)
+    path('api/academic/', include('hub_academic.urls'))
 ]

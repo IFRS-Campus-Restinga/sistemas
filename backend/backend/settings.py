@@ -70,11 +70,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     # project apps
-    'users',
-    'groups',
-    'permissions',
-    'systems',
-    'calendars',
+    'hub_users',
+    'hub_groups',
+    'hub_permissions',
+    'hub_systems',
+    'hub_calendars',
+    'hub_academic',
 ]
 
 MIDDLEWARE = [
@@ -161,7 +162,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 
-AUTH_USER_MODEL = 'users.CustomUser' 
+AUTH_USER_MODEL = 'hub_users.CustomUser' 
 
 LANGUAGE_CODE = 'en-us'
 

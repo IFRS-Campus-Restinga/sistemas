@@ -125,6 +125,8 @@ const Calendar = () => {
         state: {
           calendarId: state,
           selectedDate: slotInfo.start.toISOString().split('T')[0],
+          calendarStart: calendar?.start,
+          calendarEnd: calendar?.end
         },
       })
     }

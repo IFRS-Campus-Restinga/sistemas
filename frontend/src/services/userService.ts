@@ -50,7 +50,7 @@ const UserService = {
         return await api.get<UserState>('api/user/data/')
     },
 
-    searchOrListUsers: async (profile: string, param: string = '', page: number = 1, data_format: string) => {
+    searchOrListUsers: async (profile: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
         const queryParams = new URLSearchParams()
 
         if (param.trim() !== '') queryParams.append('search', param)
@@ -58,7 +58,8 @@ const UserService = {
 
         return api.get(`api/user/get/access_profile/${profile}/?${queryParams.toString()}`, {
             params: {
-                data_format
+                data_format,
+                active
             }
         })
     },

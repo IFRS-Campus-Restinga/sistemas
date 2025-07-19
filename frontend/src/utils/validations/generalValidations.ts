@@ -11,12 +11,12 @@ export const validateMandatoryArrayField = (value: Array<any>, customMessage?: s
     return null
 }
 
-export const compareDates = (date1: string, date2: string) => {
+export const compareDates = (date1: string, date2: string, message?: string) => {
     const start = new Date(date1)
     const end = new Date(date2)
 
     if (end < start) {
-        return "Data de encerramento não pode ser inferior à de início"
+        return message ?? "Data de encerramento não pode ser inferior à de início"
     }
 
     return null

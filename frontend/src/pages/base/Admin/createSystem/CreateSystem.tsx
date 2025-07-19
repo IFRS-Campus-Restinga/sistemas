@@ -62,7 +62,7 @@ const CreateSystem = () => {
                 }
             ).then(() => {
                 setTimeout(() => {
-                    redirect('/admin/home')
+                    redirect('/session/admin/home')
                 }, 2000);
             })
         }

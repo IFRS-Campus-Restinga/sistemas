@@ -116,6 +116,8 @@ const EventForm = () => {
         } else if (eventId) {
             fetchEvent()
         }
+
+        console.log(state)
     }, [state])
 
     return (
@@ -145,6 +147,8 @@ const EventForm = () => {
                                     onChange={(e) => setEvent({...event, start: e.target.value})}
                                     onBlur={() => setErrors({...errors, title: validateMandatoryStringField(event.start)})}
                                     error={errors.start}
+                                    min={new Date(state.calendarStart).toISOString().split('T')[0]}
+                                    max={new Date(state.calendarEnd).toISOString().split('T')[0]}
                                 />
                             </CustomLabel>
                             <CustomLabel title='Data Encerramento *'>
@@ -155,6 +159,7 @@ const EventForm = () => {
                                     onBlur={() => setErrors({...errors, end: validateMandatoryStringField(event.end)})}
                                     error={errors.end}
                                     min={event.start}
+                                    max={new Date(state.calendarEnd).toISOString().split('T')[0]}
                                 />
                             </CustomLabel>
                         </div>

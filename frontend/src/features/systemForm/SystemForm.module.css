@@ -6,6 +6,10 @@
     padding: 20px;
 }
 
+.formGroupContainer {
+    margin-top: 20px;
+}
+
 .formGroup {
     display: flex;
     width: 100%;

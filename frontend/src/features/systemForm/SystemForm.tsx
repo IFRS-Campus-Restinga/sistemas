@@ -32,7 +32,7 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
 
     const searchUsers = async () => {
         try {
-            const res = await UserService.searchOrListUsers('aluno', inputSearch, undefined, 'search')
+            const res = await UserService.searchOrListUsers('aluno', inputSearch, undefined, 'search', true)
 
             if (res.status !== 200) throw new Error(res.data?.message)
 
@@ -142,74 +142,76 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
                     />
                 </CustomLabel>
             </div>
-            <div className={styles.formGroup}>
-                <div className={styles.tableFormGroup}>
-                    <div className={styles.searchContainer}>
-                        <div className={styles.inputContainer}>
-                            <CustomInput
-                                type='text'
-                                placeholder='Pesquise um aluno por nome, email ou matrícula'
-                                value={inputSearch}
-                                max={50}
-                                onChange={(e) => {
-                                    setInputSearch(e.target.value)
-                                }}
-                                onKeyDown={(e) => {
-                                    if (e && e.key === 'Enter') {
-                                        searchUsers()
-                                    }
-                                }}
-                            />
-                            {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
-                            {
-                                optionsOpen ? (
-                                    <CustomOptions
-                                        options={userOptions}
-                                        onSelect={(option) => {
-                                            addUser(option)
-                                            setInputSearch('')
-                                        }}
-                                    />
-                                ) : null
-                            }
+            <div className={styles.formGroupContainer}>
+                <div className={styles.formGroup}>
+                    <div className={styles.tableFormGroup}>
+                        <div className={styles.searchContainer}>
+                            <div className={styles.inputContainer}>
+                                <CustomInput
+                                    type='text'
+                                    placeholder='Pesquise um aluno por nome, email ou matrícula'
+                                    value={inputSearch}
+                                    max={50}
+                                    onChange={(e) => {
+                                        setInputSearch(e.target.value)
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e && e.key === 'Enter') {
+                                            searchUsers()
+                                        }
+                                    }}
+                                />
+                                {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
+                                {
+                                    optionsOpen ? (
+                                        <CustomOptions
+                                            options={userOptions}
+                                            onSelect={(option) => {
+                                                addUser(option)
+                                                setInputSearch('')
+                                            }}
+                                        />
+                                    ) : null
+                                }
+                            </div>
+                            <div className={styles.searchTools}>
+                                <img className={styles.tool} src={search} alt="search" onClick={() => searchUsers()} />
+                                <img className={styles.tool} src={x} alt="clear" onClick={() => {
+                                    setInputSearch('')
+                                    setOptionsOpen(false)
+                                }} />
+                            </div>
                         </div>
-                        <div className={styles.searchTools}>
-                            <img className={styles.tool} src={search} alt="search" onClick={() => searchUsers()} />
-                            <img className={styles.tool} src={x} alt="clear" onClick={() => {
-                                setInputSearch('')
-                                setOptionsOpen(false)
-                            }} />
-                        </div>
-                    </div>
-                    <div className={tableStyles.tableContainer}>
-                        <table className={tableStyles.table}>
-                            <thead className={tableStyles.thead}>
-                                <tr className={tableStyles.tr}>
-                                    <th className={tableStyles.th}>Alunos</th>
-                                    <th className={tableStyles.th}/>
-                                </tr>
-                            </thead>
-                            <tbody className={tableStyles.tbody}>
-                                {devTeamViewList.map((option, index) => (
+                        <div className={tableStyles.tableContainer}>
+                            <table className={tableStyles.table}>
+                                <thead className={tableStyles.thead}>
                                     <tr className={tableStyles.tr}>
-                                        <td className={tableStyles.td}>{option}</td>
-                                        <td className={tableStyles.td}>
-                                            <img src={x} className={tableStyles.remove} alt="remover" onClick={() => removeUser(index)}/>
-                                        </td>
+                                        <th className={tableStyles.th}>Alunos</th>
+                                        <th className={tableStyles.th}/>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className={tableStyles.tbody}>
+                                    {devTeamViewList.map((option, index) => (
+                                        <tr className={tableStyles.tr}>
+                                            <td className={tableStyles.td}>{option}</td>
+                                            <td className={tableStyles.td}>
+                                                <img src={x} className={tableStyles.remove} alt="remover" onClick={() => removeUser(index)}/>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-                <div className={styles.tableFormGroup}>
-                    <h2 className={styles.h2}>Grupos de acesso *</h2>
-                    {errors.groups ? <ErrorMessage message={errors.groups}/> : null}
-                    <DynamicTable
-                        itemTitle='Grupos'
-                        items={formData.groups}
-                        setItems={(newGroups) => setFormData((prev) => ({ ...prev, groups: newGroups }))}
-                    />
+                    <div className={styles.tableFormGroup}>
+                        <h2 className={styles.h2}>Grupos de acesso *</h2>
+                        {errors.groups ? <ErrorMessage message={errors.groups}/> : null}
+                        <DynamicTable
+                            itemTitle='Grupos'
+                            items={formData.groups}
+                            setItems={(newGroups) => setFormData((prev) => ({ ...prev, groups: newGroups }))}
+                        />
+                    </div>
                 </div>
             </div>
             <div className={styles.buttonContainer}>
