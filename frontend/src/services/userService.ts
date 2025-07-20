@@ -8,15 +8,39 @@ export interface RequestGroup {
     Nome: string
 }
 
+export interface visitorAccountProps {
+    first_name: string
+    last_name: string
+    email: string
+    password: string
+}
+
 export interface RequestInterface {
     id: string
     username: string
     email: string
+    is_abstract: boolean
     accessProfile: 'aluno' | 'servidor' | 'convidado' | ''
     groups: RequestGroup[]
 }
 
 const UserService = {
+    createAccount: async (visitorData: visitorAccountProps) => {
+            const params = {
+                ...visitorData,
+                accessProfile: 'convidado'
+            }
+    
+            try {
+                const res = await api.post('api/user/create/', params)
+    
+                return res
+            } catch (error: any) {
+                throw extractError(error)
+            }
+    
+    },
+
     getRequests: async (page: number = 1) => {
         try {
             return await api.get('api/user/request/get/', {

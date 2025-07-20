@@ -55,8 +55,8 @@ const Menu = () => {
 
     return (
         <>
-            <h2 className={styles.h2}>Bem vindo {user.username}</h2>
-            <Link to={'/session/admin/sistemas/cadastro'}>Adicionar novo sistema</Link>
+            <h2 className={styles.h2}>Sistemas</h2>
+            <Link to={'/session/admin/sistemas/cadastro'} className={styles.addButton}>+</Link>
             <section className={styles.menu}>
                 {
                     prev ? (

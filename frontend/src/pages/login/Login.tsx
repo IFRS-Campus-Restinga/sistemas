@@ -4,19 +4,13 @@ import styles from './Login.module.css'
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
 import LoginGroupList from "../../components/loginGroupList/LoginGroupList"
 import VisitorForm from "../../components/visitorForm/VisitorForm"
-import AuthService from "../../services/authService"
+import AuthService, { type visitorLoginProps } from "../../services/authService"
 import { toast, ToastContainer } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import CustomLoading from "../../components/customLoading/CustomLoading"
 import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/validations/authValidations"
 import { useSetUser } from "../../store/userHooks"
-
-export interface visitorAccountProps {
-    first_name: string
-    last_name: string
-    email: string
-    password: string
-}
+import UserService, {type visitorAccountProps} from "../../services/userService"
 
 export interface visitorAccountErrorProps {
     first_name: string | null
@@ -24,11 +18,6 @@ export interface visitorAccountErrorProps {
     email: string | null
     password: string | null
     passwordConfirmation: string | null
-}
-
-export interface visitorLoginProps {
-    email: string
-    password: string
 }
 
 export interface visitorLoginErrorProps {
@@ -92,7 +81,7 @@ const Login = () => {
                 try {
                     const res = await req;
 
-                    if ('is_active' in res.data) {
+                    if (!res.data.user) {
                         setAccessRequested(true)
                     } else {
                         setUser(res.data.user)
@@ -146,7 +135,7 @@ const Login = () => {
         if (!validateRegisterForm()) return
 
         if ('first_name' in visitorAccountData) {
-            const req = AuthService.createAccount(visitorAccountData)
+            const req = UserService.createAccount(visitorAccountData)
 
             toast.promise(
                 (async () => {

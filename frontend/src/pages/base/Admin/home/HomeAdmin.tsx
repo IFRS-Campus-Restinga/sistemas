@@ -5,11 +5,11 @@ import UserService, { type RequestGroup, type RequestInterface } from '../../../
 import { toast } from 'react-toastify';
 import Table from '../../../../components/table/tablesComponents/Table';
 import FormContainer from '../../../../components/formContainer/FormContainer';
-import CustomLabel from '../../../../components/customLabel/CustomLabel';
 import DualTableTransfer from '../../../../components/table/tablesComponents/DualTableTransfer';
 import GroupService from '../../../../services/groupService';
 import CustomButton from '../../../../components/customButton/CustomButton';
 import x from '../../../../assets/close-svgrepo-com-white.svg'
+import Switch from '../../../../components/switch/Switch';
 
 const HomeAdmin = () => {
     const [requests, setRequests] = useState<Record<string, any>[]>([])
@@ -25,6 +25,7 @@ const HomeAdmin = () => {
         username: '',
         email: '',
         accessProfile: '',
+        is_abstract: false,
         groups: []
     })
 
@@ -80,6 +81,7 @@ const HomeAdmin = () => {
             accessProfile: request.perfil,
             email: request.email,
             username: request.nome,
+            is_abstract: request.is_abstract,
             groups: []
         })
         
@@ -98,6 +100,7 @@ const HomeAdmin = () => {
                 accessProfile: '',
                 email: '',
                 id: '',
+                is_abstract: false,
                 username: '',
                 groups: []
             })
@@ -172,6 +175,7 @@ const HomeAdmin = () => {
                                         id: '',
                                         username: '',
                                         email: '',
+                                        is_abstract: false,
                                         accessProfile: '',
                                         groups: []
                                     })
@@ -199,6 +203,15 @@ const HomeAdmin = () => {
                                                     <p className={styles.requestParam}>{approvedRequest?.accessProfile}</p>
                                                 </label>
                                             </div>
+                                        </div>
+                                        <div className={styles.switchContainer}>
+                                            Tipo de usuário
+                                            <Switch
+                                                stateHandler={(value) => setApprovedRequest({...approvedRequest, is_abstract: value === 'Abstrato' ? true : false})}
+                                                value={approvedRequest.is_abstract ? 'Abstrato' : 'Pessoal'}
+                                                value1='Abstrato'
+                                                value2='Pessoal'
+                                            />
                                         </div>
                                         <DualTableTransfer
                                             list1={groups}

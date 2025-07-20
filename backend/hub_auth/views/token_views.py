@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from hub_users.services.token_service import *
+from hub_auth.services.token_service import *
 from hub_systems.managers.system_managers import *
 from django.http import Http404
 

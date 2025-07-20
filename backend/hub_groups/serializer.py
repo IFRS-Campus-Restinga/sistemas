@@ -1,6 +1,8 @@
+import uuid
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 from .formatter import FormatGroupData
+from .models import GroupUUIDMap
 
 class GroupSerializer(serializers.ModelSerializer):
     permissions = serializers.PrimaryKeyRelatedField(
@@ -28,7 +30,6 @@ class GroupSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.save()
 
-        # Remove do grupo apenas as permissões recebidas
         if 'permissions' in validated_data:
             permissions_to_remove = validated_data['permissions']
             instance.permissions.remove(*permissions_to_remove)

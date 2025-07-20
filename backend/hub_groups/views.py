@@ -11,7 +11,7 @@ def create(request):
     try:
         group = GroupService.create(request.data.get('name', None))
 
-        GroupService.edit(request.data, group.uuid_map.uuid)
+        GroupService.edit(request.data, str(group.uuid_map.uuid))
 
         return Response({'message': 'Grupo criado com sucesso'}, status=status.HTTP_200_OK)
     except serializers.ValidationError as e:

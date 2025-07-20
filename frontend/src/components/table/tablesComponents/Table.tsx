@@ -90,7 +90,7 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
                         }
                         {
                             !crudActions && !dualActions ? null : (
-                                <th className={styles.th}>
+                                <th className={styles.thAction}>
                                     Ações
                                 </th>
                             ) 
@@ -110,7 +110,7 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
                                         ) : null
                                     ))
                                 }
-                                <td className={styles.td}>
+                                <td className={styles.tdAction}>
                                     <div className={styles.actions}>
                                         {crudActions ? (
                                             <>

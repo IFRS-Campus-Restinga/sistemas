@@ -7,8 +7,8 @@ from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from hub_users.models import *
 from .token_service import TokenService
-from .user_service import UserService, UserValidationException
-from .password_service import PasswordService
+from hub_users.services.user_service import UserService, UserValidationException
+from hub_users.services.password_service import PasswordService
 
 GOOGLE_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_ID
 
@@ -18,7 +18,7 @@ class UserAuthException(Exception):
 class UserAuthenticationService:
     @staticmethod
     def login():
-        pass
+        pass 
 
 class CommonLogin(UserAuthenticationService):
     @staticmethod
@@ -69,22 +69,24 @@ class GoogleLogin(UserAuthenticationService):
             last_name = idinfo.get('family_name', None)
             picture = idinfo.get('picture', None)
 
-            user = UserService.create_user(email, first_name, last_name, access_profile)
+            user, created = UserService.create_user(email, first_name, last_name, access_profile)
 
             GoogleLogin.check_login(user)
 
             if not CustomUser.objects.filter(access_profile=access_profile).exists():
                 raise UserValidationException("Grupo de acesso inválido para esta conta")
 
-            if not user.is_active:
-                raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active})
+            if created:
+                return None, None, None
             else:
-                user_data = UserService.build_user_data(user, picture)
-                
-                access, refresh = TokenService.pair_token(user)
+                if user.is_active:
+                    user_data = UserService.build_user_data(user, picture)
+                    
+                    access, refresh = TokenService.pair_token(user)
 
-                return user_data, refresh, access
-                  
+                    return user_data, refresh, access
+                else:
+                    raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active}) 
         except Group.DoesNotExist as e:
             raise UserValidationException('Grupo de acesso não encontrado')
         except GoogleAuthError as e:

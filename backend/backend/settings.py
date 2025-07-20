@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     # project apps
+    'hub_auth',
     'hub_users',
     'hub_groups',
     'hub_permissions',

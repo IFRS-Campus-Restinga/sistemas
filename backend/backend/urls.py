@@ -15,15 +15,14 @@ Including another URLconf
 """ 
 from django.contrib import admin
 from django.urls import path, include
-from hub_users.views.login_django_admin import *
+from hub_auth.views.login_django_admin import *
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('django-admin/', include('hub_users.urls')),
+    path('django-admin/', include('hub_auth.urls')),
 
-    # auth & session
-    path('auth/', include('hub_users.urls')),
-    path('session/', include('hub_users.urls')),
+    # session
+    path('session/', include('hub_auth.urls')),
 
     # user, group & permission data
     path('api/user/', include('hub_users.urls')),

@@ -8,9 +8,29 @@ from rest_framework import status, serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from hub_users.models import CustomUser
-from hub_users.services.user_service import UserService
-from hub_users.services.token_service import *
+from hub_users.services.user_service import *
+from hub_auth.services.token_service import *
 from django.conf import settings
+
+@api_view(['POST'])
+def create_account_visitor(request):
+    try:
+        email = request.data.get('email', None)
+        first_name = request.data.get('first_name', None)
+        last_name = request.data.get('last_name', None)
+        access_profile = request.data.get('accessProfile', None)
+        password = request.data.get('password', None)
+
+        if not email or not first_name or not last_name or not access_profile or not password:
+            return Response({'message': 'Dados incompletos'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user = UserService.create_user(email, first_name, last_name, access_profile, password)
+
+        return Response({'message': 'Conta criada com sucesso'}, status=status.HTTP_201_CREATED)
+    except UserValidationException as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
 def get_user_data(request):

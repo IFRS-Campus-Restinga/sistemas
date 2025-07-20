@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view
-from hub_users.services.auth_service import *
+from hub_auth.services.auth_service import *
 from rest_framework.response import Response
 from rest_framework import status
 from fs_auth_middleware.decorators import is_authenticated
@@ -87,26 +87,6 @@ def login(request):
     except UserAuthException as e:
         return Response(e.args[0], status=status.HTTP_403_FORBIDDEN)
     except UserValidationException  as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['POST'])
-def create_account_visitor(request):
-    try:
-        email = request.data.get('email', None)
-        first_name = request.data.get('first_name', None)
-        last_name = request.data.get('last_name', None)
-        access_profile = request.data.get('accessProfile', None)
-        password = request.data.get('password', None)
-
-        if not email or not first_name or not last_name or not access_profile or not password:
-            return Response({'message': 'Dados incompletos'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = UserService.create_user(email, first_name, last_name, access_profile, password)
-
-        return Response({'message': 'Conta criada com sucesso'}, status=status.HTTP_201_CREATED)
-    except UserValidationException as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

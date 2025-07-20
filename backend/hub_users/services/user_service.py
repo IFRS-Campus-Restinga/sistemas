@@ -21,13 +21,13 @@ class UserValidationException(Exception):
 class UserService:
     @staticmethod
     @transaction.atomic
-    def create_user(email: str, first_name: str, last_name: str, access_profile: str, password: str = None) -> CustomUser:
+    def create_user(email: str, first_name: str, last_name: str, access_profile: str, password: str = None) -> tuple[CustomUser, bool]:
         try:
             if password:
                 if access_profile != 'convidado':
                     raise UserValidationException('Servidores e alunos podem autenticar apenas pela conta google')
                 
-                user_serializer = CustomUserSerializer(data={'email': email, 'first_name': first_name, 'last_name': last_name})
+                user_serializer = CustomUserSerializer(data={'email': email, 'first_name': first_name, 'last_name': last_name, 'access_profile': access_profile})
 
                 if not user_serializer.is_valid():
                     raise serializers.ValidationError(user_serializer.errors)
@@ -41,7 +41,7 @@ class UserService:
             if password and created:
                 PasswordService.create(user, password)
 
-            return user
+            return user, created
         except serializers.ValidationError as e:
             raise e
 
@@ -130,6 +130,7 @@ class UserService:
     def approve_request(request_data, id):
         user_id = id
         group_list = request_data.get('groups')
+        is_abstract = request_data.get('is_abstract')
 
         if not user_id or not group_list:
             raise ValueError("ID do usuário e lista de grupos são obrigatórios.")
@@ -148,6 +149,7 @@ class UserService:
 
         # Atualizar o usuário
         user.is_active = True
+        user.is_abstract = is_abstract
         user.groups.set(group_ids)
         user.save()
 
