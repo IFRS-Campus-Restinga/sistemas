@@ -1,6 +1,8 @@
 import uuid
+from django.http import Http404
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
-from fs_auth_middleware.decorators import has_any_permission, has_every_permission, is_authenticated
+from fs_auth_middleware.decorators import has_permissions
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.pagination import PageNumberPagination
@@ -9,7 +11,7 @@ from hub_systems.models.system import System
 from hub_systems.services.system_services import SystemService, SystemException
 
 @api_view(['POST'])
-@has_every_permission(['add_system'])
+@has_permissions(['add_system'])
 def create_system(request):
     try:
         SystemService.create(request.data)
@@ -21,19 +23,18 @@ def create_system(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@is_authenticated()
 def get_system(request, system_id):
     try:
-        system = System.objects.get(id=uuid.UUID(system_id))
+        get_object_or_404(System, pk=uuid.UUID(system_id))
 
-        return Response(status=status.HTTP_200_OK)
-    except System.DoesNotExist as e:
+        return Response({'message': "Sistema válido"}, status=status.HTTP_200_OK)
+    except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str (e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@is_authenticated()
+@has_permissions(['view_system'])
 def menu_list(request):
     try:
         user_id = request.GET.get('user_id', None)

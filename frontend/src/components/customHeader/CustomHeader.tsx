@@ -56,7 +56,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                     !Object.values(user).every((value) => value === null) ? (
                         <div className={styles.userMenu}>
                             <span className={styles.greetings}>
-                                Bem vindo,
+                                Bem vindo
                                 <p className={styles.username}>
                                     {user.username}
                                 </p>

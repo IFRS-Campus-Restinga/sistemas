@@ -1,7 +1,7 @@
 import jwt
 import uuid
 from jwt.exceptions import ExpiredSignatureError
-from fs_auth_middleware.decorators import has_any_permission
+from fs_auth_middleware.decorators import has_permissions
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 from rest_framework import status, serializers
@@ -61,7 +61,7 @@ def get_user_data(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@has_any_permission(['view_customuser'])
+@has_permissions(['view_customuser'])
 def list_users_by_access_profile(request, access_profile_name):
     try:
         return UserService.list_by_access_profile(request, access_profile_name)
@@ -71,7 +71,7 @@ def list_users_by_access_profile(request, access_profile_name):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_any_permission(['view_customuser'])
+@has_permissions(['view_customuser'])
 def list_users_by_group(request, group_name):
     try:
         return UserService.list_by_group(request, group_name)
@@ -81,7 +81,7 @@ def list_users_by_group(request, group_name):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_any_permission(['view_customuser'])
+@has_permissions(['view_customuser'])
 def list_user_requests(request):
     try:
         return UserService.get_requests(request)
@@ -89,7 +89,7 @@ def list_user_requests(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['PUT'])
-@has_any_permission(['change_customuser'])
+@has_permissions(['change_customuser'])
 def approve_user_request(request, request_id):
     try:
         UserService.approve_request(request.data, request_id)
@@ -101,7 +101,7 @@ def approve_user_request(request, request_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['DELETE'])
-@has_any_permission(['delete_customuser'])
+@has_permissions(['delete_customuser'])
 def decline_user_request(request, request_id):
     try:
         UserService.decline_request(request_id)

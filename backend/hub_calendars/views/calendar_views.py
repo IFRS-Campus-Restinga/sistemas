@@ -1,12 +1,12 @@
 from django.http import Http404
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view
-from fs_auth_middleware.decorators import has_every_permission
+from fs_auth_middleware.decorators import has_permissions
 from rest_framework.response import Response
 from ..services.calendar_service import CalendarService
 
 @api_view(['POST'])
-@has_every_permission(['add_calendar'])
+@has_permissions(['add_calendar'])
 def create_calendar(request):
     try:
         calendar = CalendarService.create(request.data)
@@ -19,7 +19,7 @@ def create_calendar(request):
 
 
 @api_view(['GET'])
-@has_every_permission(['view_calendar'])
+@has_permissions(['view_calendar'])
 def list_calendars(request):
     try:
         return CalendarService.list_calendars(request)
@@ -30,7 +30,7 @@ def list_calendars(request):
 
 
 @api_view(['GET'])
-@has_every_permission(['view_calendar'])
+@has_permissions(['view_calendar'])
 def get_calendar(request, calendar_id):
     try:
         calendar = CalendarService.get_calendar(request, calendar_id)
@@ -42,7 +42,7 @@ def get_calendar(request, calendar_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'PATCH'])
-@has_every_permission(['change_calendar'])
+@has_permissions(['change_calendar'])
 def edit_calendar(request, calendar_id):
     try:
         CalendarService.edit(request.data, calendar_id)
@@ -56,6 +56,6 @@ def edit_calendar(request, calendar_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['DELETE'])
-@has_every_permission(['delete_calendar'])
+@has_permissions(['delete_calendar'])
 def delete_calendar(request, group_id):
     pass

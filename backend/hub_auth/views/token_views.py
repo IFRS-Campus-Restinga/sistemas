@@ -46,6 +46,9 @@ def pair_token(request):
     user = request.GET.get('user', None)
 
     try:
+        if not system or not user:
+            return Response({'message': 'Autenticação necessária'}, status=status.HTTP_401_UNAUTHORIZED)
+    
         access_token, refresh_token = TokenService.pair_token(user, system)
 
         return Response({'access': access_token, 'refresh': refresh_token}, status=status.HTTP_200_OK)

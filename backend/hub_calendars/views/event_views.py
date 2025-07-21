@@ -1,12 +1,12 @@
 from django.http import Http404
 from rest_framework import serializers, status
 from rest_framework.decorators import api_view
-from fs_auth_middleware.decorators import has_every_permission
+from fs_auth_middleware.decorators import has_permissions
 from rest_framework.response import Response
 from ..services.event_service import EventService
 
 @api_view(['POST'])
-@has_every_permission(['add_event'])
+@has_permissions(['add_event'])
 def create_event(request):
     try:
         event = EventService.create(request.data)
@@ -18,7 +18,7 @@ def create_event(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_every_permission(['view_event'])
+@has_permissions(['view_event'])
 def list_events(request):
     try:
         events = EventService.list_by_month(request, request.GET.get('month', None), request.GET.get('year', None))
@@ -31,7 +31,7 @@ def list_events(request):
 
 
 @api_view(['GET'])
-@has_every_permission(['view_event'])
+@has_permissions(['view_event'])
 def get_event(request, event_id):
     try:
         event = EventService.get_event(request, event_id)
@@ -43,7 +43,7 @@ def get_event(request, event_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'PATCH'])
-@has_every_permission(['change_event'])
+@has_permissions(['change_event'])
 def edit_event(request, event_id):
     try:
         EventService.edit(request.data, event_id)
@@ -57,6 +57,6 @@ def edit_event(request, event_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['DELETE'])
-@has_every_permission(['delete_event'])
+@has_permissions(['delete_event'])
 def delete_event(request, event_id):
     pass
