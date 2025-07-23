@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view
 from hub_auth.services.auth_service import *
 from rest_framework.response import Response
 from rest_framework import status
-from fs_auth_middleware.decorators import is_authenticated
 
 @api_view(['POST'])
 def login_with_google(request):
@@ -92,7 +91,6 @@ def login(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['POST'])
-@is_authenticated()
 def logout(request):
     try:
         response = Response({'message': 'Logout concluído com sucesso'}, status=status.HTTP_200_OK)

@@ -4,7 +4,6 @@ from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
 from .models import GroupUUIDMap
 from rest_framework import serializers
-from django.db import transaction
 from .serializer import GroupSerializer
 from rest_framework.pagination import PageNumberPagination
 
@@ -15,7 +14,6 @@ class GroupPagination(PageNumberPagination):
 
 class GroupService:
     @staticmethod
-    @transaction.atomic
     def create(group_name) -> Group:
         if not group_name:
             raise serializers.ValidationError("O nome do grupo é obrigatório.")

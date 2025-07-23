@@ -1,23 +1,52 @@
-from rest_framework import serializers
+from django.http import Http404
+from rest_framework import serializers, status
 from rest_framework.decorators import api_view
-from fs_auth_middleware.decorators import has_every_permission
+from fs_auth_middleware.decorators import has_permissions
+from rest_framework.response import Response
+from ..services.course_service import CourseService
 
 @api_view(['POST'])
-@has_every_permission(['add_course', 'add_class'])
+@has_permissions(['add_course', 'add_class'])
 def create_course(request):
-    pass
+    try:
+        CourseService.create(request.data)
+
+        return Response({'message': 'Curso cadastrado com sucesso'}, status=status.HTTP_200_OK)
+    except serializers.ValidationError as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_every_permission(['view_course', 'view_class'])
+@has_permissions(['view_course', 'view_class'])
 def list_course(request):
-    pass
+    try:
+        return CourseService.list(request)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_every_permission(['view_course', 'view_class'])
-def get_course(request):
-    pass
+@has_permissions(['view_course', 'view_class'])
+def get_course(request, course_id):
+    try:
+        course = CourseService.get(request, course_id)
+
+        return Response(course, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'PATCH'])
-@has_every_permission(['change_course', 'change_class'])
-def edit_course(request):
-    pass
+@has_permissions(['change_course', 'change_class'])
+def edit_course(request, course_id):
+    try:
+        CourseService.edit(request.data, course_id)
+
+        return Response({'message': 'Curso atualizado com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except serializers.ValidationError as e:
+            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

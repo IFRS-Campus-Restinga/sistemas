@@ -7,7 +7,12 @@ class PPC(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=100, unique=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='subject')
+    created_at = models.DateField(auto_now_add=True)
+
+class PPCSubject(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ppc = models.ForeignKey(PPC, on_delete=models.CASCADE, related_name='ppc_subject')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='ppc')
     subject_teach_workload = models.IntegerField()
     subject_ext_workload = models.IntegerField()
     subject_remote_workload = models.IntegerField()
