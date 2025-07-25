@@ -5,7 +5,7 @@ from rest_framework import serializers
 from ..models.course import Course
 from ..serializers.course_serializer import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
-from .class_service import ClassService
+from .course_class_service import CourseClassService
 
 class CoursePagination(PageNumberPagination):
     page_size = 10
@@ -16,7 +16,12 @@ class CourseService:
     @staticmethod
     @transaction.atomic
     def create(course_data):
-        classes = course_data.pop('classes')
+        classes = course_data.pop('classes', None)
+        category = course_data.get('category', None)
+
+        if category in ['Técnico Subsequente ao Ensino Médio', 'Técnico Integrado ao Ensino Médio']:
+            if not classes:
+                raise serializers.ValidationError({'turmas': 'Em modalidades relacionadas ao Ensino Médio, o curso deve possuir turmas.'})
 
         serializer = CourseSerializer(data=course_data)
 
@@ -25,7 +30,7 @@ class CourseService:
         
         serializer.save()
 
-        [ClassService.create(serializer.instance.id, new_class).id for new_class in classes]
+        [CourseClassService.create(serializer.instance.id, class_data['number']) for class_data in classes]
 
     @staticmethod
     def get(request, course_id):
@@ -54,7 +59,15 @@ class CourseService:
     @staticmethod
     @transaction.atomic
     def edit(course_data, course_id):
-        classes = course_data.get('classes', None)
+        classes = course_data.pop('classes', None)
+        category = course_data.get('category', None)
+
+        classes_to_create = [c for c in classes if 'id' not in c or not c['id']]
+        classes_to_edit = [c for c in classes if 'id' in c and c['id']]
+
+        if category in ['Técnico Subsequente ao Ensino Médio', 'Técnico Integrado ao Ensino Médio']:
+            if not classes:
+                raise serializers.ValidationError({'turmas': 'Em modalidades relacionadas ao Ensino Médio, o curso deve possuir turmas.'})
 
         course = get_object_or_404(Course, pk=uuid.UUID(course_id))
 
@@ -65,6 +78,6 @@ class CourseService:
         
         serializer.save()
 
-        [ClassService.edit(class_data) for class_data in classes]
-
+        [CourseClassService.create(serializer.instance.id, class_data['number']) for class_data in classes_to_create]
+        [CourseClassService.edit(class_data) for class_data in classes_to_edit]
 

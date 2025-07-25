@@ -7,7 +7,7 @@ class FormatCourseData:
             'id': course.id,
             'nome': course.name,
             'modalidade': course.category,
-            'carga_horária': course.workload,
+            'carga horária': course.workload,
             'coordenador': course.coord.email,
         }
     
@@ -18,6 +18,6 @@ class FormatCourseData:
             'name': course.name,
             'category': course.category,
             'workload': course.workload,
-            'coord': {'id': course.coord.id, 'email': course.coord.email},
+            'coord': {'id': course.coord.id, 'name': f'{course.coord.first_name} {course.coord.last_name}'},
             'classes': [{'id': course_class.id, 'number': course_class.number, 'course': course.id} for course_class in course.course_class.all()]
         }

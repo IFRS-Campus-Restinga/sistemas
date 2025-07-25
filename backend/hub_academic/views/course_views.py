@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from ..services.course_service import CourseService
 
 @api_view(['POST'])
-@has_permissions(['add_course', 'add_class'])
+@has_permissions(['add_course', 'add_courseclass'])
 def create_course(request):
     try:
         CourseService.create(request.data)
@@ -18,7 +18,7 @@ def create_course(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_permissions(['view_course', 'view_class'])
+@has_permissions(['view_course', 'view_courseclass'])
 def list_course(request):
     try:
         return CourseService.list(request)
@@ -26,7 +26,7 @@ def list_course(request):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['GET'])
-@has_permissions(['view_course', 'view_class'])
+@has_permissions(['view_course', 'view_courseclass'])
 def get_course(request, course_id):
     try:
         course = CourseService.get(request, course_id)
@@ -38,7 +38,7 @@ def get_course(request, course_id):
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['PUT', 'PATCH'])
-@has_permissions(['change_course', 'change_class'])
+@has_permissions(['change_course', 'change_courseclass'])
 def edit_course(request, course_id):
     try:
         CourseService.edit(request.data, course_id)

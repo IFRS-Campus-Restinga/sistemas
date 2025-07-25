@@ -25,15 +25,15 @@ urlpatterns = [
     path('session/', include('hub_auth.urls')),
 
     # user, group & permission data
-    path('api/user/', include('hub_users.urls')),
-    path('api/group/', include('hub_groups.urls')),
-    path('api/permission/', include('hub_permissions.urls')),
+    path('api/users/', include('hub_users.urls')),
+    path('api/groups/', include('hub_groups.urls')),
+    path('api/permissions/', include('hub_permissions.urls')),
 
     # system data
-    path('api/system/', include('hub_systems.urls')),
+    path('api/systems/', include('hub_systems.urls')),
 
     # calendar & events data
-    path('api/calendar/', include('hub_calendars.urls')),
+    path('api/calendars/', include('hub_calendars.urls')),
 
     # academic data (courses, subjects, ppcs, classes)
     path('api/academic/', include('hub_academic.urls'))

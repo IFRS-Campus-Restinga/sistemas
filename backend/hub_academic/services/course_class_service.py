@@ -1,13 +1,13 @@
 import uuid
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from ..models.class_model import CourseClass
-from ..serializers.class_serializer import ClassSerializer
+from ..models.course_class import CourseClass
+from ..serializers.course_class_serializer import CourseClassSerializer
 
-class ClassService:
+class CourseClassService:
     @staticmethod
     def create(course_id, class_number):
-        serializer = ClassSerializer(data={'course': course_id, 'number': class_number})
+        serializer = CourseClassSerializer(data={'course': course_id, 'number': class_number})
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
@@ -20,9 +20,16 @@ class ClassService:
     def edit(class_data):
         course_class = get_object_or_404(CourseClass, pk=uuid.UUID(class_data.get('id', None)))
         
-        serializer = ClassSerializer(instance=course_class, data=class_data)
+        serializer = CourseClassSerializer(instance=course_class, data=class_data)
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
         
         serializer.save()
+
+    @staticmethod
+    def delete(class_id):
+        course_class = get_object_or_404(CourseClass, pk=uuid.UUID(class_id))
+
+        course_class.delete()
+
