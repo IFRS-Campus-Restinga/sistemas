@@ -31,11 +31,11 @@ export interface EventInterface {
 
 const EventService = {
     create: async (param: EventInterface) => {
-        return await api.post('api/calendar/event/create/', param)
+        return await api.post('api/calendars/events/create/', param)
     },
 
     list: async (month: number = new Date().getMonth(), year: number = new Date().getFullYear()) => {
-        return await api.get('api/calendar/event/get/', {
+        return await api.get('api/calendars/events/get/', {
             params: {
                 data_format: 'list',
                 month,
@@ -45,7 +45,7 @@ const EventService = {
     },
 
     get: async (eventId: string) => {
-        return await api.get(`api/calendar/event/get/${eventId}/`, {
+        return await api.get(`api/calendars/events/get/${eventId}/`, {
             params: {
                 data_format: 'details'
             }
@@ -53,7 +53,7 @@ const EventService = {
     },
 
     edit: async (params: EventInterface, eventId: string) => {
-        return await api.put(`api/calendar/event/edit/${eventId}/`, params)
+        return await api.put(`api/calendars/events/edit/${eventId}/`, params)
     }
 }
 

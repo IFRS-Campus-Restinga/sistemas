@@ -1,7 +1,7 @@
 import GroupService from '../../../../services/groupService'
 import ListPage from '../../../../features/listPage/ListPage'
 
-const ListGroups = () => {
+const GroupList = () => {
 
     const fetchGroups = async (currentPage: number, searchParam: string) => {
         const res = await GroupService.list(currentPage, searchParam)
@@ -29,4 +29,4 @@ const ListGroups = () => {
     )
 }
 
-export default ListGroups
+export default GroupList

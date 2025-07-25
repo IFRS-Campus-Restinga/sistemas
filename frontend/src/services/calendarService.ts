@@ -12,7 +12,7 @@ export interface CalendarInterface {
 const CalendarService = {
     create: async (param: CalendarInterface) => {
         try {
-            return await api.post('api/calendar/create/', param)
+            return await api.post('api/calendars/create/', param)
             
         } catch (error) {
             throw extractError(error)
@@ -20,7 +20,7 @@ const CalendarService = {
     },
 
     list: async (page: number = 1, param: string = '') => {
-        return await api.get('api/calendar/get/', {
+        return await api.get('api/calendars/get/', {
             params: {
                 data_format: 'list',
                 search: param,
@@ -30,7 +30,7 @@ const CalendarService = {
     },
 
     get: async (calendarId: string) => {
-        return await api.get(`api/calendar/get/${calendarId}/`, {
+        return await api.get(`api/calendars/get/${calendarId}/`, {
             params: {
                 data_format: 'details'
             }
@@ -38,7 +38,7 @@ const CalendarService = {
     },
 
     edit: async (params: CalendarInterface, calendarId: string) => {
-        return await api.put(`api/calendar/edit/${calendarId}/`, params)
+        return await api.put(`api/calendars/edit/${calendarId}/`, params)
     }
 }
 

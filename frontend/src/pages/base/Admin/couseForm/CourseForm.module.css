@@ -1,0 +1,83 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.formGroup {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.searchContainer {
+    width: 100%;
+    display: flex;
+    position: relative;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    max-height: 29px;
+}
+
+.searchInput {
+    width: 100%;
+    border: none;
+    height: 100%;
+    color: #767676;
+
+    &:focus {
+        outline: none;
+        border: none;
+    }
+}
+
+.actionsContainer {
+    display: flex;
+    width: 65px;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+.action {
+    width: 20px;
+    height: 20px;
+}
+
+.addButton {
+    background-color: #006b3f;
+    padding: 5px;
+    border-radius: 50%;
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    width: 20px;
+    height: 20px;
+    margin: 0px auto 0px auto;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.formTable {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    gap: 8px;
+}
+
+.buttonContainer {
+    width: 20%;
+    margin: 20px auto 0px auto;
+    display: flex;
+    justify-content: center;
+}

@@ -32,7 +32,7 @@ const SystemForm = ({formData, setFormData, errors, setErrors, devTeamViewList, 
 
     const searchUsers = async () => {
         try {
-            const res = await UserService.searchOrListUsers('aluno', inputSearch, undefined, 'search', true)
+            const res = await UserService.listByAccessProfile('aluno', inputSearch, undefined, 'search', true)
 
             if (res.status !== 200) throw new Error(res.data?.message)
 

@@ -11,7 +11,7 @@ export interface Group {
 const GroupService = {
     create: async (param: Group) => {
         try {
-            return api.post('api/group/create/', param)
+            return api.post('api/groups/create/', param)
         } catch (error) {
             throw extractError(error)
         }
@@ -19,7 +19,7 @@ const GroupService = {
 
     list: async (page: number, search: string) => {
         try {
-            return await api.get('api/group/get/', {
+            return await api.get('api/groups/get/', {
                 params: {
                     search,
                     page,
@@ -33,7 +33,7 @@ const GroupService = {
 
     get: async (groupId: string) => {
         try {
-            return await api.get(`api/group/get/${groupId}/`, {
+            return await api.get(`api/groups/get/${groupId}/`, {
                 params: {
                     data_format: 'details'
                 }
@@ -45,7 +45,7 @@ const GroupService = {
 
     edit: async (params: Group, group_id: string) => {
         try {
-            return api.put(`api/group/edit/${group_id}/`, params)
+            return api.put(`api/groups/edit/${group_id}/`, params)
         } catch (error) {
             throw extractError(error)
         }

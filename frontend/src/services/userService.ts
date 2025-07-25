@@ -32,7 +32,7 @@ const UserService = {
             }
     
             try {
-                const res = await api.post('api/user/create/', params)
+                const res = await api.post('api/users/create/', params)
     
                 return res
             } catch (error: any) {
@@ -43,7 +43,7 @@ const UserService = {
 
     getRequests: async (page: number = 1) => {
         try {
-            return await api.get('api/user/request/get/', {
+            return await api.get('api/users/request/get/', {
                 params: {
                     page,
                     data_format: 'request'
@@ -56,7 +56,7 @@ const UserService = {
 
     approveRequest: async (request: RequestInterface) => {
         try {
-            return await api.put(`api/user/request/${request.id}/approve/`, request)
+            return await api.put(`api/users/request/${request.id}/approve/`, request)
         } catch (error) {
             throw extractError(error)
         }
@@ -64,23 +64,37 @@ const UserService = {
 
     declineRequest: async (requestId: string) => {
         try {
-            return await api.delete(`api/user/request/${requestId}/decline/`)
+            return await api.delete(`api/users/request/${requestId}/decline/`)
         } catch (error) {
             throw extractError(error)
         }
     },
 
     getData: async (): Promise<AxiosResponse<UserState, Error>> => {
-        return await api.get<UserState>('api/user/data/')
+        return await api.get<UserState>('api/users/data/')
     },
 
-    searchOrListUsers: async (profile: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
+    listByAccessProfile: async (profile: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
         const queryParams = new URLSearchParams()
 
         if (param.trim() !== '') queryParams.append('search', param)
         queryParams.append('page', String(page))
 
         return api.get(`api/user/get/access_profile/${profile}/?${queryParams.toString()}`, {
+            params: {
+                data_format,
+                active
+            }
+        })
+    },
+
+    listByGroup: async (group: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
+        const queryParams = new URLSearchParams()
+
+        if (param.trim() !== '') queryParams.append('search', param)
+        queryParams.append('page', String(page))
+
+        return api.get(`api/user/get/group/${group}/?${queryParams.toString()}`, {
             params: {
                 data_format,
                 active

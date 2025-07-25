@@ -2,12 +2,12 @@ import { useLocation } from 'react-router-dom'
 import UserService from '../../../../services/userService'
 import ListPage from '../../../../features/listPage/ListPage'
 
-const ListUsers = () => {
+const UserList = () => {
     const location = useLocation()
-    const group = location.pathname.split('/')[3]
+    const accessProfile = location.pathname.split('/')[3]
 
     const fetchUsers = async (page: number = 1, searchParam: string) => {
-        const res = await UserService.searchOrListUsers(group, searchParam, page, 'list')
+        const res = await UserService.listByAccessProfile(accessProfile, searchParam, page, 'list')
 
         return {
             next: res.data.next,
@@ -22,7 +22,7 @@ const ListUsers = () => {
 
     return (
         <ListPage
-            title={group}
+            title={accessProfile}
             fetchData={fetchUsers}
             registerUrl='session/admin/usuarios/create/'
             onDelete={deleteUser}
@@ -32,4 +32,4 @@ const ListUsers = () => {
     )
 }
 
-export default ListUsers
+export default UserList

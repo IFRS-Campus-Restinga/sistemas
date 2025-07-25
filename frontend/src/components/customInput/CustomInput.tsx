@@ -11,9 +11,10 @@ interface CustomInputProps {
     min?: number | string
     max?: number | string
     placeholder?: string
+    maxLength?: number
 }
 
-const CustomInput = ({ value, error, type, min, max, onBlur, onChange, placeholder, onKeyDown }: CustomInputProps) => {
+const CustomInput = ({ value, error, type, min, max, onBlur, onChange, placeholder, onKeyDown, maxLength }: CustomInputProps) => {
 
     return (
         <div className={styles.inputContainer}>
@@ -24,7 +25,8 @@ const CustomInput = ({ value, error, type, min, max, onBlur, onChange, placehold
                 min={min} 
                 onBlur={onBlur} 
                 onChange={onChange} 
-                max={max} 
+                max={max}
+                maxLength={maxLength}
                 placeholder={placeholder}
                 onKeyDown={onKeyDown} 
             />

@@ -15,7 +15,7 @@ export interface System {
 export const SystemService = {
     create: async (params: System) => {
         try {
-            const res = await api.post('api/system/create/', params)
+            const res = await api.post('api/systems/create/', params)
 
             return res
         } catch (error) {
@@ -25,7 +25,7 @@ export const SystemService = {
 
     list: async (user_id: string, page: number) => {
         try {
-            const res = await api.get('api/system/menu/', {
+            const res = await api.get('api/systems/menu/', {
                 params: {
                     user_id,
                     page

@@ -9,7 +9,7 @@ export interface Permissions {
 const PermissionService = {
     list: async (page: number = 1) => {
         try {
-            return api.get(`api/permission/get/`, {
+            return api.get(`api/permissions/get/`, {
                 params: {
                     data_format: 'list',
                     page
@@ -23,7 +23,7 @@ const PermissionService = {
 
     listByGroup: async (groupId: string, page: number = 1) => {
         try {
-            return api.get(`api/permission/get/${groupId}/`, {
+            return api.get(`api/permissions/get/${groupId}/`, {
                 params: {
                     data_format: 'list',
                     page
@@ -37,7 +37,7 @@ const PermissionService = {
 
     notAssignedTo: async (groupId: string, page: number = 1) => {
         try {
-            return api.get(`api/permission/get/${groupId}/not_assigned/`, {
+            return api.get(`api/permissions/get/${groupId}/not_assigned/`, {
                 params: {
                     data_format: 'list',
                     page

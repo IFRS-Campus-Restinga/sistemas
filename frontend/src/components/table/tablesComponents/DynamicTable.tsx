@@ -19,7 +19,16 @@ interface DynamicTableProps {
 
 const DynamicTable = ({ items, itemTitle, ParentRemoveItem, ParentSetItem, parentIndex, setItems, useSelect, selectOptions, errors }: DynamicTableProps) => {
     const removeItem = (itemIndex: number) => {
-        if (setItems) setItems(items.filter((_, index) => index !== itemIndex))
+        if (setItems) {
+            const newItems = items.filter((_, index) => index !== itemIndex)
+            setItems(newItems)
+        }
+    }
+
+    const addItem = () => {
+        if (setItems) {
+            setItems([...items, ''])
+        }
     }
 
     const setItem = (itemIndex: number, itemValue: string) => {       
@@ -27,11 +36,6 @@ const DynamicTable = ({ items, itemTitle, ParentRemoveItem, ParentSetItem, paren
         newItems[itemIndex] = itemValue
         if (setItems) setItems(newItems)
     }
-
-    const addItem = () => {
-        if (setItems) setItems([...items, ''])
-    }
-
 
     return (
         <div className={styles.dynamicTableContainer}>
@@ -44,63 +48,65 @@ const DynamicTable = ({ items, itemTitle, ParentRemoveItem, ParentSetItem, paren
                                     {itemTitle}
                                 </p>
                             </th>
-                            <th className={styles.th}/>
+                            <th className={styles.thAction}/>
                         </tr>
                     </thead>
                     <tbody className={styles.tbody}>
                         {
-                            items.map((item, index) => (
-                                <tr className={styles.tr} key={index}>
-                                    <td className={styles.td}>
-                                        {
-                                            useSelect && selectOptions ? (
-                                                <>
-                                                    <CustomSelect
-                                                        options={selectOptions}
-                                                        onChange={ParentSetItem ? 
-                                                            (e) => ParentSetItem(parentIndex!, index, e.target.value)
+                            items.length > 0 ? (
+                                items.map((item, index) => (
+                                    <tr className={styles.tr} key={index}>
+                                        <td className={styles.td}>
+                                            {
+                                                useSelect && selectOptions ? (
+                                                    <>
+                                                        <CustomSelect
+                                                            options={selectOptions}
+                                                            onChange={ParentSetItem ? 
+                                                                (e) => ParentSetItem(parentIndex!, index, e.target.value)
+                                                                :
+                                                                (e) => setItem(index, e.target.value)
+                                                            }
+                                                            value={item}
+                                                        />
+                                                        {errors && errors[index] ? <ErrorMessage message={errors[index]}/> : null}
+                                                    </>
+                                                ) : (
+                                                    <CustomInput
+                                                        value={item}
+                                                        onChange={
+                                                            ParentSetItem ? 
+                                                            (e) => ParentSetItem(parentIndex!, index, e.target.value) 
                                                             :
                                                             (e) => setItem(index, e.target.value)
+                
                                                         }
-                                                        value={item}
+                                                        error={errors && errors[index] ? errors[index] : null}
+                                                        type='text'
                                                     />
-                                                    {errors && errors[index] ? <ErrorMessage message={errors[index]}/> : null}
-                                                </>
-                                            ) : (
-                                                <CustomInput
-                                                    value={item}
-                                                    onChange={
-                                                        ParentSetItem ? 
-                                                        (e) => ParentSetItem(parentIndex!, index, e.target.value) 
-                                                        :
-                                                        (e) => setItem(index, e.target.value)
-            
-                                                    }
-                                                    error={errors && errors[index] ? errors[index] : null}
-                                                    type='text'
-                                                />
-                                            )
-                                        }
-                                    </td>
-                                    <td className={styles.td}>
-                                        <img 
-                                            src={X} 
-                                            className={styles.remove} 
-                                            alt="remover" 
-                                            onClick={
-                                                parentIndex !== undefined && ParentRemoveItem !== undefined ? 
-                                                () => ParentRemoveItem(parentIndex, index) 
-                                                : () => removeItem(index)}/>
-                                    </td>
-                                </tr>
-                            ))
+                                                )
+                                            }
+                                        </td>
+                                        <td className={styles.tdAction}>
+                                            <img 
+                                                src={X} 
+                                                className={styles.remove} 
+                                                alt="remover" 
+                                                onClick={
+                                                    parentIndex !== undefined && ParentRemoveItem !== undefined ? 
+                                                    () => ParentRemoveItem(parentIndex, index) 
+                                                    : () => removeItem(index)}/>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : null
                         }
                     </tbody>
                 </table>
             </div>
             {
                 !ParentRemoveItem && !ParentSetItem ? (
-                    <button className={styles.addButton} type='button' onClick={addItem}>+</button>
+                    <button className={styles.addButton} type='button' onClick={() => addItem()}>+</button>
                 ) : null
             }
         </div>

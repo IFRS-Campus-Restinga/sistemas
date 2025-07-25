@@ -26,7 +26,6 @@ const BaseAdmin = () => {
             setUser(res.data)
             setAuthorized(hasGroup('admin', res.data))
         } catch (error) {
-            console.log(error instanceof AxiosError)
             if (error instanceof AxiosError) {
                 if (error?.response?.status === 401) {
                     console.error("Token inválido ou refresh falhou, redirecionando.")
