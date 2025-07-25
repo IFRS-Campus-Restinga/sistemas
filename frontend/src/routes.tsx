@@ -16,6 +16,8 @@ import Calendar from './pages/base/Admin/calendar/Calendar'
 import EventForm from './pages/base/Admin/eventForm/EventForm'
 import CourseList from './pages/base/Admin/courseList/CourseList'
 import CourseForm from './pages/base/Admin/couseForm/CourseForm'
+import SubjectList from './pages/base/Admin/subjectList/SubjectList'
+import SubjectForm from './pages/base/Admin/subjectForm/SubjectForm'
 
 const routes = createBrowserRouter([
     {
@@ -93,6 +95,18 @@ const routes = createBrowserRouter([
             {
                 path: 'cursos/:cursoId/edit/',
                 element: <CourseForm/>
+            },
+            {
+                path: 'disciplinas/',
+                element: <SubjectList/>
+            },
+            {
+                path: 'disciplinas/create/',
+                element: <SubjectForm/>,
+            },
+            {
+                path: 'disciplinas/:disciplinaId/edit/',
+                element: <SubjectForm/>
             }
         ]
     },

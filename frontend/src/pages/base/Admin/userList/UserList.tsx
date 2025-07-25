@@ -24,7 +24,7 @@ const UserList = () => {
         <ListPage
             title={accessProfile}
             fetchData={fetchUsers}
-            registerUrl='session/admin/usuarios/create/'
+            registerUrl='/session/admin/usuarios/create/'
             onDelete={deleteUser}
             canEdit={true}
             canView={true}

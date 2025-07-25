@@ -11,6 +11,7 @@ import { compareDates, validateMandatoryStringField } from '../../../../utils/va
 import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
+import CustomTextArea from '../../../../components/customTextArea/CustomTextArea'
 
 interface EventFormErrors {
     title: string | null
@@ -201,9 +202,8 @@ const EventForm = () => {
                         </div>
                         <div className={styles.formGroup}>
                             <CustomLabel title='Descrição'>
-                                <textarea 
-                                    className={styles.textArea}
-                                    value={event.description}
+                                <CustomTextArea 
+                                    value={event.description ?? ''}
                                     onChange={(e) => setEvent({...event, description: e.target.value})}
                                 />
                             </CustomLabel>
