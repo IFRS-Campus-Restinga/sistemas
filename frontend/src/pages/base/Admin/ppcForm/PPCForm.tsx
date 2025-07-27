@@ -6,7 +6,7 @@ import type { PPCInterface } from '../../../../services/ppcService'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import { validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
-import CourseService from '../../../../services/courseService'
+import CourseService from '../../../../services/courseService' 
 import { AxiosError } from 'axios'
 import { toast } from 'react-toastify'
 import CustomSearch from '../../../../components/customSearch/CustomSearch'
@@ -34,6 +34,12 @@ interface Subject {
     preRequists: string[]
 }
 
+interface Period {
+    number: number
+    subjects: Subject[]
+}
+
+
 const PPCForm = () => {
     const location = useLocation()
     const { state } = location
@@ -42,8 +48,11 @@ const PPCForm = () => {
     const [course, setCourse] = useState<string>('')
     // Campo de opções de curso
     const [courseOptions, setCourseOptions] = useState([])
+    // Controla os dados que aparecem: nome do período, nome das disciplinas e nome dos pré-requisitos
+    const [periods, setPeriods] = useState<Period[]>([])
     // Nome das disciplinas e nome dos pré requisitos { name : 'disciplina', preReq: ['preReq1', 'preReq2']}
     const [subjects, setSubjects] = useState<Subject[]>([])
+    // Controla se o modal do período respectivo está aberto
     const [periodIsOpen, setPeriodIsOpen] = useState<boolean[]>([])
     const [PPC, setPPC] = useState<PPCInterface>({
         title: '',
@@ -125,6 +134,12 @@ const PPCForm = () => {
                                             periods: updated
                                         }
                                     })
+
+                                    setPeriods([...periods, {number: periods.length + 1, subjects: []}])
+
+                                    setPeriodIsOpen((prev) => {
+                                        return [...prev, false]
+                                    })
                                 }}
                             >
                                 +
@@ -163,6 +178,10 @@ const PPCForm = () => {
                                                         periods: updatedPeriods,
                                                     };
                                                 });
+
+                                                setPeriods(periods.filter((_, i) => i !== index))
+
+                                                setPeriodIsOpen(periodIsOpen.filter((_, i) => i !== index))
                                             }}
                                         />
                                         {`${period.number}º Período`}
@@ -183,9 +202,18 @@ const PPCForm = () => {
                                             <CurriculumTable
                                                 state={state}
                                                 title={`${period.number}º Período`}
+                                                periodIndex={index}
                                                 period={PPC.periods[index]}
-                                                subjects={subjects}
-                                                setSubjects={setSubjects}
+                                                subjects={periods[index].subjects}
+                                                setSubjects={(updatedSubjects) => 
+                                                    setPeriods((prev) => {
+                                                    const updated = [...prev]
+
+                                                    updated[index].subjects = updatedSubjects
+
+                                                    return updated
+                                                    }
+                                                )}
                                                 setPeriod={(updatedPeriod) =>
                                                     setPPC((prev) => {
                                                         const updated = [...prev.periods]

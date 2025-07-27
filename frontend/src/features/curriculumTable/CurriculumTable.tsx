@@ -31,13 +31,14 @@ interface ErrorsSubjectsForm {
 interface CurriculumTableProps {
   state?: string
   title: string
+  periodIndex: number
   period: SchoolPeriodInterface
   setPeriod: (curriculum: SchoolPeriodInterface) => void
   subjects: Subject[]
-  setSubjects: React.Dispatch<React.SetStateAction<Subject[]>>
+  setSubjects: (subjects: Subject[]) => void 
 }
 
-const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects}: CurriculumTableProps) => {
+const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects, periodIndex}: CurriculumTableProps) => {
     const [subjectSearched, setSubjectSearched] = useState<boolean[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [preReqSearched, setPreReqSearched] = useState<boolean[]>([])
@@ -185,13 +186,11 @@ const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects
                                                                         value={subjects[index].name}
                                                                         onSearch={() => fetchSubjects(index)}
                                                                         setSearch={(param) => {
-                                                                            setSubjects((prev) => {
-                                                                                const updated = [...prev]
+                                                                            const updated = [...subjects]
 
-                                                                                updated[index].name = param
+                                                                            updated[index].name = param
 
-                                                                                return updated
-                                                                            })
+                                                                            setSubjects(updated)
                                                                         }}
                                                                     />
                                                                     <CustomOptions
@@ -209,12 +208,11 @@ const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects
                                                                                 curriculum: updatedCurriculum
                                                                             })
                                                                             
-                                                                            // atualizações auxiliares
-                                                                            setSubjects((prev) => {
-                                                                            const updated = [...prev];
-                                                                            updated[index].name = option.title;
-                                                                            return updated;
-                                                                            });
+                                                                            const updatedSubjects = [...subjects]
+
+                                                                            updatedSubjects[index].name = option.title
+
+                                                                            setSubjects(updatedSubjects);
 
                                                                             setSubjectOptions((prev) => {
                                                                             const updated = [...prev];
@@ -256,15 +254,11 @@ const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects
                                                                             searched={preReqSearched[index]}
                                                                             onSelect={(option) => {
                                                                                 // Atualiza subjects (usado para exibir os nomes na UI)
-                                                                                setSubjects((prev) => {
-                                                                                    const updated = [...prev]
-                                                                                    const subject = { ...updated[index] }
+                                                                                const updatedPreReq = [...subjects]
 
-                                                                                    subject.preRequists = [...(subject.preRequists || []), option.extraField!]
-                                                                                    updated[index] = subject
+                                                                                updatedPreReq[index].preRequists.push(option.extraField!)
 
-                                                                                    return updated
-                                                                                })
+                                                                                setSubjects(updatedPreReq)
 
                                                                                 const updatedCurriculum = [...period.curriculum];
                                                                                 const subject = { ...updatedCurriculum[index] };
@@ -316,31 +310,35 @@ const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects
                                                                                     if (preReq.ppcsubject) {
                                                                                         deletePreReq(index, pIndex, curriculumSubject.subject, preReq.id)
                                                                                     } else {
-                                                                                        // Atualiza visual dos nomes dos pré-requisitos
-                                                                                        setSubjects((prev) => {
-                                                                                            const updated = [...prev]
-                                                                                            const subject = { ...updated[index] }
+                                                                                       // Atualiza visual dos nomes dos pré-requisitos (subjects)
+                                                                                        const updatedSubjects = [...subjects];
 
-                                                                                            subject.preRequists = subject.preRequists.filter((_, i) => i !== pIndex)
-                                                                                            updated[index] = subject
+                                                                                        // Cópia segura da disciplina (subject) com nome de exibição de pré-requisitos
+                                                                                        const updatedDisplaySubject = { ...updatedSubjects[index] };
 
-                                                                                            return updated
-                                                                                        })
+                                                                                        // Remove o pré-requisito visual com base no índice
+                                                                                        updatedDisplaySubject.preRequists = updatedDisplaySubject.preRequists.filter((_, i) => i !== pIndex);
 
-                                                                                        const updatedCurriculum = [...period.curriculum]
-                                                                                        const updatedSubject = { ...updatedCurriculum[index] }
+                                                                                        // Atualiza o subject no array
+                                                                                        updatedSubjects[index] = updatedDisplaySubject;
 
-                                                                                        updatedSubject.pre_requisits = updatedSubject.pre_requisits.filter((_, i) => i !== pIndex)
-                                                                                        updatedCurriculum[index] = updatedSubject
+                                                                                        // Atualiza o estado visual
+                                                                                        setSubjects(updatedSubjects);
 
-                                                                                        // Atualiza o estado de period.curriculum (removendo o pré-requisito)
+                                                                                        // Atualiza o estado do curriculum real (period.curriculum)
+                                                                                        const updatedCurriculum = [...period.curriculum];
+                                                                                        const updatedCurriculumSubject = { ...updatedCurriculum[index] };
+
+                                                                                        updatedCurriculumSubject.pre_requisits = updatedCurriculumSubject.pre_requisits.filter((_, i) => i !== pIndex);
+                                                                                        updatedCurriculum[index] = updatedCurriculumSubject;
+
+                                                                                        // Atualiza o estado do period
                                                                                         setPeriod({
-                                                                                            ...period,
-                                                                                            curriculum: updatedCurriculum
-                                                                                        })
-                                                                                    }
-                                                                                }}
-                                                                                />
+                                                                                        ...period,
+                                                                                        curriculum: updatedCurriculum,
+                                                                                        });
+                                                                                    }}
+                                                                                }/>
                                                                             </div>
                                                                         ))
                                                                     }
@@ -388,8 +386,6 @@ const CurriculumTable = ({state, title, period, setPeriod, subjects, setSubjects
                                                                     ...period,
                                                                     curriculum: updatedCurriculum
                                                                 })
-
-                                                                setSubjects(prev => prev.filter((_, i) => i !== index))
                                                             }
                                                         }}
                                                     />
