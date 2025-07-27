@@ -12,6 +12,13 @@ class FormatCourseData:
         }
     
     @staticmethod
+    def search_format(course: Course):
+        return {
+            'id': course.id,
+            'title': course.name,
+        }
+    
+    @staticmethod
     def details_format(course: Course):
         return {
             'id': course.id,

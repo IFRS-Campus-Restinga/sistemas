@@ -10,10 +10,19 @@ class FormatSubjectData:
         }
     
     @staticmethod
+    def search_format(subject: Subject):
+        return {
+            'id': subject.id,
+            'title': subject.name,
+            'extraField': subject.shortname
+        }
+    
+    @staticmethod
     def details_format(subject: Subject):
         return {
             'id': subject.id,
             'name': subject.name,
             'objective': subject.objective,
             'menu': subject.menu,
+            'shortname': subject.shortname
         }

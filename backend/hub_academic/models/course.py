@@ -9,3 +9,6 @@ class Course(models.Model):
     workload = models.IntegerField()
     category = models.CharField(choices=CourseCategory.choices, max_length=37)
     coord = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name

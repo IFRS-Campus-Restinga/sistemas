@@ -13,15 +13,13 @@ class FormatPPCData:
         result = []
         for ps in ppc_subjects:
             result.append({
+                'subject': ps.subject.id,
                 'subject_name': ps.subject.name,
                 'subject_teach_workload': ps.subject_teach_workload,
                 'subject_ext_workload': ps.subject_ext_workload,
                 'subject_remote_workload': ps.subject_remote_workload,
-                'real_teach_workload': ps.real_teach_workload,
-                'real_ext_workload': ps.real_ext_workload,
-                'real_remote_workload': ps.real_remote_workload,
-                'total_workload': ps.total_workload,
                 'weekly_periods': ps.weekly_periods,
+                'pre_requisits': [pre_req for pre_req in ps.pre_requisits.all()]
             })
 
         return result
@@ -40,5 +38,5 @@ class FormatPPCData:
             'id': ppc.id,
             'title': ppc.title,
             'course': {'id': ppc.course.id, 'name': ppc.course.name},
-            'subjects': PPCService.get_subjects(str(ppc.id))
+            'subjects': FormatPPCData.get_subjects(str(ppc.id))
         }

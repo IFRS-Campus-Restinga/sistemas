@@ -9,6 +9,9 @@ class PPC(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     created_at = models.DateField(auto_now_add=True)
 
+    def __str__(self):
+        return self.title
+
 class PPCSubject(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     ppc = models.ForeignKey(PPC, on_delete=models.CASCADE, related_name='ppc_subject')

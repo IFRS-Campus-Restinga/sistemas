@@ -1,27 +1,30 @@
 import api from "../../config/apiConfig"
 
-interface PPCSubjectInterface {
-    subject_name: string
-    subject_teach_workload: string 
-    subject_ext_workload: string
-    subject_remote_workload: string
-    real_teach_workload: string
-    real_ext_workload: string
-    real_remote_workload: string
-    total_workload: string
-    weekly_periods: string
+export interface PreRequisitInterface {
+    id: string
+    ppcsubject?: string
 }
 
-interface PPCCourseInterface {
-    id: string
-    name: string
+export interface PPCSubjectInterface {
+    id?: string
+    subject: string
+    subject_teach_workload: string
+    subject_ext_workload: string
+    subject_remote_workload: string
+    weekly_periods: string
+    pre_requisits: PreRequisitInterface[]
 }
 
 export interface PPCInterface {
     id?: string
     title: string
-    course: PPCCourseInterface
-    subjects: PPCSubjectInterface[]
+    course: string
+    periods: SchoolPeriodInterface[]
+}
+
+export interface SchoolPeriodInterface {
+    number: number
+    curriculum: PPCSubjectInterface[]
 }
 
 const PPCService = {
@@ -49,6 +52,14 @@ const PPCService = {
 
     edit: async (PPCId: string, params: PPCInterface) => {
         return await api.put(`api/academic/ppcs/edit/${PPCId}/`, params)
+    },
+
+    deleteSubject: async (PPCId: string, subjectId: string) => {
+        return await api.delete(`api/academic/ppcs/delete/${PPCId}/subjects/${subjectId}/`)
+    },
+
+    deletePreReq: async (PPCId: string, subjectId: string, preReqId: string) => {
+        return await api.delete(`api/academic/ppcs/delete/${PPCId}/subjects/${subjectId}/pre_reqs/${preReqId}/`)
     }
 }
 

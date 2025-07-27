@@ -5,6 +5,7 @@ export interface SubjectInterface {
     name: string
     objective: string
     menu: string
+    shortname: string
 }
 
 const SubjectService = {
@@ -12,12 +13,12 @@ const SubjectService = {
         return api.post('api/academic/subjects/create/', params)
     },
 
-    list: async (page: number, search: string) => {
+    list: async (page: number, search: string, data_format: string = 'list') => {
         return await api.get('api/academic/subjects/get/', {
             params: {
                 search,
                 page,
-                data_format: 'list'
+                data_format
             }
         })
     },

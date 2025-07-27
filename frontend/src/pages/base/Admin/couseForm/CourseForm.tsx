@@ -19,6 +19,7 @@ import CustomButton from '../../../../components/customButton/CustomButton'
 import ErrorMessage from '../../../../components/errorMessage/ErrorMessage'
 import CourseClassService from '../../../../services/courseClassService'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
+import CustomSearch from '../../../../components/customSearch/CustomSearch'
 
 interface ErrorsCourseForm {
     name: string | null
@@ -95,6 +96,8 @@ const CourseForm = () => {
             } else {
                 console.log(error)
             }
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -263,19 +266,12 @@ const CourseForm = () => {
                         <div className={styles.formGroup}>
                             <CustomLabel title='Coordenador *'>
                                 <div className={styles.searchContainer}>
-                                    <input
-                                        type='text'
+                                    <CustomSearch
+                                        onSearch={fetchCoord}
+                                        setSearch={(param) => setCoordSearch(param)}
+                                        setSearched={setSearched}
                                         value={coordSearch}
-                                        onChange={(e) =>  setCoordSearch(e.target.value)}
-                                        className={styles.searchInput}
-                                        onBlur={() => {
-                                            setSearched(false)
-                                        }}
                                     />
-                                    <span className={styles.actionsContainer}>
-                                        <img src={search} alt="" className={styles.action} onClick={() => fetchCoord()}/>
-                                        <img src={clear} alt="" className={styles.action} onClick={() => setCoordSearch('')}/>
-                                    </span>
                                     <CustomOptions
                                         options={coordOptions}
                                         onSelect={(option) => {

@@ -12,7 +12,7 @@ const CustomOptions = ({ options, onSelect, searched }: CustomOptionsProps) => {
     return (
         <ul className={styles.optionsContainer}>
             {
-                options.length > 0 ? (
+                options.length > 0 ? (  
                     options.map((option) => (
                     <li className={styles.customOption} onClick={() => onSelect(option)}>{option.title}</li>
                     ))

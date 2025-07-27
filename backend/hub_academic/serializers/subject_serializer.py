@@ -20,5 +20,7 @@ class SubjectSerializer(serializers.ModelSerializer):
                 return FormatSubjectData.list_format(instance)
             case 'details':
                 return FormatSubjectData.details_format(instance)
+            case 'search':
+                return FormatSubjectData.search_format(instance)
             case _:
                 raise serializers.ValidationError('data_format inválido')

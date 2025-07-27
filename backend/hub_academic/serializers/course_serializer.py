@@ -34,5 +34,7 @@ class CourseSerializer(serializers.ModelSerializer):
                 return FormatCourseData.list_format(instance)
             case 'details':
                 return FormatCourseData.details_format(instance)
+            case 'search':
+                return FormatCourseData.search_format(instance)
             case _:
                 raise serializers.ValidationError('data_format inválido')

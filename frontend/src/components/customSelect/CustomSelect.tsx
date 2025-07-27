@@ -2,6 +2,7 @@ import styles from './CustomSelect.module.css'
 
 export type OptionProps<Key extends string = 'value'> = {
   title: string
+  extraField?: string
 } & {
   [K in Key]: string
 }

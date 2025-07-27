@@ -6,7 +6,7 @@
     position: absolute !important;
     top: 110%;
     left: 0;
-    z-index: 100
+    z-index: 999
 }
 
 .customOption {

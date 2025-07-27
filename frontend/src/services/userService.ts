@@ -80,7 +80,7 @@ const UserService = {
         if (param.trim() !== '') queryParams.append('search', param)
         queryParams.append('page', String(page))
 
-        return api.get(`api/user/get/access_profile/${profile}/?${queryParams.toString()}`, {
+        return api.get(`api/users/get/access_profile/${profile}/?${queryParams.toString()}`, {
             params: {
                 data_format,
                 active
@@ -94,7 +94,7 @@ const UserService = {
         if (param.trim() !== '') queryParams.append('search', param)
         queryParams.append('page', String(page))
 
-        return api.get(`api/user/get/group/${group}/?${queryParams.toString()}`, {
+        return api.get(`api/users/get/group/${group}/?${queryParams.toString()}`, {
             params: {
                 data_format,
                 active

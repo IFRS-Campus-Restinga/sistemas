@@ -18,6 +18,8 @@ import CourseList from './pages/base/Admin/courseList/CourseList'
 import CourseForm from './pages/base/Admin/couseForm/CourseForm'
 import SubjectList from './pages/base/Admin/subjectList/SubjectList'
 import SubjectForm from './pages/base/Admin/subjectForm/SubjectForm'
+import PPCList from './pages/base/Admin/ppcList/PPCList'
+import PPCForm from './pages/base/Admin/ppcForm/PPCForm'
 
 const routes = createBrowserRouter([
     {
@@ -107,6 +109,18 @@ const routes = createBrowserRouter([
             {
                 path: 'disciplinas/:disciplinaId/edit/',
                 element: <SubjectForm/>
+            },
+            {
+                path: 'ppcs/',
+                element: <PPCList/>
+            },
+            {
+                path: 'ppcs/create/',
+                element: <PPCForm/>
+            },
+            {
+                path: 'ppcs/:ppcId/edit/',
+                element: <PPCForm/>
             }
         ]
     },
