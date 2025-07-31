@@ -18,7 +18,7 @@ interface ListPageProps {
 
 const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }: ListPageProps) => {
     const navigate = useNavigate()
-    const [data, setData] = useState<Record<any, string>[]>([])
+    const [listData, setListData] = useState<Record<string, any>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [nextPage, setNextPage] = useState<number | null>(null)
@@ -31,10 +31,10 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
         try {
             const { next, previous, data } = await fetchData(page, param)
 
-            setData(data)
+            setListData([...listData, ...data])
 
-            if (next) setNextPage(currentPage + 1)
-            if (previous) setPreviousPage(currentPage - 1)
+            setNextPage(next ? currentPage + 1 : null)
+            setPreviousPage(previous ? currentPage - 1 : null)
         } catch (error) {
             console.error(error)
         } finally {
@@ -44,7 +44,7 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
 
     useEffect(() => {
         handleSearch(currentPage, searchParam)
-    }, [title])
+    }, [title, currentPage])
 
     useEffect(() => {
         if (searchParam === '') handleSearch(currentPage, searchParam)
@@ -63,31 +63,21 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
                 />
                 <div className={styles.addIcon} onClick={() => navigate(registerUrl)}>+</div>
             </div>
-            {
-                isLoading ? (
-                    <CustomLoading />
-                ) : data.length > 0 ? (
-                    <Table 
-                        itemList={data}
-                        fetchData={handleSearch} 
-                        next={nextPage} 
-                        previous={previousPage} 
-                        current={currentPage} 
-                        setCurrent={setCurrentPage} 
-                        loadingContent={isLoading} 
-                        crudActions={{
-                            canEdit: canEdit,
-                            canView: canView,
-                            onDelete: onDelete
-                        }}
-                        searchParam={searchParam}
-                    />
-                ) : (
-                    <div className={styles.messageContainer}>
-                        <p className={styles.message}>Não há resultados para serem mostrados</p>
-                    </div>
-                )
-            }
+                <Table 
+                    itemList={listData}
+                    fetchData={handleSearch}
+                    next={nextPage}
+                    previous={previousPage}
+                    current={currentPage}
+                    setCurrent={setCurrentPage} 
+                    loadingContent={isLoading} 
+                    crudActions={{
+                        canEdit: canEdit,
+                        canView: canView,
+                        onDelete: onDelete
+                    }}
+                    searchParam={searchParam}
+                />
         </FormContainer>
     )
 }

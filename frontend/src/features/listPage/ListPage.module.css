@@ -18,21 +18,3 @@
     margin-left: 15px;
     font-weight: 600;
 }
-
-.messageContainer {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.message {
-    font-size: 14px;
-    font-family: 'Roboto';
-    color: #767676;
-    font-weight: 600;
-    border: 1px solid #767676;
-    border-radius: 8px;
-    padding: 8px;
-    text-align: center;
-}

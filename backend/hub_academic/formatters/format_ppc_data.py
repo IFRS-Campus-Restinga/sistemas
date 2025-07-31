@@ -1,11 +1,11 @@
 import uuid
-from ..models.ppc import PPC, PPCSubject
+from ..models.ppc import PPC, Curriculum
 
 class FormatPPCData:
     @staticmethod
     def get_subjects(ppc_id):
         ppc_subjects = (
-            PPCSubject.objects
+            Curriculum.objects
             .filter(ppc__id=uuid.UUID(ppc_id))
             .select_related('subject')
         )

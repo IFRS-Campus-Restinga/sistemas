@@ -36,6 +36,8 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
     const redirect = useNavigate()
     const firstRef = useRef(null)
     const lastRef = useRef(null)
+    const loadingRef = useRef(false);
+
 
     const redirectAction = (itemId: string, action: string = '') => {
         redirect(`${itemId}/${action}`, {state: itemId})
@@ -50,9 +52,9 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-            if (entry.isIntersecting && next && !loadingContent) {
-                setCurrent(prev => prev + 1);
-            }
+                if (entry.isIntersecting && next && !loadingContent) {
+                    setCurrent(prev => prev + 1);
+                }
             });
         }, { threshold: 1.0 });
 
@@ -78,92 +80,104 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
                     </div>
                 ) : null
             }
-            <table className={styles.table}>
-                <thead className={styles.thead}>
-                    <tr className={styles.tr}>
-                        {
-                            Object.keys(itemList[0] ?? {}).map((itemKey) => (
-                                itemKey !== 'id' ? (
-                                    <th className={styles.th}>{itemKey}</th>
-                                ) : null
-                            ))
-                        }
-                        {
-                            !crudActions && !dualActions ? null : (
-                                <th className={styles.thAction}>
-                                    Ações
-                                </th>
-                            ) 
-                        }
-                    </tr>
-                </thead>
-                <tbody className={styles.tbody}>
-                    {
-                        itemList.map((item) => (
+            {
+                itemList.length > 0 ? (
+                    <table className={styles.table}>
+                        <thead className={styles.thead}>
                             <tr className={styles.tr}>
                                 {
-                                    Object.entries(item).map(([key, value]) => (
-                                        key !== 'id' ? (
-                                            <td className={styles.td}>
-                                                {value}
-                                            </td>
+                                    Object.keys(itemList[0] ?? {}).map((itemKey) => (
+                                        itemKey !== 'id' ? (
+                                            <th className={styles.th}>{itemKey}</th>
                                         ) : null
                                     ))
                                 }
-                                <td className={styles.tdAction}>
-                                    <div className={styles.actions}>
-                                        {crudActions ? (
-                                            <>
-                                                {crudActions.canView && (
-                                                    <img
-                                                        src={search}
-                                                        alt="detalhes"
-                                                        className={styles.action}
-                                                        onClick={() => redirectAction(item.id)}
-                                                    />
-                                                )}
-
-                                                {crudActions.canEdit && (
-                                                    <img
-                                                        src={editIcon}
-                                                        alt="editar"
-                                                        className={styles.action}
-                                                        onClick={() => redirectAction(item.id, 'edit')}
-                                                    />
-                                                )}
-
-                                                {typeof crudActions.onDelete === 'function' && (
-                                                    <img
-                                                        src={deleteIcon}
-                                                        alt="excluir"
-                                                        className={styles.action}
-                                                        onClick={() => openModal(item.id)}
-                                                    />
-                                                )}
-                                            </>
-                                        ) : dualActions ? (
-                                            <>
-                                                <img
-                                                    src={check}
-                                                    alt="aprovar"
-                                                    className={styles.action}
-                                                    onClick={() => dualActions.onApprove(item)}
-                                                />
-                                                <img
-                                                    src={x}
-                                                    alt="rejeitar"
-                                                    className={styles.action}
-                                                    onClick={() => dualActions.onDecline(item.id)}
-                                                />
-                                            </>
-                                        ) : null}
-                                    </div>
-                                </td>
+                                {
+                                    !crudActions && !dualActions ? null : (
+                                        <th className={styles.thAction}>
+                                            Ações
+                                        </th>
+                                    ) 
+                                }
                             </tr>
-                        ))
-                    }
-                </tbody>
-            </table>
+                        </thead>
+                        <tbody className={styles.tbody}>
+                            {
+                                itemList.map((item, index) => (
+                                    <tr 
+                                        key={item.id}
+                                        className={styles.tr}
+                                        ref={index === itemList.length - 1 ? lastRef : null}
+                                    >
+                                        {
+                                            Object.entries(item).map(([key, value]) => (
+                                                key !== 'id' ? (
+                                                    <td className={styles.td}>
+                                                        {value}
+                                                    </td>
+                                                ) : null
+                                            ))
+                                        }
+                                        <td className={styles.tdAction}>
+                                            <div className={styles.actions}>
+                                                {crudActions ? (
+                                                    <>
+                                                        {crudActions.canView && (
+                                                            <img
+                                                                src={search}
+                                                                alt="detalhes"
+                                                                className={styles.action}
+                                                                onClick={() => redirectAction(item.id)}
+                                                            />
+                                                        )}
+
+                                                        {crudActions.canEdit && (
+                                                            <img
+                                                                src={editIcon}
+                                                                alt="editar"
+                                                                className={styles.action}
+                                                                onClick={() => redirectAction(item.id, 'edit')}
+                                                            />
+                                                        )}
+
+                                                        {typeof crudActions.onDelete === 'function' && (
+                                                            <img
+                                                                src={deleteIcon}
+                                                                alt="excluir"
+                                                                className={styles.action}
+                                                                onClick={() => openModal(item.id)}
+                                                            />
+                                                        )}
+                                                    </>
+                                                ) : dualActions ? (
+                                                    <>
+                                                        <img
+                                                            src={check}
+                                                            alt="aprovar"
+                                                            className={styles.action}
+                                                            onClick={() => dualActions.onApprove(item)}
+                                                        />
+                                                        <img
+                                                            src={x}
+                                                            alt="rejeitar"
+                                                            className={styles.action}
+                                                            onClick={() => dualActions.onDecline(item.id)}
+                                                        />
+                                                    </>
+                                                ) : null}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            }
+                        </tbody>
+                    </table>
+                ) : (
+                    <div className={styles.messageContainer}>
+                        <p className={styles.message}>Não há resultados para serem mostrados</p>
+                    </div>
+                )
+            }
         </div>
     )
 }

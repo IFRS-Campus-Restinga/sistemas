@@ -5,26 +5,22 @@ export interface PreRequisitInterface {
     ppcsubject?: string
 }
 
-export interface PPCSubjectInterface {
+export interface CurriculumInterface {
     id?: string
     subject: string
     subject_teach_workload: string
     subject_ext_workload: string
     subject_remote_workload: string
+    period: number
     weekly_periods: string
-    pre_requisits: PreRequisitInterface[]
+    pre_requisits: Array<PreRequisitInterface | string>
 }
 
 export interface PPCInterface {
     id?: string
     title: string
     course: string
-    periods: SchoolPeriodInterface[]
-}
-
-export interface SchoolPeriodInterface {
-    number: number
-    curriculum: PPCSubjectInterface[]
+    curriculum: CurriculumInterface[]
 }
 
 const PPCService = {

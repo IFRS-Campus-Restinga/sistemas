@@ -2,6 +2,8 @@
     width: 100%;
     overflow-y: visible;
     min-height: 200px;
+    max-height: 350px;
+    overflow-y: scroll;
 }
 
 .searchContainer {

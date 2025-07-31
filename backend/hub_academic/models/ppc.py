@@ -12,13 +12,14 @@ class PPC(models.Model):
     def __str__(self):
         return self.title
 
-class PPCSubject(models.Model):
+class Curriculum(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    ppc = models.ForeignKey(PPC, on_delete=models.CASCADE, related_name='ppc_subject')
+    ppc = models.ForeignKey(PPC, on_delete=models.CASCADE, related_name='curriculum')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='ppc')
     subject_teach_workload = models.IntegerField()
     subject_ext_workload = models.IntegerField()
     subject_remote_workload = models.IntegerField()
+    period = models.IntegerField()
     weekly_periods = models.IntegerField()
     pre_requisits = models.ManyToManyField(Subject)
 
