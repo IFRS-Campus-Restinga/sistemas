@@ -39,7 +39,7 @@
 }
 
 .preReq {
-    width: 80px;
+    width: max-content;
     display: flex;
     justify-content: center;
     gap: 8px;

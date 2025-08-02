@@ -1,3 +1,4 @@
+# services/ppc_service.py
 import uuid
 from django.db import transaction
 from django.shortcuts import get_object_or_404
@@ -6,43 +7,22 @@ from ..models.ppc import PPC, Curriculum
 from ..serializers.ppc_serializer import PPCSerializer, CurriculumSerializer
 from rest_framework.pagination import PageNumberPagination
 
+
 class PPCPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 30
 
-class CurriculumService:
-    @staticmethod
-    def bulk_create(ppc_id, curriculum_data):
-        for item in curriculum_data:
-            item['ppc'] = str(ppc_id)  # Certifique-se de usar string se o serializer espera UUID como string
-
-        serializer = CurriculumSerializer(data=curriculum_data, many=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-
-    @staticmethod
-    def bulk_update(curriculum_data):
-        for item in curriculum_data:
-            instance = get_object_or_404(Curriculum, pk=uuid.UUID(item['id']))
-            serializer = CurriculumSerializer(instance=instance, data=item)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-
 class PPCService:
     @staticmethod
     @transaction.atomic
     def create(ppc_data):
-        curriculum_data = ppc_data.pop('curriculum', [])
+        serializer = PPCSerializer(data=ppc_data, context={'request': None})
 
-        ppc_serializer = PPCSerializer(data=ppc_data)
-        ppc_serializer.is_valid(raise_exception=True)
-        ppc_serializer.save()
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
 
-        CurriculumService.bulk_create(ppc_serializer.instance.id, curriculum_data)
-
-        return ppc_serializer.data
+        return serializer.save()
 
     @staticmethod
     def get(request, ppc_id):
@@ -64,10 +44,10 @@ class PPCService:
         curriculum_data = ppc_data.pop('curriculum', [])
 
         ppc = get_object_or_404(PPC, pk=uuid.UUID(ppc_id))
-        ppc_serializer = PPCSerializer(instance=ppc, data=ppc_data)
-        ppc_serializer.is_valid(raise_exception=True)
-        ppc_serializer.save()
 
-        CurriculumService.bulk_update(curriculum_data)
+        serializer = PPCSerializer(instance=ppc, data={**ppc_data, 'curriculum': curriculum_data}, context={'request': None})
 
-        return ppc_serializer.data
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+
+        return PPCSerializer(instance=ppc, context={'request': None}).data

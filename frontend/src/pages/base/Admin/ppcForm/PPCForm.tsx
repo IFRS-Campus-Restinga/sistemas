@@ -42,6 +42,7 @@ const PPCForm = () => {
     const location = useLocation()
     const { state } = location
     const [searched, setSearched] = useState<boolean>(false)
+    const [periods, setPeriods] = useState<number[]>([])
     // Nome do curso
     const [course, setCourse] = useState<string>('')
     // Campo de opções de curso
@@ -61,8 +62,6 @@ const PPCForm = () => {
         period: null,
         curriculum: []
     })
-
-    const { grouped, periods } = groupByPeriod(PPC.curriculum);
 
     const fetchCourses = async () => {
         try {
@@ -125,6 +124,44 @@ const PPCForm = () => {
         return Object.values(newErrors).every((error) => error === null || error.every((value: []) => value === null))
     }
 
+    const removeEmtpyItems = () => {
+        setPPC((prev) => {
+            const filtered = prev.curriculum.filter((item) => {
+                return Object.entries(item).some(([key, value]) => {
+                    if (key === 'period') return false;
+
+                    if (typeof value === 'string' && value.trim() !== '') return true;
+
+                    if (key === 'pre_requisits' && Array.isArray(value) && value.length > 0) return true;
+
+                    return false;
+                });
+            });
+
+            // Identificar os períodos que ainda têm disciplinas
+            const remainingPeriods = [...new Set(filtered.map((item) => item.period))];
+
+            // Atualiza o visual (curriculum e setPeriodIsOpen)
+            setCurriculum((prevCurriculum) =>
+                prevCurriculum.filter((curriculum) => {
+                    const periodNumber = parseInt(curriculum.period);
+                    return remainingPeriods.includes(periodNumber);
+                })
+            );
+
+            setPeriodIsOpen((prevOpen) =>
+                prevOpen.filter((_, idx) => remainingPeriods.includes(idx + 1))
+            );
+
+            return {
+                ...prev,
+                curriculum: filtered
+            };
+        });
+    };
+
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -151,7 +188,11 @@ const PPCForm = () => {
     }
 
     useEffect(() => {
-        console.log(PPC)
+        setPeriods(groupByPeriod(PPC.curriculum))
+    }, [PPC.curriculum])
+
+    useEffect(() => {
+        console.log(PPC.curriculum)
     }, [PPC])
 
     return (
@@ -197,48 +238,38 @@ const PPCForm = () => {
                             Períodos *
                             <button className={styles.addButton} type='button' 
                                 onClick={() => {
-                                    // Pega o número atual do maior período no estado curriculum
-                                    const existingPeriodsNumbers = curriculum.map(c => {
-                                    // extrai o número do texto "1º Período" -> 1
-                                    const match = c.period.match(/^(\d+)/);
-                                    return match ? Number(match[1]) : 0;
-                                    });
-
-                                    const maxPeriod = existingPeriodsNumbers.length > 0 ? Math.max(...existingPeriodsNumbers) : 0;
+                                    const existingPeriods = PPC.curriculum.map((c) => c.period);
+                                    const maxPeriod = existingPeriods.length > 0 ? Math.max(...existingPeriods) : 0;
                                     const nextPeriodNumber = maxPeriod + 1;
 
-                                    setPPC((prev) => {
-                                        const updated = [...prev.curriculum]
+                                    const newCurriculumItem: CurriculumInterface = {
+                                        subject: '',
+                                        subject_teach_workload: '',
+                                        subject_ext_workload: '',
+                                        subject_remote_workload: '',
+                                        weekly_periods: '',
+                                        pre_requisits: [],
+                                        period: nextPeriodNumber
+                                    };
 
-                                        updated.push({
-                                            subject: '',
-                                            subject_ext_workload: '',
-                                            subject_remote_workload: '',
-                                            subject_teach_workload: '',
-                                            weekly_periods: '',
-                                            pre_requisits: [],
-                                            period: nextPeriodNumber
-                                        })
+                                    setPPC((prev) => ({
+                                        ...prev,
+                                        curriculum: [...prev.curriculum, newCurriculumItem]
+                                    }));
 
-                                        return {
-                                            ...prev,
-                                            curriculum: updated
+                                    setCurriculum((prev) => [
+                                        ...prev,
+                                        {
+                                            period: `${nextPeriodNumber}º Período`,
+                                            subjects: [{
+                                                name: '',
+                                                preRequisits: []
+                                            }]
                                         }
-                                    })
+                                    ]);
 
-                                    setCurriculum([...curriculum, {
-                                        period: `${nextPeriodNumber}º Período`, 
-                                        subjects: [{
-                                            name: '',
-                                            preRequisits: []
-                                        }]
-                                    }])
-
-                                    setPeriodIsOpen((prev) => {
-                                        return [...prev, false]
-                                    })
-                                    
-                                    setErrors({...errors, period: null, curriculum: []})
+                                    setPeriodIsOpen((prev) => [...prev, false]);
+                                    setErrors((prev) => ({ ...prev, period: null, curriculum: [] }));
                                 }}
                             >
                                 +
@@ -251,7 +282,7 @@ const PPCForm = () => {
                                 const periodTitle = `${periodNumber}º Período`;
 
                                 return (
-                                    <div key={periodNumber}>
+                                    <div key={index}>
                                         <div className={styles.periodContainer}>
                                             <div className={styles.periodHeader}>
                                                 <p className={styles.periodTitle}>{periodTitle}</p>
@@ -261,14 +292,36 @@ const PPCForm = () => {
                                                     className={styles.clearIcon}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setPPC((prev) => ({
-                                                            ...prev,
-                                                            curriculum: prev.curriculum.filter(
-                                                                (subject) => subject.period !== periodNumber
-                                                            ),
-                                                        }));
-                                                        setCurriculum((prev) => prev.filter((c) => c.period !== periodTitle));
-                                                        setPeriodIsOpen((prev) => prev.filter((_, i) => i !== index));
+
+                                                        setPPC((prev) => {
+                                                            const filtered = prev.curriculum.filter((item) => item.period !== periodNumber);
+
+                                                            // 2. Renumera os períodos restantes (PPC.curriculum)
+                                                            const renumbered = filtered.map((item, idx) => ({
+                                                                ...item,
+                                                                period: idx + 1
+                                                            }));
+
+                                                            // 3. Atualiza o estado visual (curriculum)
+                                                            setCurriculum((prevCurriculum) => {
+                                                                const filteredCurriculum = prevCurriculum.filter((curriculum) => !curriculum.period.includes(`${periodNumber}`))
+
+                                                                const renumberedCurriculum = filteredCurriculum.map((curriculum, cIdx) => ({
+                                                                    ...curriculum,
+                                                                    period: `${cIdx + 1}º Período`
+                                                                }))
+
+                                                                return renumberedCurriculum
+                                                            });
+
+                                                            // 4. Atualiza os modais abertos
+                                                            setPeriodIsOpen(renumbered.map(() => false));
+
+                                                            return {
+                                                                ...prev,
+                                                                curriculum: renumbered
+                                                            };
+                                                        });
                                                     }}
                                                 />
                                             </div>
@@ -299,35 +352,13 @@ const PPCForm = () => {
                                                         return updated;
                                                     });
 
-                                                    setPPC((prev) => {
-                                                        const updated = prev.curriculum.filter((subject) =>
-                                                            Object.entries(subject).some(([key, value]) => {
-                                                                if (key === 'period') return false;
-
-                                                                if (typeof value === 'string') {
-                                                                    return value.trim() !== '';
-                                                                }
-
-                                                                if (Array.isArray(value)) {
-                                                                    return value.length > 0;
-                                                                }
-
-                                                                return value !== null && value !== undefined;
-                                                            })
-                                                        );
-
-                                                        return {
-                                                            ...prev,
-                                                            curriculum: updated
-                                                        }
-                                                    })
-
+                                                    removeEmtpyItems()
                                                 }}
                                             >
                                                 <CurriculumTable
                                                     state={state}
                                                     title={periodTitle}
-                                                    period={periodNumber}
+                                                    period={Number(periodNumber)}
                                                     curriculum={PPC.curriculum.filter((c) => c.period === periodNumber)}
                                                     subjects={curriculum.find((c) => c.period.includes(periodTitle))!.subjects}
                                                     setSubjects={(updatedSubjects) => {

@@ -255,6 +255,7 @@ const CourseForm = () => {
                                     type='text'
                                     value={course.workload}
                                     maxLength={4}
+                                    placeholder='Insira a carga horária em horas-aula'
                                     onChange={(e) =>  {
                                         if (!isNaN(e.target.value)) setCourse({...course, workload: e.target.value})
                                     }}
