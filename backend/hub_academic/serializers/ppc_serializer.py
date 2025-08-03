@@ -1,3 +1,4 @@
+from uuid import UUID
 from rest_framework import serializers
 from ..models.ppc import PPC, Curriculum
 from ..formatters.format_ppc_data import FormatPPCData
@@ -8,7 +9,7 @@ class CurriculumSerializer(serializers.ModelSerializer):
     ppc = serializers.PrimaryKeyRelatedField(queryset=PPC.objects.all(), required=False)
     period = serializers.IntegerField()
     subject = serializers.UUIDField()
-    pre_requisits = serializers.ListField(child=serializers.UUIDField(), required=False)
+    pre_requisits = serializers.ListField(required=False)
     subject_teach_workload = serializers.IntegerField()
     subject_ext_workload = serializers.IntegerField()
     subject_remote_workload = serializers.IntegerField()
@@ -17,6 +18,26 @@ class CurriculumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Curriculum
         fields = '__all__'
+
+    def to_internal_value(self, data):
+        # Normaliza pre_requisits para lista de UUIDs strings
+        pre_reqs = data.get('pre_requisits', [])
+
+        normalized = []
+        for item in pre_reqs:
+            if isinstance(item, dict):
+                # extrai o UUID dentro do dict
+                pre_req_id = item.get('subject')
+                if pre_req_id:
+                    normalized.append(pre_req_id)
+            elif isinstance(item, str):
+                normalized.append(item)
+            else:
+                # ignora ou lança erro
+                pass
+
+        data['pre_requisits'] = normalized
+        return super().to_internal_value(data)
 
 
 class PPCSerializer(serializers.ModelSerializer):
@@ -64,19 +85,35 @@ class PPCSerializer(serializers.ModelSerializer):
         instance.title = validated_data.get('title', instance.title)
         instance.save()
 
-        # Remove currículo antigo
         instance.curriculum.all().delete()
 
+        def normalize_pre_requisits(pre_requisits_raw):
+            normalized = []
+            for pr in pre_requisits_raw:
+                if isinstance(pr, dict):
+                    pre_req_id = pr.get('subject')
+                else:
+                    pre_req_id = pr
+                if pre_req_id:
+                    normalized.append(pre_req_id)
+            return normalized
+
         for item in curriculum_data:
-            subject_id = item.pop('subject')
-            pre_req_ids = item.pop('pre_requisits', [])
+            subject_id = item.get('subject')
+            pre_req_ids = normalize_pre_requisits(item.get('pre_requisits', []))
+            other_fields = item.copy()
+            other_fields.pop('subject', None)
+            other_fields.pop('pre_requisits', None)
+
             subject = Subject.objects.get(id=subject_id)
 
             curriculum = Curriculum.objects.create(
                 ppc=instance,
                 subject=subject,
-                **item
+                **other_fields
             )
+
+            print(pre_req_ids)
 
             if pre_req_ids:
                 curriculum.pre_requisits.set(
@@ -109,8 +146,9 @@ class PPCSerializer(serializers.ModelSerializer):
             current_period = item['period']
             for pre_req in item.get('pre_requisits', []):
                 pre_req_period = period_map.get(pre_req)
-                if pre_req_period >= current_period:
-                    raise serializers.ValidationError({"Pré Requisito":"Disciplinas de períodos posteriores não podem ser pré-requisitos de períodos anteriores."})
+                if pre_req_period:
+                    if pre_req_period >= current_period:
+                        raise serializers.ValidationError({"Pré Requisito":"Disciplinas de períodos posteriores não podem ser pré-requisitos de períodos anteriores."})
 
         # 5. Validação da carga horária
         total_teach = sum(item['subject_teach_workload'] for item in curriculum)
@@ -129,8 +167,8 @@ class PPCSerializer(serializers.ModelSerializer):
         except Course.DoesNotExist:
             raise serializers.ValidationError({"Curso":"Curso vinculado não encontrado."})
 
-        if total_curriculum_workload != course.workload:
-            raise serializers.ValidationError({"Carga Horária":f"Soma das cargas horárias ({total_curriculum_workload}h) não corresponde à carga horária do curso ({course.workload}h)."})
+        # if total_curriculum_workload != course.workload:
+        #     raise serializers.ValidationError({"Carga Horária":f"Soma das cargas horárias ({total_curriculum_workload}h) não corresponde à carga horária do curso ({course.workload}h)."})
 
         data['curriculum'] = curriculum
         return data
@@ -145,8 +183,10 @@ class PPCSerializer(serializers.ModelSerializer):
         match data_format:
             case 'list':
                 return FormatPPCData.list_format(instance)
-            case 'details':
-                return FormatPPCData.details_format(instance)
+            case 'edit_details':
+                return FormatPPCData.edit_details(instance)
+            case 'view_details':
+                return FormatPPCData
             case _:
                 raise serializers.ValidationError('data_format inválido')
         

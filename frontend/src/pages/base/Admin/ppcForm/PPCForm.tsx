@@ -12,6 +12,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import CustomSearch from '../../../../components/customSearch/CustomSearch'
 import CustomOptions from '../../../../components/customOptions/CustomOptions'
 import clear from '../../../../assets/close-svgrepo-com.svg'
+import deleteIcon from '../../../../assets/delete-svgrepo-com.svg'
 import calendarIcon from '../../../../assets/calendar-svgrepo-com-green.svg'
 import CurriculumTable from '../../../../features/curriculumTable/CurriculumTable'
 import Modal from '../../../../components/modal/Modal'
@@ -62,6 +63,27 @@ const PPCForm = () => {
         period: null,
         curriculum: []
     })
+
+    const fetchPPC = async () => {
+        try {
+            const res = await PPCService.get(state, 'edit_details')
+
+            setPPC(res.data.ppc)
+            setCurriculum(res.data.curriculum)
+            setCourse(res.data.course)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message,
+                    {
+                        autoClose: 2000,
+                        position: 'bottom-center'
+                    }
+                )
+            } else {
+                console.error(error)
+            }
+        }
+    }
 
     const fetchCourses = async () => {
         try {
@@ -142,12 +164,19 @@ const PPCForm = () => {
             const remainingPeriods = [...new Set(filtered.map((item) => item.period))];
 
             // Atualiza o visual (curriculum e setPeriodIsOpen)
-            setCurriculum((prevCurriculum) =>
-                prevCurriculum.filter((curriculum) => {
-                    const periodNumber = parseInt(curriculum.period);
-                    return remainingPeriods.includes(periodNumber);
-                })
-            );
+            setCurriculum((prevCurriculum) => {
+                const updated = prevCurriculum
+                    .filter((curriculum) => {
+                        const periodNumber = parseInt(curriculum.period);
+                        return remainingPeriods.includes(periodNumber);
+                    })
+                    .map((curriculum, idx) => ({
+                        ...curriculum,
+                        period: `${idx + 1}º Período`
+                    }));
+
+                return updated;
+            });
 
             setPeriodIsOpen((prevOpen) =>
                 prevOpen.filter((_, idx) => remainingPeriods.includes(idx + 1))
@@ -160,7 +189,36 @@ const PPCForm = () => {
         });
     };
 
+    const periodAlreadyExists = (periodNumber: number) => {
+        const periodSubjects = PPC.curriculum.filter((subject) => subject.period === periodNumber)
 
+        return periodSubjects.some((subject) => subject.id)
+    }
+
+    const deletePeriod = async (periodNumber: number) => {
+        try {
+            await PPCService.deletePeriod(state, periodNumber)
+
+            setPPC({...PPC, curriculum: PPC.curriculum.filter((subject) => subject.period !== periodNumber)})
+            setCurriculum(curriculum.filter((curriculum) => !curriculum.period.includes(`${periodNumber}º Período`)))
+
+            toast.success('Período removido com sucesso', {
+                autoClose: 2000,
+                position: 'bottom-center'
+            })
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message,
+                    {
+                        autoClose: 2000,
+                        position: 'bottom-center'
+                    }
+                )
+            } else {
+                console.error(error)
+            }
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -190,10 +248,14 @@ const PPCForm = () => {
     useEffect(() => {
         setPeriods(groupByPeriod(PPC.curriculum))
     }, [PPC.curriculum])
+    
+    useEffect(() => {
+        if (state) fetchPPC()
+        }, [state])
 
     useEffect(() => {
-        console.log(PPC.curriculum)
-    }, [PPC])
+        console.log(curriculum)
+    }, [curriculum])
 
     return (
         <FormContainer title={state ? 'Editar PPC' : 'Cadastrar PPC'} width='60%' formTip={"Preencha os campos obrigatórios (*)\n\nUtilize a barra de pesquisa para buscar/vincular o curso so PPC\n\nUtilize o botão de '+' para adicionar novos períodos ao PPC.\n\nClique no respectivo período para editá-lo"}>
@@ -238,8 +300,7 @@ const PPCForm = () => {
                             Períodos *
                             <button className={styles.addButton} type='button' 
                                 onClick={() => {
-                                    const existingPeriods = PPC.curriculum.map((c) => c.period);
-                                    const maxPeriod = existingPeriods.length > 0 ? Math.max(...existingPeriods) : 0;
+                                    const maxPeriod = periods.length > 0 ? Math.max(...periods) : 0;
                                     const nextPeriodNumber = maxPeriod + 1;
 
                                     const newCurriculumItem: CurriculumInterface = {
@@ -287,41 +348,61 @@ const PPCForm = () => {
                                             <div className={styles.periodHeader}>
                                                 <p className={styles.periodTitle}>{periodTitle}</p>
                                                 <img
-                                                    src={clear}
+                                                    src={periodAlreadyExists(periodNumber) ? deleteIcon : clear}
                                                     alt=""
                                                     className={styles.clearIcon}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        if (periodAlreadyExists(periodNumber)) {
+                                                            deletePeriod(periodNumber)
+                                                        } else {
+                                                            setPPC((prev) => {
+                                                                // 1. Remove todos os itens do período excluído
+                                                                const filtered = prev.curriculum.filter((item) => item.period !== periodNumber)
 
-                                                        setPPC((prev) => {
-                                                            const filtered = prev.curriculum.filter((item) => item.period !== periodNumber);
+                                                                // 2. Descobre os períodos únicos remanescentes e ordena
+                                                                const uniqueSortedPeriods = Array.from(
+                                                                    new Set(filtered.map((item) => item.period))
+                                                                ).sort((a, b) => a - b)
 
-                                                            // 2. Renumera os períodos restantes (PPC.curriculum)
-                                                            const renumbered = filtered.map((item, idx) => ({
-                                                                ...item,
-                                                                period: idx + 1
-                                                            }));
+                                                                // 3. Cria um mapa antigo -> novo (ex: {3: 2, 4: 3})
+                                                                const periodMap = new Map<number, number>()
+                                                                uniqueSortedPeriods.forEach((oldPeriod, idx) => {
+                                                                    periodMap.set(oldPeriod, idx + 1)
+                                                                })
 
-                                                            // 3. Atualiza o estado visual (curriculum)
-                                                            setCurriculum((prevCurriculum) => {
-                                                                const filteredCurriculum = prevCurriculum.filter((curriculum) => !curriculum.period.includes(`${periodNumber}`))
-
-                                                                const renumberedCurriculum = filteredCurriculum.map((curriculum, cIdx) => ({
-                                                                    ...curriculum,
-                                                                    period: `${cIdx + 1}º Período`
+                                                                // 4. Renumera os períodos com base no mapa
+                                                                const renumbered = filtered.map((item) => ({
+                                                                    ...item,
+                                                                    period: periodMap.get(item.period)!
                                                                 }))
 
-                                                                return renumberedCurriculum
-                                                            });
+                                                                // 5. Atualiza o estado visual `curriculum`
+                                                                setCurriculum((prevCurriculum) => {
+                                                                    // Remove o período visual que foi excluído
+                                                                    const filteredVisual = prevCurriculum.filter(
+                                                                        (c) => !c.period.startsWith(`${periodNumber}º`)
+                                                                    )
 
-                                                            // 4. Atualiza os modais abertos
-                                                            setPeriodIsOpen(renumbered.map(() => false));
+                                                                    // Renumera visualmente de acordo com o novo índice
+                                                                    return filteredVisual.map((c, idx) => ({
+                                                                        ...c,
+                                                                        period: `${idx + 1}º Período`
+                                                                    }))
+                                                                })
 
-                                                            return {
-                                                                ...prev,
-                                                                curriculum: renumbered
-                                                            };
-                                                        });
+                                                                // 6. Atualiza o estado dos modais abertos
+                                                                setPeriodIsOpen((prevOpen) => {
+                                                                    return uniqueSortedPeriods.map((_, idx) => prevOpen[idx] ?? false)
+                                                                })
+
+                                                                // 7. Retorna o novo estado de `PPC`
+                                                                return {
+                                                                    ...prev,
+                                                                    curriculum: renumbered
+                                                                }
+                                                            })
+                                                        }
                                                     }}
                                                 />
                                             </div>

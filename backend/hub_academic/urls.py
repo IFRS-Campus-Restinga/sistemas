@@ -23,4 +23,7 @@ urlpatterns = [
     path('ppcs/get/', list_ppc),
     path('ppcs/get/<str:ppc_id>/', get_ppc),
     path('ppcs/edit/<str:ppc_id>/', edit_ppc),
+    path('ppcs/delete/<str:ppc_id>/period/<int:period>/', delete_period_from),
+    path('ppcs/delete/<str:ppc_id>/subjects/<str:subject_id>/', delete_subject_from),
+    path('ppcs/delete/<str:ppc_id>/subjects/<str:subject_id>/pre_reqs/<str:pre_req_id>/', delete_pre_requisit_from),
 ]

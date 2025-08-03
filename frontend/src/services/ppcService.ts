@@ -1,8 +1,7 @@
 import api from "../../config/apiConfig"
 
 export interface PreRequisitInterface {
-    id: string
-    ppcsubject?: string
+    subject: string
 }
 
 export interface CurriculumInterface {
@@ -38,10 +37,10 @@ const PPCService = {
         })
     },
 
-    get: async (PPCId: string) => {
+    get: async (PPCId: string, data_format: string = 'view_details') => {
         return await api.get(`api/academic/ppcs/get/${PPCId}/`, {
             params: {
-                data_format: 'details'
+                data_format
             }
         });
     },
@@ -50,13 +49,17 @@ const PPCService = {
         return await api.put(`api/academic/ppcs/edit/${PPCId}/`, params)
     },
 
+    deletePeriod: async (PPCId: string, period: number) => {
+        return await api.delete(`api/academic/ppcs/delete/${PPCId}/period/${period}/`)
+    },
+
     deleteSubject: async (PPCId: string, subjectId: string) => {
         return await api.delete(`api/academic/ppcs/delete/${PPCId}/subjects/${subjectId}/`)
     },
 
     deletePreReq: async (PPCId: string, subjectId: string, preReqId: string) => {
         return await api.delete(`api/academic/ppcs/delete/${PPCId}/subjects/${subjectId}/pre_reqs/${preReqId}/`)
-    }
+    },
 }
 
 export default PPCService

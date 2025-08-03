@@ -29,9 +29,9 @@ def list_ppc(request):
 @has_permissions(['view_ppc', 'view_subject', 'view_course'])
 def get_ppc(request, ppc_id):
     try:
-        course = PPCService.get(request, ppc_id)
+        ppc = PPCService.get(request, ppc_id)
 
-        return Response(course, status=status.HTTP_200_OK)
+        return Response(ppc, status=status.HTTP_200_OK)
     except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
@@ -48,5 +48,40 @@ def edit_ppc(request, ppc_id):
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except serializers.ValidationError as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+@has_permissions(['delete_curriculum', 'change_ppc'])
+def delete_period_from(request, ppc_id, period):
+    try:
+        PPCService.delete_period(ppc_id, period)
+
+        return Response({'message': 'Período excluído com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['DELETE'])
+@has_permissions(['delete_curriculum', 'change_ppc'])
+def delete_subject_from(request, ppc_id, subject_id):
+    try:
+        PPCService.delete_subject(ppc_id, subject_id)
+
+        return Response({'message': 'Disciplina excluída com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['DELETE'])
+@has_permissions(['delete_curriculum', 'change_ppc'])
+def delete_pre_requisit_from(request, ppc_id, subject_id, pre_req_id):
+    try:
+        PPCService.delete_pre_requisit(ppc_id, subject_id, pre_req_id)
+        return Response({'message': 'Pré requisito excluído com sucesso'}, status=status.HTTP_200_OK)
+    except Http404 as e:
+        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

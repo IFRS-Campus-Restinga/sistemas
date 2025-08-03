@@ -5,7 +5,7 @@ import type { CurriculumInterface } from '../../services/ppcService'
 import CustomLabel from '../../components/customLabel/CustomLabel'
 import SubjectService from '../../services/subjectService'
 import { AxiosError } from 'axios'
-import { toast } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import PPCService from '../../services/ppcService'
 import CustomSearch from '../../components/customSearch/CustomSearch'
 import CustomOptions from '../../components/customOptions/CustomOptions'
@@ -98,7 +98,16 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
         try {
             await PPCService.deleteSubject(state!, subjectId)
 
-            // setPPC({...PPC, subjects: PPC.subjects.filter((_, i) => i !== index)})
+            const updatedCurriculum = curriculum.filter((_, i) => i !== index)
+            setCurriculum(updatedCurriculum)
+
+            const updatedSubjects = subjects.filter((_, i) => i !== index)
+            setSubjects(updatedSubjects)
+
+            toast.success('Disciplina removida com sucesso', {
+                autoClose: 2000,
+                position: 'bottom-center'
+            })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
@@ -115,7 +124,17 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
         try {
             await PPCService.deletePreReq(state!, subjectId, preReqId)
 
-            
+            const updatedCurriculum = curriculum
+            updatedCurriculum[index].pre_requisits = curriculum[index].pre_requisits.filter((_, i) => i !== pIndex)
+            setCurriculum(updatedCurriculum)
+
+            const updatedSubjects = subjects
+            updatedSubjects[index].preRequisits = subjects[index].preRequisits.filter((_, i) => i !== pIndex)
+
+            toast.success('Pré requisito removido com sucesso', {
+                autoClose: 2000,
+                position: 'bottom-center'
+            })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
@@ -149,6 +168,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     return (
         <FormContainer title={title} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize o botão de '+' para incluir novas linhas na tabela\n\nUtilize a barra de pesquisa para buscar/vincular disciplinas\n\nOs campos de carga horária devem ser preenchidos como horas-aula"}>
+            <ToastContainer/>
             <div className={styles.formGroup}>
                 <CustomLabel title='Grade Curricular *'>
                     {
@@ -262,7 +282,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                     const currentPreReqs = subject.pre_requisits ?? [];
 
                                                                                     const alreadyAdded = currentPreReqs.some(pr =>
-                                                                                        typeof pr === 'object' ? pr.id === option.id : pr === option.id
+                                                                                        typeof pr === 'object' ? pr.subject === option.id : pr === option.id
                                                                                     );
                                                                                     if (alreadyAdded) return; // ou um toast
 
@@ -299,7 +319,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                                 alt=""
                                                                                                 onClick={() => {
                                                                                                     if (typeof preReq !== 'string') {
-                                                                                                        deletePreReq(index, pIndex, curriculumData.subject, preReq.id)
+                                                                                                        deletePreReq(index, pIndex, curriculumData.subject, preReq.subject)
                                                                                                     } else {
                                                                                                     // Atualiza visual dos nomes dos pré-requisitos (subjects)
                                                                                                         const updatedSubjects = [...subjects];
@@ -372,7 +392,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                         alt=""
                                                         onClick={() => {
                                                             if (curriculumData.id) {
-                                                                deleteSubject(index, curriculumData.id)
+                                                                deleteSubject(index, curriculumData.subject)
                                                             } else {
                                                                 const updatedCurriculum = curriculum.filter((_, i) => i !== index)
 

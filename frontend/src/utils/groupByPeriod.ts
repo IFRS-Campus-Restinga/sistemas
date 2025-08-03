@@ -1,4 +1,6 @@
-export function groupByPeriod(curriculum: any[]): number[] {
+import type { CurriculumInterface } from "../services/ppcService";
+
+export function groupByPeriod(curriculum: CurriculumInterface[]): number[] {
     const periodsSet = new Set<number>();
 
     curriculum.forEach((subject) => {
@@ -8,5 +10,6 @@ export function groupByPeriod(curriculum: any[]): number[] {
     });
 
     const result = Array.from(periodsSet).sort((a, b) => a - b);
+
     return result
 }
