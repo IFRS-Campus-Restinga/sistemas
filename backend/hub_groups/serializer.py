@@ -1,17 +1,41 @@
+import re
 import uuid
+import unicodedata
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 from .formatter import FormatGroupData
 from .models import GroupUUIDMap
 
+def format_string(text: str) -> str:
+    # Converte para minúsculas
+    text = text.lower()
+
+    # Remove acentos
+    text = unicodedata.normalize('NFKD', text)
+    text = text.encode('ASCII', 'ignore').decode('utf-8')
+
+    # Substitui espaços por _
+    text = text.replace(' ', '_')
+
+    # Remove qualquer caractere que não seja letra, número ou _
+    text = re.sub(r'[^\w_]', '', text)
+
+    return text
+
 class GroupSerializer(serializers.ModelSerializer):
-    permissions = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Permission.objects.all(), write_only=True
+    permissions_to_add = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Permission.objects.all(), required=False
+    )
+    permissions_to_remove = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Permission.objects.all(), required=False
     )
 
     class Meta:
         model = Group
         fields = '__all__'
+        extra_kwargs = {
+            'name': {'required': True}
+        }
 
     def to_representation(self, instance):
         request = self.context.get('request')
@@ -25,13 +49,43 @@ class GroupSerializer(serializers.ModelSerializer):
                 return FormatGroupData.list_format(instance)
             case 'details':
                 return FormatGroupData.details_format(instance)
-    
+
+    def create(self, validated_data):
+        permissions_to_add = validated_data.pop('permissions_to_add', [])
+
+        # Obtem ou cria o grupo pelo nome
+        group_name = validated_data.get('name')
+        
+        group, created = Group.objects.get_or_create(name=format_string(group_name))
+
+        # Atribui permissões (mesmo se já existia)
+        if permissions_to_add:
+            group.permissions.add(*permissions_to_add)
+
+        # Cria UUIDMap apenas se o grupo for novo
+        if created:
+            GroupUUIDMap.objects.create(group=group)
+
+        return group
+
     def update(self, instance, validated_data):
-        instance.name = validated_data.get('name', instance.name)
+        permissions_to_add = validated_data.pop('permissions_to_add', [])
+        permissions_to_remove = validated_data.pop('permissions_to_remove', [])
+
+        group = Group.objects.filter(name=format_string(validated_data.get('name', instance.name))).first()
+
+        if group:
+            raise serializers.ValidationError({'nome': 'Já existe um grupo com com este nome'})
+
+        instance.name = format_string(validated_data.get('name', instance.name))
         instance.save()
 
-        if 'permissions' in validated_data:
-            permissions_to_remove = validated_data['permissions']
-            instance.permissions.remove(*permissions_to_remove)
+        if permissions_to_add:
+            perms_ids = [p.pk if hasattr(p, 'pk') else p for p in permissions_to_add]
+            instance.permissions.add(*perms_ids)
+
+        if permissions_to_remove:
+            perms_ids = [p.pk if hasattr(p, 'pk') else p for p in permissions_to_remove]
+            instance.permissions.remove(*perms_ids)
 
         return instance

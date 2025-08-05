@@ -14,29 +14,44 @@ class GroupPagination(PageNumberPagination):
 
 class GroupService:
     @staticmethod
-    def create(group_name) -> Group:
-        if not group_name:
-            raise serializers.ValidationError("O nome do grupo é obrigatório.")
+    def create(group_data) -> Group:
+        group_data.pop('permissionsToRemove', [])
+        permission_uuids = [perm['id'] for perm in group_data.pop('permissionsToAdd', [])]
 
-        group, created = Group.objects.get_or_create(name=group_name)
+        # Busca as permissões e obtém instâncias
+        new_permissions = list(Permission.objects.filter(uuid_map__uuid__in=permission_uuids))
 
-        if created:
-            group_map = GroupUUIDMap.objects.create(group=group)
+        # Passa para o serializer as PKs (IDs), não os objetos
+        serializer = GroupSerializer(data={
+            'name': group_data.get('name'),
+            'permissions_to_add': [p.pk for p in new_permissions]
+        })
 
-        return group
-    
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+
+        serializer.save()
+
+        return serializer.instance
+
     @staticmethod
     def edit(group_data, group_id: str):
         group = get_object_or_404(Group, uuid_map__uuid=uuid.UUID(group_id))
 
-        group_name = group_data['name']
-        permissions_uuids = [uuid.UUID(perm['id']) for perm in group_data['permissions']]
+        add_permission_uuids = [perm['id'] for perm in group_data.pop('permissionsToAdd', [])]
+        remove_permission_uuids = [perm['id'] for perm in group_data.pop('permissionsToRemove', [])]
 
-        permissions = Permission.objects.filter(
-            uuid_map__uuid__in=permissions_uuids
-        ).values_list('id', flat=True)
- 
-        serializer = GroupSerializer(instance=group, data={'name': group_name, 'permissions': permissions})
+        permissions_to_add = list(Permission.objects.filter(uuid_map__uuid__in=add_permission_uuids))
+        permissions_to_remove = list(Permission.objects.filter(uuid_map__uuid__in=remove_permission_uuids))
+
+        serializer = GroupSerializer(
+            instance=group, 
+            data={
+                'name': group_data.get('name'),
+                'permissions_to_add': [p.pk for p in permissions_to_add],
+                'permissions_to_remove': [p.pk for p in permissions_to_remove]
+            }
+        )
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
@@ -45,28 +60,21 @@ class GroupService:
 
     @staticmethod
     def list(request):
-        groups = Group.objects.filter(name__icontains=request.GET.get('search', ''))
+        search = request.GET.get('search', '')
+        groups = Group.objects.filter(name__icontains=search)
 
-        if not groups.exists():
-            paginator = GroupPagination()
-            paginated_result = paginator.paginate_queryset([], request)
-            return paginator.get_paginated_response(paginated_result)
-        
         paginator = GroupPagination()
         paginated_result = paginator.paginate_queryset(groups, request)
 
         serializer = GroupSerializer(paginated_result, many=True, context={'request': request})
-
         return paginator.get_paginated_response(serializer.data)
 
     @staticmethod
     def get_group_data(group_id: str, request):
         group = get_object_or_404(Group, uuid_map__uuid=uuid.UUID(group_id))
-
         serializer = GroupSerializer(instance=group, context={'request': request})
-
         return serializer.data
-    
+
     @staticmethod
     def get_by_user_and_system(user, system):
         return list(
@@ -75,5 +83,3 @@ class GroupService:
                 Q(id__in=system.groups.values_list('id', flat=True))
             ).values_list('name', flat=True)
         )
-
-

@@ -7,7 +7,7 @@ class FormatUserData:
 
         return {
             "id": instance.id,
-            "nome": f"{instance.first_name}{instance.last_name}" if instance.first_name else "-",
+            "nome": f"{instance.first_name} {instance.last_name}" if instance.first_name else "-",
             "email": instance.email,
             "ativo": "Ativo" if instance.is_active else "Inativo",
         }

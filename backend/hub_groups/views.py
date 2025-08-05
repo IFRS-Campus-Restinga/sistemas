@@ -9,9 +9,7 @@ from .service import GroupService
 @has_permissions(['add_group'])
 def create(request):
     try:
-        group = GroupService.create(request.data.get('name', None))
-
-        GroupService.edit(request.data, str(group.uuid_map.uuid))
+        group = GroupService.create(request.data)
 
         return Response({'message': 'Grupo criado com sucesso'}, status=status.HTTP_200_OK)
     except serializers.ValidationError as e:

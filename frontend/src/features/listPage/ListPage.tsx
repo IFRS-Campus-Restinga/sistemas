@@ -42,9 +42,31 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
         }
     }
 
+    const resetAndFetch = async () => {
+        setIsLoading(true)
+        setListData([])
+        setCurrentPage(1)
+
+        try {
+            const { next, previous, data } = await fetchData(1, searchParam)
+            setListData(data)
+            setNextPage(next ? 2 : null)
+            setPreviousPage(previous ? 0 : null)
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() =>{
+        resetAndFetch()
+    }, [title])
+
     useEffect(() => {
         handleSearch(currentPage, searchParam)
-    }, [title, currentPage])
+    }, [currentPage])
+
 
     useEffect(() => {
         if (searchParam === '') handleSearch(currentPage, searchParam)

@@ -10,6 +10,8 @@ interface DualTableTransferProps<T> {
     list2: T[]
     setList1: React.Dispatch<React.SetStateAction<T[]>>
     setList2: React.Dispatch<React.SetStateAction<T[]>>
+    callbackList1?: (item: T) => void
+    callbackList2?: (item: T) => void
     currentList1: number
     currentList2?: number
     setCurrentList1: React.Dispatch<React.SetStateAction<number>>
@@ -32,7 +34,9 @@ const DualTableTransfer = <T,>({
     list1, 
     list2, 
     setList1, 
-    setList2, 
+    setList2,
+    callbackList1,
+    callbackList2,
     getKey, 
     renderItem,
     currentList1,
@@ -41,8 +45,6 @@ const DualTableTransfer = <T,>({
     setCurrentList2,
     nextList1,
     nextList2,
-    prevList1,
-    prevList2,
     fetchData1,
     fetchData2,
     loadingList1,
@@ -67,6 +69,7 @@ const DualTableTransfer = <T,>({
         }
 
         setList1(updatedList1); // Isso deve vir **depois**
+        if (callbackList1) callbackList1(item)
     };
 
     const sendToList1 = (itemIndex: number) => {
@@ -83,6 +86,7 @@ const DualTableTransfer = <T,>({
         }
 
         setList2(updatedList2); // Isso deve vir **depois**
+        if (callbackList2) callbackList2(item)
     };
 
     // useffect para controlar paginação da tabela 1 através do scroll

@@ -77,16 +77,22 @@ class GoogleLogin(UserAuthenticationService):
                 raise UserValidationException("Grupo de acesso inválido para esta conta")
 
             if created:
-                return None, None, None
-            else:
-                if user.is_active:
-                    user_data = UserService.build_user_data(user, picture)
-                    
-                    access, refresh = TokenService.pair_token(user)
+                if access_profile != 'aluno':
+                    return None, None, None
+                
+                user.is_active = True
+                user.is_abstract = False
 
-                    return user_data, refresh, access
-                else:
-                    raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active}) 
+                user.save()
+                
+            if user.is_active:
+                user_data = UserService.build_user_data(user, picture)
+                
+                access, refresh = TokenService.pair_token(user)
+
+                return user_data, refresh, access
+            else:
+                raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active}) 
         except Group.DoesNotExist as e:
             raise UserValidationException('Grupo de acesso não encontrado')
         except GoogleAuthError as e:

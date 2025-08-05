@@ -5,11 +5,15 @@ import { type Permissions } from "./permissionService"
 export interface Group {
     id?: string
     name: string
-    permissions: Permissions[]
+}
+
+export interface GroupData extends Group {
+    permissionsToAdd: Permissions[]
+    permissionsToRemove: Permissions[]
 }
 
 const GroupService = {
-    create: async (param: Group) => {
+    create: async (param: GroupData) => {
         try {
             return api.post('api/groups/create/', param)
         } catch (error) {
@@ -43,7 +47,7 @@ const GroupService = {
         }
     },
 
-    edit: async (params: Group, group_id: string) => {
+    edit: async (params: GroupData, group_id: string) => {
         try {
             return api.put(`api/groups/edit/${group_id}/`, params)
         } catch (error) {

@@ -38,6 +38,9 @@ class UserService:
                 'access_profile': access_profile
             })
 
+            if access_profile == 'aluno':
+                UserService.add_group(user, 'aluno')
+
             if password and created:
                 PasswordService.create(user, password)
 
@@ -95,7 +98,6 @@ class UserService:
         if search_param:
             users = CustomUser.objects.get_by_access_profile_and_param(access_profile_name, search_param, active)
         else:
-            print(active)
             users = CustomUser.objects.get_by_access_profile(access_profile_name, active)
 
         if not users.exists():

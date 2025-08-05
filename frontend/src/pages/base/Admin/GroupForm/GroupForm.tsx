@@ -21,15 +21,21 @@ const GroupForm = () => {
     const [prevPageList1, setPrevPageList1] = useState<number | null>(null)
     const [nextPageList2, setNextPageList2] = useState<number | null>(null)
     const [prevPageList2, setPrevPageList2] = useState<number | null>(null)
-    const [permissions, setPermissions] = useState<Permissions[]>([])
+    // permissões disponíveis
+    const [availablePermissions, setAvailablePermissions] = useState<Permissions[]>([])
+    // permissões do grupo
+    const [groupPermissions, setGroupPermissions] = useState<Permissions[]>([])
+    // permissões a serem adicionadas ao grupo
+    const [permissionsToAdd, setPermissionsToAdd] = useState<Permissions[]>([])
+    // permissões a serem removidas do grupo
+    const [permissionsToRemove, setPermissionsToRemove] = useState<Permissions[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
-    const [isLoadingPermissions, setIsLoadingPermissions] = useState<boolean>(true)
+    const [isLoadingPermissions, setIsLoadingAvailablePermissions] = useState<boolean>(true)
     const [isLoadingGroupPermissions, setIsLoadingGroupPermissions] = useState<boolean>(true)
     const [nameError, setNameError] = useState<string | null>(null)
     const [group, setGroup] = useState<Group>({
         id: '',
         name: '',
-        permissions: []
     })
     
     const fetchGroupData = async () => {
@@ -40,12 +46,9 @@ const GroupForm = () => {
                 PermissionService.listByGroup(state, pageList2)
             ])
 
-            setPermissions(res[1].data.results)
-            setGroup((prev) => ({
-                id: res[0].data.id,
-                name: res[0].data.name,
-                permissions: [...prev.permissions, ...res[2].data.results.flat()]
-            }))
+            setGroup(res[0].data)
+            setAvailablePermissions(res[1].data.results)
+            setGroupPermissions(res[2].data.results)
 
             setNextPageList1(res[1].data.next ? pageList1 + 1 : null)
             setPrevPageList1(res[1].data.prev ? pageList1 - 1 : null)
@@ -61,7 +64,7 @@ const GroupForm = () => {
             }
         } finally {
             setIsLoading(false)
-            setIsLoadingPermissions(false)
+            setIsLoadingAvailablePermissions(false)
             setIsLoadingGroupPermissions(false)
         }
     }
@@ -73,10 +76,7 @@ const GroupForm = () => {
             try {
                 const res =  await PermissionService.listByGroup(state, pageList2)
 
-                setGroup((prev) => ({
-                    ...prev,
-                    permissions: [...prev.permissions, ...res.data.results]
-                }))
+                setGroupPermissions([...groupPermissions, ...res.data.results])
 
                 setNextPageList2(res.data.next ? pageList2 + 1 : null)
                 setPrevPageList2(res.data.previous ? pageList2 - 1 : null)
@@ -88,13 +88,13 @@ const GroupForm = () => {
         }
     }
 
-    const fetchPermissions = async () => {
-        setIsLoadingPermissions(true)
+    const fetchAvailablePermissions = async () => {
+        setIsLoadingAvailablePermissions(true)
 
         try {
-            const res = await PermissionService.list(pageList1)
+            const res = await PermissionService.notAssignedTo(state, pageList1)
 
-            setPermissions((prev) => [...prev, ...res.data.results])
+            setAvailablePermissions((prev) => [...prev, ...res.data.results])
 
             setNextPageList1(res.data.next ? pageList1 + 1 : null)
             setPrevPageList1(res.data.previous ? pageList1 - 1 : null)
@@ -102,7 +102,7 @@ const GroupForm = () => {
             console.error(error)
         } finally {
             setIsLoading(false)
-            setIsLoadingPermissions(false)
+            setIsLoadingAvailablePermissions(false)
             setIsLoadingGroupPermissions(false)
         }
     }
@@ -124,8 +124,21 @@ const GroupForm = () => {
         if (validateForm()) {
             let req
 
-            if (state) req = GroupService.edit({id: state, name: group.name, permissions: permissions}, state)
-            else req = GroupService.create(group)
+            if (state) req = GroupService.edit(
+                {
+                    id: state, 
+                    name: group.name, 
+                    permissionsToAdd: permissionsToAdd,
+                    permissionsToRemove: permissionsToRemove
+                }, state)
+            else req = GroupService.create(
+                {
+                    id: state, 
+                    name: group.name, 
+                    permissionsToAdd: permissionsToAdd,
+                    permissionsToRemove: permissionsToRemove
+                }
+            )
 
             toast.promise(
                 req,
@@ -137,30 +150,41 @@ const GroupForm = () => {
                             return data.message || 'Erro ao alterar dados'
                         }
                     }
+                },
+                {
+                    autoClose: 2000,
+                    position: 'bottom-center'
                 }
             )
         }
     }
 
-    const setGroupPermissions = (newPermissions: React.SetStateAction<Permissions[]>) => {
-        setGroup(prevGroup => {
-            // Se newPermissions for função, chama ela com prevGroup.permissions para obter o novo array
+    const setGroupPermissionsDisplay = (newPermissions: React.SetStateAction<Permissions[]>) => {
+        setGroupPermissions(groupPermissions => {
+            // Se newPermissions for função, chama ela com groupPermissions para obter o novo array
             const updatedPermissions = typeof newPermissions === 'function'
-            ? (newPermissions as (prev: Permissions[]) => Permissions[])(prevGroup.permissions)
+            ? (newPermissions as (prev: Permissions[]) => Permissions[])(groupPermissions)
             : newPermissions
 
-            return {
-            ...prevGroup,
-            permissions: updatedPermissions,
-            }
+            return updatedPermissions
         })
+    }
+
+    const addPermission = (perm: Permissions) => {
+        setPermissionsToAdd([...permissionsToAdd, perm])
+        setPermissionsToRemove(permissionsToRemove.filter((p) => p.id !== perm.id))
+    }
+
+    const removePermission = (perm: Permissions) => {
+        setPermissionsToRemove([...permissionsToRemove, perm])
+        setPermissionsToAdd(permissionsToAdd.filter((p) => p.id !== perm.id))
     }
 
     useEffect(() => {
         if (state) {
             fetchGroupData()  
         } else {
-            fetchPermissions()
+            fetchAvailablePermissions()
         }
     }, [state])
 
@@ -186,17 +210,19 @@ const GroupForm = () => {
                             <DualTableTransfer
                                 title1="Permissões disponíveis"
                                 title2="Permissões do grupo"
-                                list1={permissions}
-                                list2={group.permissions}
-                                setList1={setPermissions}
-                                setList2={setGroupPermissions}
+                                list1={availablePermissions}
+                                list2={groupPermissions}
+                                setList1={setAvailablePermissions}
+                                setList2={setGroupPermissionsDisplay}
+                                callbackList1={(perm) => addPermission(perm)}
+                                callbackList2={(perm) => removePermission(perm)}
                                 currentList1={pageList1}
                                 currentList2={pageList2}
                                 nextList1={nextPageList1}
                                 nextList2={nextPageList2}
                                 prevList1={prevPageList1}
                                 prevList2={prevPageList2}
-                                fetchData1={fetchPermissions}
+                                fetchData1={fetchAvailablePermissions}
                                 fetchData2={fetchGroupPermissions}
                                 loadingList1={isLoadingPermissions}
                                 loadingList2={isLoadingGroupPermissions}

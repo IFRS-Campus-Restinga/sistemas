@@ -15,5 +15,4 @@ class FormatGroupData:
         return {
             'id': group.uuid_map.uuid,
             'name': group.name,
-            'permissions': []
         }
