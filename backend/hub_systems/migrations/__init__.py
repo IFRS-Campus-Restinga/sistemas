@@ -1,1 +1,1 @@
-from ..models.system import System
+from ..models import System

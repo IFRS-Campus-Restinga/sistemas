@@ -23,7 +23,7 @@ class SystemManager(models.Manager):
         for system in systems:
             system_groups = [group.name for group in system.groups.all()]
 
-            if (system.dev_team.filter(id=user.id).exists() and system.current_state == 'Em desenvolvimento') or is_admin:
+            if (system.dev_team.filter(id=user.id).exists() and system.current_state == 'Em desenvolvimento' and system.is_active == True) or is_admin:
                 results.append(system)
             elif set(user_groups) & set(system_groups):
                 results.append(system)

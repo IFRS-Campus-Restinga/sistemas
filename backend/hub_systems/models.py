@@ -3,7 +3,7 @@ from django.db import models
 from hub_systems.enums import CurrentState
 from hub_users.models import CustomUser
 from django.contrib.auth.models import Group
-from hub_systems.managers.system_managers import *
+from hub_systems.managers import *
 
 class System(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

@@ -2,9 +2,8 @@ import uuid
 from django.db.models import Q
 from django.contrib.auth.models import Group, Permission
 from django.shortcuts import get_object_or_404
-from .models import GroupUUIDMap
 from rest_framework import serializers
-from .serializer import GroupSerializer
+from .serializer import GroupSerializer, format_string
 from rest_framework.pagination import PageNumberPagination
 
 class GroupPagination(PageNumberPagination):
@@ -18,12 +17,21 @@ class GroupService:
         group_data.pop('permissionsToRemove', [])
         permission_uuids = [perm['id'] for perm in group_data.pop('permissionsToAdd', [])]
 
-        # Busca as permissões e obtém instâncias
+        # Formata o nome
+        raw_name = group_data.get('name')
+        formatted_name = format_string(raw_name)
+
+        # Verifica se o grupo já existe
+        group = Group.objects.filter(name=formatted_name).first()
+        if group:
+            return group  # Apenas retorna, sem erro e sem usar o serializer
+
+        # Busca as permissões
         new_permissions = list(Permission.objects.filter(uuid_map__uuid__in=permission_uuids))
 
-        # Passa para o serializer as PKs (IDs), não os objetos
+        # Usa o serializer apenas para criação do novo grupo
         serializer = GroupSerializer(data={
-            'name': group_data.get('name'),
+            'name': raw_name,
             'permissions_to_add': [p.pk for p in new_permissions]
         })
 
@@ -31,7 +39,6 @@ class GroupService:
             raise serializers.ValidationError(serializer.errors)
 
         serializer.save()
-
         return serializer.instance
 
     @staticmethod
@@ -83,3 +90,7 @@ class GroupService:
                 Q(id__in=system.groups.values_list('id', flat=True))
             ).values_list('name', flat=True)
         )
+    
+    @staticmethod
+    def get_by_name(name):
+        return Group.objects.filter(name=name).first()

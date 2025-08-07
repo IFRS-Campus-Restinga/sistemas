@@ -63,6 +63,9 @@ const BaseAdmin = () => {
     return (
         <Base navBar={
             <CustomNavBar
+                backgroundColor="#003d24"
+                backgroundColor2="#006b3f"
+                color="white"
                 navBarItems={
                     [
                         {

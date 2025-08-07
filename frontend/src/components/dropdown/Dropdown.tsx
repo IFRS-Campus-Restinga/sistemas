@@ -14,9 +14,12 @@ export interface DropdownProps {
     dropdownIcon?: string
     items: DropdownItemProps[]
     dropdownChildren?: React.ReactNode
+    backgroundColor?: string
+    backgroundColor2?: string
+    color?: string
 }
 
-const Dropdown = ({ items, dropdownIcon, dropdownTitle, dropdownChildren }: DropdownProps) => {
+const Dropdown = ({ items, dropdownIcon, dropdownTitle, backgroundColor, backgroundColor2, color, dropdownChildren }: DropdownProps) => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
 
     const changeDropdownState = () => {
@@ -33,35 +36,47 @@ const Dropdown = ({ items, dropdownIcon, dropdownTitle, dropdownChildren }: Drop
         <div className={styles.dropdownContainer}>
             <h1 className={styles.dropdownTitle} onMouseEnter={changeDropdownState}>
                 {
-                    dropdownIcon && dropdownTitle ? (
-                        <>
-                            <img className={styles.dropdownIcon} src={dropdownIcon} alt={dropdownTitle} />
-                            {dropdownTitle}
-                        </>
+                    dropdownTitle ? (
+                        dropdownIcon ? (
+                            <>
+                                <img className={styles.dropdownIcon} src={dropdownIcon} alt={dropdownTitle} />
+                                {dropdownTitle}
+                            </>
+                        ) : (
+                            dropdownTitle
+                        )
+                    ) : dropdownIcon ? (
+                        <img className={styles.dropdownIcon} src={dropdownIcon} />
                     ) : dropdownChildren ? (
                         dropdownChildren
-                    ) : (
-                        null
-                    )
+                    ) : null
                 }
             </h1>
             {
                 dropdownOpen ? (
-                    <ul className={styles.dropdownList} onMouseLeave={changeDropdownState}>
+                    <ul className={styles.dropdownList} style={{backgroundColor: backgroundColor}} onMouseLeave={changeDropdownState}>
                         {
-                            items.map((item) => (
+                            items.map((item) =>
                                 item.link ? (
-                                    <Link to={item.link} className={styles.dropdownItem}>
-                                        <li>
-                                            {item.title}
-                                        </li>
-                                    </Link>
+                                <Link
+                                    to={item.link}
+                                    className={styles.dropdownItem}
+                                    style={{ color: color, '--hover-bg': backgroundColor2 } as React.CSSProperties}
+                                    key={item.title}
+                                >
+                                    <li>{item.title}</li>
+                                </Link>
                                 ) : (
-                                    <li className={styles.dropdownItem} onClick={item.onClick}>
-                                        {item.title}
-                                    </li>
+                                <li
+                                    className={styles.dropdownItem}
+                                    onClick={item.onClick}
+                                    style={{ color: color, '--hover-bg': backgroundColor2 } as React.CSSProperties}
+                                    key={item.title}
+                                >
+                                    {item.title}
+                                </li>
                                 )
-                            ))
+                            )
                         }
                     </ul>
                 ) : null

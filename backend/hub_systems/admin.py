@@ -1,4 +1,4 @@
 from django.contrib import admin
-from hub_systems.models.system import System
+from hub_systems.models import System
 
 admin.site.register(System)

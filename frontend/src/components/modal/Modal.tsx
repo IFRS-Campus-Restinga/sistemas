@@ -1,5 +1,5 @@
 import styles from './Modal.module.css'
-import close from '../../assets/close-svgrepo-com-white.svg'
+import close from '../../assets/close-svgrepo-com.svg'
 
 interface ModalProps {
     setIsOpen: (isOpen: boolean) => void

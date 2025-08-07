@@ -1,0 +1,39 @@
+.actionsContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.actionsIcon {
+    width: 20px;
+    height: 20px;
+    border: 2px solid white;
+    padding: 3px;
+    border-radius: 50%;
+}
+
+.actionsList {
+    position: absolute;
+    top: 110%;
+    background-color: white;
+    width: fit-content;
+    border-radius: 8px;
+    color: #767676;
+    padding: 8px;
+}
+
+.actionItem{
+    padding: 5px;
+    list-style: none;
+    font-weight: 600;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.actionIcon {
+    width: 15px;
+    height: 15px;
+}

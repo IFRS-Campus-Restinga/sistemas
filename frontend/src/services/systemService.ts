@@ -28,7 +28,8 @@ export const SystemService = {
             const res = await api.get('api/systems/menu/', {
                 params: {
                     user_id,
-                    page
+                    page,
+                    data_format: 'list'
                 }
             })
 
@@ -36,5 +37,17 @@ export const SystemService = {
         } catch (error) {
             throw extractError(error)
         }
+    },
+
+    get: async (systemId: string) => {
+        return api.get(`api/systems/get/${systemId}/`, {
+            params: {
+                data_format: 'details'
+            }
+        })
+    },
+
+    edit: async (systemId: string, params: System) => {
+        return api.put(`api/systems/edit/${systemId}/`, params)
     }
 }

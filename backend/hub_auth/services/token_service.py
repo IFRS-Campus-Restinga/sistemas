@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta, timezone
 from hub_users.models import CustomUser
-from hub_systems.models.system import System
+from hub_systems.models import System
 from hub_groups.service import GroupService
 from django.conf import settings
 

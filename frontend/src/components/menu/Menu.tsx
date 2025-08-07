@@ -1,11 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from './Menu.module.css'
 import { SystemService } from '../../services/systemService';
 import { useEffect, useState } from 'react';
 import { useUser } from '../../store/userHooks';
-import CustomButton from '../../components/customButton/CustomButton';
 import CustomLoading from '../../components/customLoading/CustomLoading';
 import doubleArrow from '../../assets/double-arrow-right-svgrepo-com-white.svg'
+import Actions from '../actions/Actions';
+import dots from '../../assets/three-dots-line-svgrepo-com-white.svg'
+import Modal from '../modal/Modal';
+import FormContainer from '../formContainer/FormContainer';
+import CustomLabel from '../customLabel/CustomLabel';
 
 interface SystemInterface {
     id: string
@@ -18,11 +22,13 @@ interface SystemInterface {
 }
 
 const Menu = () => {
+    const redirect = useNavigate()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [systems, setSystems] = useState<SystemInterface[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
     const [next, setNext] = useState<number | null>(null)
     const [prev, setPrev] = useState<number | null>(null)
+    const [isOpen, setIsOpen] = useState<boolean>(false)
     const user = useUser()
 
     const redirectToSystem = (system: SystemInterface) => {
@@ -41,6 +47,14 @@ const Menu = () => {
         } finally {
             setIsLoading(false)
         }
+    }
+
+    const handleSystemDetails = (system: SystemInterface) => {
+        if (!user.groups?.includes('admin')) {
+            return system.dev_team.includes(user.id!) && system.current_state === 'Em desenvolvimento'
+        }
+
+        return true
     }
 
     useEffect(() => {
@@ -68,7 +82,32 @@ const Menu = () => {
                 <div className={styles.menuContainer}>
                     {
                         systems.map((system) => (
-                            <CustomButton text={system.name} type='button' onClick={() => redirectToSystem(system)}/>
+                            <>
+                            <button className={styles.systemButton} style={{backgroundColor: system.is_active ? "006b3f" : "#ccc"}} onClick={() => redirectToSystem(system)}>
+                                <p className={styles.systemTitle}>{system.name}</p>
+                                <Actions 
+                                    iconSrc={dots} 
+                                    itemId={system.id}
+                                    onView={handleSystemDetails(system) ? () => setIsOpen(true) : undefined}
+                                    onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
+                                    onDelete={handleSystemDetails(system) ? () => setIsOpen(true) : undefined}
+                                />
+                            </button>
+                            {
+                                isOpen ? (
+                                    <Modal setIsOpen={setIsOpen}>
+                                        <FormContainer title={system.name} formTip={"Copie e cole este código no arquivo de configurações do backend do seu projeto"} width='50%'>
+                                            <div className={styles.formGroup}>
+                                                ID do sistema
+                                                <p className={styles.content}>
+                                                    {system.id}
+                                                </p>
+                                            </div>
+                                        </FormContainer>
+                                    </Modal>
+                                ) : null
+                            }
+                            </>
                         ))
                     }
                 </div>

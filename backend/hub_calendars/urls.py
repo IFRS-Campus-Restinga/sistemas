@@ -11,9 +11,9 @@ urlpatterns = [
     path('delete/<str:calendar_id>/', delete_calendar),
 
     # event views
-    path('event/create/', create_event),
-    path('event/get/', list_events),
-    path('event/get/<str:event_id>/', get_event),
-    path('event/edit/<str:event_id>/', edit_event),
-    path('event/delete/<str:event_id>/', delete_event),
+    path('events/create/', create_event),
+    path('events/get/', list_events),
+    path('events/get/<str:event_id>/', get_event),
+    path('events/edit/<str:event_id>/', edit_event),
+    path('events/delete/<str:event_id>/', delete_event),
 ]

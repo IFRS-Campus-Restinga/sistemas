@@ -6,7 +6,7 @@ import BaseVisitor from './pages/base/Visitor/BaseVisitor'
 import HomeAdmin from './pages/base/Admin/home/HomeAdmin'
 import HomeMember from './pages/base/Member/home/HomeMember'
 import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
-import CreateSystem from './pages/base/Admin/createSystem/CreateSystem'
+import SystemForm from './pages/base/Admin/systemForm/SystemForm'
 import UserList from './pages/base/Admin/userList/UserList'
 import GroupList from './pages/base/Admin/groupList/GroupList'
 import GroupForm from './pages/base/Admin/groupForm/GroupForm'
@@ -60,7 +60,11 @@ const routes = createBrowserRouter([
             },
             {
                 path: 'sistemas/cadastro/',
-                element: <CreateSystem />
+                element: <SystemForm />
+            },
+            {
+                path: 'sistemas/:systemId/edit/',
+                element: <SystemForm/>
             },
             {
                 path: 'calendarios/',

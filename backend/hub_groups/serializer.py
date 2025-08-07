@@ -72,11 +72,6 @@ class GroupSerializer(serializers.ModelSerializer):
         permissions_to_add = validated_data.pop('permissions_to_add', [])
         permissions_to_remove = validated_data.pop('permissions_to_remove', [])
 
-        group = Group.objects.filter(name=format_string(validated_data.get('name', instance.name))).first()
-
-        if group:
-            raise serializers.ValidationError({'nome': 'Já existe um grupo com com este nome'})
-
         instance.name = format_string(validated_data.get('name', instance.name))
         instance.save()
 

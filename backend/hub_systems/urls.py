@@ -1,8 +1,10 @@
 from django.urls import path
-from hub_systems.views.system_views import *
+from hub_systems.views import *
 
 urlpatterns = [
-    path('create/', create_system),
-    path('get/<str:system_id>/', get_system),
+    path('create/', create),
+    path('get/<str:system_id>/', get),
+    path('search/<str:system_id>/', validate),
     path('menu/', menu_list),
+    path('edit/<str:system_id>/', edit),
 ]
