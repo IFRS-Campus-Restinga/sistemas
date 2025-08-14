@@ -8,8 +8,8 @@ import FormContainer from '../../../../components/formContainer/FormContainer';
 import DualTableTransfer from '../../../../components/table/tablesComponents/DualTableTransfer';
 import GroupService from '../../../../services/groupService';
 import CustomButton from '../../../../components/customButton/CustomButton';
-import x from '../../../../assets/close-svgrepo-com-white.svg'
 import Switch from '../../../../components/switch/Switch';
+import Modal from '../../../../components/modal/Modal';
 
 const HomeAdmin = () => {
     const [requests, setRequests] = useState<Record<string, any>[]>([])
@@ -24,7 +24,7 @@ const HomeAdmin = () => {
         id: '',
         username: '',
         email: '',
-        accessProfile: '',
+        access_profile: '',
         is_abstract: false,
         groups: []
     })
@@ -50,7 +50,7 @@ const HomeAdmin = () => {
         try {
             const res = await GroupService.list(current, '')
 
-            setGroups(res.data.results)
+            setGroups([...groups, ...res.data.results])
             setNext(res.data.next ? current + 1 : null)
             setPrev(res.data.prev ? current - 1 : null)
         } catch (error) {
@@ -78,10 +78,10 @@ const HomeAdmin = () => {
         setIsModalOpen(true)
         setApprovedRequest({
             id: request.id,
-            accessProfile: request.perfil,
+            access_profile: request.perfil,
             email: request.email,
             username: request.nome,
-            is_abstract: request.is_abstract,
+            is_abstract: approvedRequest.is_abstract,
             groups: []
         })
         
@@ -97,7 +97,7 @@ const HomeAdmin = () => {
             setRequests((prev) => prev.filter((req) => req.id !== approvedRequest.id))
             setIsModalOpen(false)
             setApprovedRequest({
-                accessProfile: '',
+                access_profile: '',
                 email: '',
                 id: '',
                 is_abstract: false,
@@ -113,6 +113,8 @@ const HomeAdmin = () => {
                         position: 'bottom-center'
                     }
                 )
+            } else {
+                console.error(error)
             }
         }
     }
@@ -138,6 +140,7 @@ const HomeAdmin = () => {
     useEffect(() => {
         fetchRequests()
     }, [])
+
     return (
         <section className={styles.home}>
             <Menu/>
@@ -167,75 +170,79 @@ const HomeAdmin = () => {
                 </FormContainer>
                 {
                     isModalOpen ? (
-                        <div className={styles.modalContainer}>
-                            <div className={styles.requestContainer}>
-                                <button className={styles.closeButton} onClick={() => {
-                                    setIsModalOpen(false)
+                        <Modal 
+                            setIsOpen={(isOpen) => {
+                                if (!isOpen) {
                                     setApprovedRequest({
                                         id: '',
                                         username: '',
                                         email: '',
                                         is_abstract: false,
-                                        accessProfile: '',
+                                        access_profile: '',
                                         groups: []
                                     })
-                                }}>
-                                    <img src={x} alt="fechar" className={styles.icon} />
-                                </button>
-                                <FormContainer width='100%' title='Adicionar grupos' formTip="Utilize as tabelas abaixo para vincular grupos ao usuário antes de aprová-lo">
-                                    <form className={styles.form} onSubmit={approveRequest}>
-                                        <div className={styles.userData}>
-                                            <div className={styles.data}>
-                                                <label className={styles.dataLabel}>
-                                                    Nome
-                                                    <p className={styles.requestParam}>{approvedRequest?.username}</p>
-                                                </label>
-                                            </div>
-                                            <div className={styles.data}>
-                                                <label className={styles.dataLabel}>
-                                                    Email
-                                                    <p className={styles.requestParam}>{approvedRequest?.email}</p>
-                                                </label>
-                                            </div>
-                                            <div className={styles.data}>
-                                                <label className={styles.dataLabel}>
-                                                    Perfil
-                                                    <p className={styles.requestParam}>{approvedRequest?.accessProfile}</p>
-                                                </label>
-                                            </div>
+                                }
+                            }}
+
+                        >
+                            <FormContainer width='50%' title='Adicionar grupos' formTip="Utilize as tabelas abaixo para vincular grupos ao usuário antes de aprová-lo">
+                                <form className={styles.form} onSubmit={approveRequest}>
+                                    <div className={styles.userData}>
+                                        <div className={styles.data}>
+                                            <label className={styles.dataLabel}>
+                                                Nome
+                                                <p className={styles.requestParam}>{approvedRequest.username}</p>
+                                            </label>
                                         </div>
-                                        <div className={styles.switchContainer}>
-                                            Tipo de usuário
-                                            <Switch
-                                                stateHandler={(value) => setApprovedRequest({...approvedRequest, is_abstract: value === 'Abstrato' ? true : false})}
-                                                value={approvedRequest.is_abstract ? 'Abstrato' : 'Pessoal'}
-                                                value1='Abstrato'
-                                                value2='Pessoal'
-                                            />
+                                        <div className={styles.data}>
+                                            <label className={styles.dataLabel}>
+                                                Email
+                                                <p className={styles.requestParam}>{approvedRequest.email}</p>
+                                            </label>
                                         </div>
-                                        <DualTableTransfer
-                                            list1={groups}
-                                            setList1={setGroups}
-                                            list2={approvedRequest.groups!}
-                                            setList2={setUserGroups}
-                                            fetchData1={fetchGroups}
-                                            loadingList1={isLoadingGroups}
-                                            currentList1={current}
-                                            setCurrentList1={setCurrent}
-                                            nextList1={next}
-                                            prevList1={prev}
-                                            getKey={(group) => group.id}
-                                            renderItem={(group) => group.Nome}
-                                            title1='Grupos disponíveis'
-                                            title2='Grupos do usuário'
+                                        <div className={styles.data}>
+                                            <label className={styles.dataLabel}>
+                                                Perfil
+                                                <p className={styles.requestParam}>{approvedRequest.access_profile}</p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div className={styles.switchContainer}>
+                                        Tipo de usuário
+                                        <Switch
+                                            stateHandler={(value) =>
+                                                setApprovedRequest(prev => ({
+                                                    ...prev,
+                                                    is_abstract: value === 'Abstrato'
+                                                }))
+                                            }                                                
+                                            value={approvedRequest.is_abstract ? 'Abstrato' : 'Pessoal'}
+                                            value1='Abstrato'
+                                            value2='Pessoal'
                                         />
-                                        <div className={styles.buttonContainer}>
-                                            <CustomButton type='submit' text='Ativar conta'/>
-                                        </div>
-                                    </form>
-                                </FormContainer>
-                            </div>
-                        </div>
+                                    </div>
+                                    <DualTableTransfer
+                                        list1={groups}
+                                        setList1={setGroups}
+                                        list2={approvedRequest.groups!}
+                                        setList2={setUserGroups}
+                                        fetchData1={fetchGroups}
+                                        loadingList1={isLoadingGroups}
+                                        currentList1={current}
+                                        setCurrentList1={setCurrent}
+                                        nextList1={next}
+                                        prevList1={prev}
+                                        getKey={(group) => group.id}
+                                        renderItem={(group) => group.Nome}
+                                        title1='Grupos disponíveis'
+                                        title2='Grupos do usuário'
+                                    />
+                                    <div className={styles.buttonContainer}>
+                                        <CustomButton type='submit' text='Ativar conta'/>
+                                    </div>
+                                </form>
+                            </FormContainer>
+                        </Modal>
                     ) : null
                 }
             </div>

@@ -167,7 +167,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
     }, []);
 
     return (
-        <FormContainer title={title} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize o botão de '+' para incluir novas linhas na tabela\n\nUtilize a barra de pesquisa para buscar/vincular disciplinas\n\nOs campos de carga horária devem ser preenchidos como horas-aula"}>
+        <FormContainer title={`${title}º Período`} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize o botão de '+' para incluir novas linhas na tabela\n\nUtilize a barra de pesquisa para buscar/vincular disciplinas\n\nOs campos de carga horária devem ser preenchidos como horas-aula"}>
             <ToastContainer/>
             <div className={styles.formGroup}>
                 <CustomLabel title='Grade Curricular *'>

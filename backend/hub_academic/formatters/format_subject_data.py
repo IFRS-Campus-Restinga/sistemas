@@ -6,15 +6,16 @@ class FormatSubjectData:
     def list_format(subject: Subject):
         return {
             'id': subject.id,
-            'nome': subject.name
+            'nome': subject.name,
+            'código': subject.code
         }
     
     @staticmethod
     def search_format(subject: Subject):
         return {
             'id': subject.id,
-            'title': subject.name,
-            'extraField': subject.shortname
+            'title': f'{subject.name} ({subject.created_at.year})',
+            'extraField': subject.code
         }
     
     @staticmethod
@@ -24,5 +25,5 @@ class FormatSubjectData:
             'name': subject.name,
             'objective': subject.objective,
             'menu': subject.menu,
-            'shortname': subject.shortname
+            'code': subject.code
         }

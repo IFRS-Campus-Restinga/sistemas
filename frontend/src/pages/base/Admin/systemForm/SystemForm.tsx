@@ -170,7 +170,13 @@ const SystemForm = () => {
                 title='Cadastro de Sistema' 
                 formTip={"Preencha os campos obrigatórios (*)\n\nPesquise e adicione alunos à equipe de desenvolvimento do projeto\n\nAdicione grupos de acesso ao projeto usando o sinal de '+' na tabela dinâmica abaixo"}
             >
-            <form className={styles.form} onSubmit={handleSubmit}>
+            <form className={styles.form} onSubmit={handleSubmit}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                    e.preventDefault(); // impede o envio
+                    }
+                }}
+            >
                 <div className={styles.formGroup}>
                     <CustomLabel title='Nome *'>
                         <CustomInput

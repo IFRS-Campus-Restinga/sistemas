@@ -113,12 +113,10 @@ const EventForm = () => {
             if (state.selectedDate) {
                 setEvent({...event, start: state.selectedDate})
                 setIsLoading(false)
+            } else  {
+                fetchEvent()
             }
-        } else if (eventId) {
-            fetchEvent()
         }
-
-        console.log(state)
     }, [state])
 
     return (

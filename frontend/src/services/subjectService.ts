@@ -5,7 +5,7 @@ export interface SubjectInterface {
     name: string
     objective: string
     menu: string
-    shortname: string
+    code: string
 }
 
 const SubjectService = {

@@ -16,7 +16,7 @@ interface ErrorSubjectForm {
     name: string | null
     objective: string | null
     menu: string | null
-    shortname: string | null
+    code: string | null
 }
 
 const SubjectForm = () => {
@@ -27,13 +27,13 @@ const SubjectForm = () => {
         menu: '',
         name: '',
         objective: '',
-        shortname: ''
+        code: ''
     })
     const [errors, setErrors] = useState<ErrorSubjectForm>({
         menu: null,
         name: null,
         objective: null,
-        shortname: null
+        code: null
     })
 
     const fetchSubject = async () => {
@@ -62,7 +62,7 @@ const SubjectForm = () => {
             name: null,
             menu: null,
             objective: null,
-            shortname: null
+            code: null
         }
 
         for (let field in subject) {
@@ -76,8 +76,8 @@ const SubjectForm = () => {
                 case 'objective':
                     newErrors.objective = validateMandatoryStringField(subject.objective)
                     break;
-                case 'shortname':
-                    newErrors.shortname = validateMandatoryStringField(subject.shortname)
+                case 'code':
+                    newErrors.code = validateMandatoryStringField(subject.code)
                     break;
                 default:
                     break;
@@ -138,14 +138,14 @@ const SubjectForm = () => {
                                     error={errors.name}
                                 />
                             </CustomLabel>
-                            <CustomLabel title='Sigla *'>
+                            <CustomLabel title='Código *'>
                                 <CustomInput
                                     type='text'
-                                    maxLength={7}
-                                    value={subject.shortname}
-                                    onChange={(e) =>  setSubject({...subject, shortname: e.target.value})}
-                                    onBlur={() => setErrors({...errors, shortname: validateMandatoryStringField(subject.shortname)})}
-                                    error={errors.shortname}
+                                    maxLength={15}
+                                    value={subject.code}
+                                    onChange={(e) =>  setSubject({...subject, code: e.target.value})}
+                                    onBlur={() => setErrors({...errors, code: validateMandatoryStringField(subject.code)})}
+                                    error={errors.code}
                                 />
                             </CustomLabel>
                         </div>

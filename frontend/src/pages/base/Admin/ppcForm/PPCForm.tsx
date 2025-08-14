@@ -11,9 +11,9 @@ import { AxiosError } from 'axios'
 import { toast, ToastContainer } from 'react-toastify'
 import CustomSearch from '../../../../components/customSearch/CustomSearch'
 import CustomOptions from '../../../../components/customOptions/CustomOptions'
-import clear from '../../../../assets/close-svgrepo-com.svg'
+import clear from '../../../../assets/close-svgrepo-com-white-thick.svg'
 import deleteIcon from '../../../../assets/delete-svgrepo-com.svg'
-import calendarIcon from '../../../../assets/calendar-svgrepo-com-green.svg'
+import editIcon from '../../../../assets/edit-3-svgrepo-com-white.svg'
 import CurriculumTable from '../../../../features/curriculumTable/CurriculumTable'
 import Modal from '../../../../components/modal/Modal'
 import CustomButton from '../../../../components/customButton/CustomButton'
@@ -86,6 +86,8 @@ const PPCForm = () => {
     }
 
     const fetchCourses = async () => {
+        setSearched(true)
+
         try {
             const res = await CourseService.list(1, course, 'search')
 
@@ -98,6 +100,8 @@ const PPCForm = () => {
                         position: 'bottom-center'
                     }
                 )
+            } else {
+                console.error(error)
             }
         }
     }
@@ -248,19 +252,26 @@ const PPCForm = () => {
     useEffect(() => {
         setPeriods(groupByPeriod(PPC.curriculum))
     }, [PPC.curriculum])
+
+    useEffect(() => {
+        setCourseOptions([])
+        setSearched(false)
+    }, [PPC.course])
     
     useEffect(() => {
         if (state) fetchPPC()
-        }, [state])
-
-    useEffect(() => {
-        console.log(curriculum)
-    }, [curriculum])
+    }, [state])
 
     return (
         <FormContainer title={state ? 'Editar PPC' : 'Cadastrar PPC'} width='60%' formTip={"Preencha os campos obrigatórios (*)\n\nUtilize a barra de pesquisa para buscar/vincular o curso so PPC\n\nUtilize o botão de '+' para adicionar novos períodos ao PPC.\n\nClique no respectivo período para editá-lo"}>
             <ToastContainer/>
-            <form className={styles.form} onSubmit={handleSubmit}>
+            <form className={styles.form} onSubmit={handleSubmit}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                    e.preventDefault(); // impede o envio
+                    }
+                }}
+            >
                 <div className={styles.formGroup}>
                     <CustomLabel title='Título *'>
                         <CustomInput
@@ -276,20 +287,26 @@ const PPCForm = () => {
                             {/* Mostra o nome do curso buscado/selecionado */}
                             <CustomSearch
                                 onSearch={fetchCourses}
-                                setSearch={setCourse}
                                 value={course}
+                                setSearch={(param) => {
+                                    setCourse(param)
+                                    if (param.length === 0) {
+                                        setCourseOptions([])
+                                        setSearched(false)
+                                    }
+                                }}
                             />
                             {errors.course ? <ErrorMessage message={errors.course}/> : null}
                             <CustomOptions
-                                onSelect={(option) => {
-                                    // Passa o id do curso selecionado para o form de PPC
-                                    setPPC({...PPC, course: option.id})
-                                    setCourse(option.title)
-                                    setSearched(false)
-                                    setCourseOptions([])
-                                }}
                                 options={courseOptions}
                                 searched={searched}
+                                onSelect={(option) => {
+                                    setPPC(prev => ({
+                                        ...prev,
+                                        course: option.id
+                                    }))
+                                    setCourse(option.title)
+                                }}
                             />
                         </div>
                     </CustomLabel>
@@ -340,17 +357,33 @@ const PPCForm = () => {
                         {errors.period ? <ErrorMessage message={errors.period}/> : null}
                         {
                             periods.map((periodNumber, index) => {
-                                const periodTitle = `${periodNumber}º Período`;
+                                const periodTitle = `${periodNumber}`;
 
                                 return (
                                     <div key={index}>
                                         <div className={styles.periodContainer}>
-                                            <div className={styles.periodHeader}>
-                                                <p className={styles.periodTitle}>{periodTitle}</p>
+                                            <span className={styles.periodTitleContainer}>
+                                                <p className={styles.periodTitle}>
+                                                    {periodNumber}
+                                                </p>
+                                            </span>
+                                            <div
+                                                className={styles.periodActions}
+                                            >
+                                                <img
+                                                    src={editIcon}
+                                                    className={styles.icon}
+                                                    onClick={() =>
+                                                        setPeriodIsOpen((prev) => {
+                                                            const updated = [...prev];
+                                                            updated[index] = true;
+                                                            return updated;
+                                                        })
+                                                    }
+                                                />
                                                 <img
                                                     src={periodAlreadyExists(periodNumber) ? deleteIcon : clear}
-                                                    alt=""
-                                                    className={styles.clearIcon}
+                                                    className={styles.icon}
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         if (periodAlreadyExists(periodNumber)) {
@@ -359,43 +392,43 @@ const PPCForm = () => {
                                                             setPPC((prev) => {
                                                                 // 1. Remove todos os itens do período excluído
                                                                 const filtered = prev.curriculum.filter((item) => item.period !== periodNumber)
-
+    
                                                                 // 2. Descobre os períodos únicos remanescentes e ordena
                                                                 const uniqueSortedPeriods = Array.from(
                                                                     new Set(filtered.map((item) => item.period))
                                                                 ).sort((a, b) => a - b)
-
+    
                                                                 // 3. Cria um mapa antigo -> novo (ex: {3: 2, 4: 3})
                                                                 const periodMap = new Map<number, number>()
                                                                 uniqueSortedPeriods.forEach((oldPeriod, idx) => {
                                                                     periodMap.set(oldPeriod, idx + 1)
                                                                 })
-
+    
                                                                 // 4. Renumera os períodos com base no mapa
                                                                 const renumbered = filtered.map((item) => ({
                                                                     ...item,
                                                                     period: periodMap.get(item.period)!
                                                                 }))
-
+    
                                                                 // 5. Atualiza o estado visual `curriculum`
                                                                 setCurriculum((prevCurriculum) => {
                                                                     // Remove o período visual que foi excluído
                                                                     const filteredVisual = prevCurriculum.filter(
-                                                                        (c) => !c.period.startsWith(`${periodNumber}º`)
+                                                                        (c) => !c.period.startsWith(`${periodNumber}`)
                                                                     )
-
+    
                                                                     // Renumera visualmente de acordo com o novo índice
                                                                     return filteredVisual.map((c, idx) => ({
                                                                         ...c,
-                                                                        period: `${idx + 1}º Período`
+                                                                        period: `${idx + 1}`
                                                                     }))
                                                                 })
-
+    
                                                                 // 6. Atualiza o estado dos modais abertos
                                                                 setPeriodIsOpen((prevOpen) => {
                                                                     return uniqueSortedPeriods.map((_, idx) => prevOpen[idx] ?? false)
                                                                 })
-
+    
                                                                 // 7. Retorna o novo estado de `PPC`
                                                                 return {
                                                                     ...prev,
@@ -406,22 +439,9 @@ const PPCForm = () => {
                                                     }}
                                                 />
                                             </div>
-
-                                            <div
-                                                className={styles.period}
-                                                onClick={() =>
-                                                    setPeriodIsOpen((prev) => {
-                                                        const updated = [...prev];
-                                                        updated[index] = true;
-                                                        return updated;
-                                                    })
-                                                }
-                                            >
-                                                <img src={calendarIcon} alt="" className={styles.calendarIcon} />
-                                                {errors.curriculum[index] ? (
-                                                    <ErrorMessage message={errors.curriculum[index]} align="center" />
-                                                ) : null}
-                                            </div>
+                                            {errors.curriculum[index] ? (
+                                                <ErrorMessage message={errors.curriculum[index]} align="center" />
+                                            ) : null}   
                                         </div>
 
                                         {periodIsOpen[index] && (
@@ -441,7 +461,7 @@ const PPCForm = () => {
                                                     title={periodTitle}
                                                     period={Number(periodNumber)}
                                                     curriculum={PPC.curriculum.filter((c) => c.period === periodNumber)}
-                                                    subjects={curriculum.find((c) => c.period.includes(periodTitle))!.subjects}
+                                                    subjects={curriculum.find((c) => c.period.includes(`${periodNumber}`))!.subjects}
                                                     setSubjects={(updatedSubjects) => {
                                                         setCurriculum((prev) => {
                                                             const updated = prev.map((c) => {

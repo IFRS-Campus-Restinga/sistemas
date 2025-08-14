@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as BigEvent, type View } from 'react-big-calendar'
 import { useEffect, useState, type CSSProperties } from 'react'
-import { format, parse, startOfWeek, getDay } from 'date-fns'
+import { format, parse, getDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import EventService, { type EventInterface } from '../../../../services/eventService'
 import CalendarService, { type CalendarInterface } from '../../../../services/calendarService'
@@ -109,8 +109,6 @@ const Calendar = () => {
     const start = new Date(calendar!.start) 
     const end = new Date(calendar!.end)
 
-    console.log(date < end && date > start)
-
     if (date < end && date > start) setCurrentDate(date)
   }
 
@@ -136,7 +134,13 @@ const Calendar = () => {
   const handleSelectEvent = (event: BigCalendarEvent) => {
     // Se quiser bloquear edição de eventos passados, cheque aqui
     if (event.start! >= today) {
-      navigate(`eventos/${event.id}/edit/`)
+      navigate(`eventos/${event.id}/edit/`, {
+        state: {
+          calendarId: state,
+          calendarStart: calendar?.start,
+          calendarEnd: calendar?.end
+        },
+      })
     }
   }
   

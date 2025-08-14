@@ -7,9 +7,9 @@ import CustomLoading from '../../components/customLoading/CustomLoading';
 import doubleArrow from '../../assets/double-arrow-right-svgrepo-com-white.svg'
 import Actions from '../actions/Actions';
 import dots from '../../assets/three-dots-line-svgrepo-com-white.svg'
+import x from '../../assets/close-svgrepo-com-white-thick.svg'
 import Modal from '../modal/Modal';
 import FormContainer from '../formContainer/FormContainer';
-import CustomLabel from '../customLabel/CustomLabel';
 
 interface SystemInterface {
     id: string
@@ -42,6 +42,8 @@ const Menu = () => {
             const res = await SystemService.list(user.id!, currentPage)
             
             setSystems(res.data.results)
+            setNext(res.data.next ? currentPage + 1 : null)
+            setPrev(res.data.next ? currentPage - 1 : null)
         } catch (error) {
             console.error(error)
         } finally {
@@ -59,7 +61,7 @@ const Menu = () => {
 
     useEffect(() => {
         fetchSystems()
-    }, [])
+    }, [currentPage])
 
     if (isLoading) return (
         <div style={{margin: 'auto'}}>
@@ -74,7 +76,7 @@ const Menu = () => {
             <section className={styles.menu}>
                 {
                     prev ? (
-                        <button className={styles.nextButton}>
+                        <button className={styles.nextButton} onClick={() => setCurrentPage((prev) => prev - 1)}>
                             <img src={doubleArrow} alt="página anterior" className={styles.icon}/>
                         </button>
                     ) : null
@@ -86,11 +88,12 @@ const Menu = () => {
                             <button className={styles.systemButton} style={{backgroundColor: system.is_active ? "006b3f" : "#ccc"}} onClick={() => redirectToSystem(system)}>
                                 <p className={styles.systemTitle}>{system.name}</p>
                                 <Actions 
-                                    iconSrc={dots} 
+                                    seeActionsIcon={dots}
+                                    collapseActionsIcon={x} 
                                     itemId={system.id}
                                     onView={handleSystemDetails(system) ? () => setIsOpen(true) : undefined}
                                     onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
-                                    onDelete={handleSystemDetails(system) ? () => setIsOpen(true) : undefined}
+                                    onDelete={user.groups?.includes('admin') ? () => setIsOpen(true) : undefined}
                                 />
                             </button>
                             {
@@ -113,7 +116,7 @@ const Menu = () => {
                 </div>
                 {
                     next ? (
-                        <button className={styles.nextButton}>
+                        <button className={styles.nextButton} onClick={() => setCurrentPage((prev) => prev + 1)}>
                             <img src={doubleArrow} alt="próxima página" className={styles.icon}/>
                         </button>
                     ) : null

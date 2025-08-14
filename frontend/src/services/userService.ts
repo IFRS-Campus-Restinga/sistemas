@@ -20,7 +20,7 @@ export interface RequestInterface {
     username: string
     email: string
     is_abstract: boolean
-    accessProfile: 'aluno' | 'servidor' | 'convidado' | ''
+    access_profile: 'aluno' | 'servidor' | 'convidado' | ''
     groups: RequestGroup[]
 }
 

@@ -55,8 +55,16 @@
 }
 
 .periodContainer {
-    color: #767676;
+    background-color: #006b3f;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     width: 100px;
+    border-radius: 8px;
+    padding: 8px;
+    gap: 8px;
 }
 
 .periodHeader {
@@ -65,25 +73,29 @@
     align-items: center;
 }
 
-.periodTitle {
-    width: 100%;
+.periodTitleContainer {
+    display: flex;
+    border: 2px solid white;
+    border-radius: 50%;
+    font-size: 30px;
+    font-weight: 700;
+    padding: 5px;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
 }
 
-.period {
-    position: relative;
-    width: 100%;
-    height: 100px;
-
-    &:hover {
-        cursor: pointer;
-    }
+.periodActions {
+    width: max-content;
+    display: flex;
+    padding: 5px;
+    border-radius: 5px;
+    gap: 8px;
 }
 
-.clearIcon {
-    margin-left: auto;
-    width: 15px;
-    height: 15px;
-    border: 1px solid #767676;
+.icon {
+    width: 20px;
+    height: 20px;
+    border: 1px solid white;
     border-radius: 50%;
     padding: 3px;
 

@@ -9,6 +9,7 @@ import { compareDates, validateMandatoryStringField } from '../../../../utils/va
 import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import { toast, ToastContainer } from 'react-toastify'
+import CustomLoading from '../../../../components/customLoading/CustomLoading'
 
 interface CalendarFormErrors {
     title: string | null
@@ -108,67 +109,73 @@ const CalendarForm = () => {
     return (
         <FormContainer title='Cadastro de Calendário' formTip="Preencha os campos obrigatórios (*)" width='50%'>
             <ToastContainer/>
-            <form onSubmit={handleSubmit} className={styles.form}>
-                <CustomLabel title='Título *'>
-                    <CustomInput
-                        type='text'
-                        value={calendar.title}
-                        onChange={(e) => setCalendar({...calendar, title: e.target.value})}
-                        onBlur={() => setErrors({...errors, title: validateMandatoryStringField(calendar.title)})}
-                        error={errors.title}
-                        max={20}
-                    />
-                </CustomLabel>
-                <div className={styles.formGroup}>
-                    <CustomLabel title='Data início *'>
-                        <CustomInput
-                            type='date'
-                            value={calendar.start}
-                            onChange={(e) => setCalendar({...calendar, start: e.target.value})}
-                            onBlur={() => setErrors({...errors, start: validateMandatoryStringField(calendar.start)})}
-                            error={errors.start}
-                        />
-                    </CustomLabel>
-                    <CustomLabel title='Data encerramento *'>
-                        <CustomInput
-                            type='date'
-                            value={calendar.end}
-                            onChange={(e) => setCalendar({...calendar, end: e.target.value})}
-                            onBlur={() => setErrors({...errors, end: validateMandatoryStringField(calendar.end)})}
-                            error={errors.end}
-                            min={calendar.start}
-                        />
-                    </CustomLabel>
-                </div>
-                <div className={styles.formGroup}>
-                    <span className={styles.inputContainer}>
-                        <CustomLabel title='Status *'>
-                            <CustomSelect
-                                options={[
-                                    {
-                                        title: 'Ativo',
-                                        value: 'Ativo',
-                                    },
-                                    {
-                                        title: 'Suspenso',
-                                        value: 'Suspenso',
-                                    },
-                                    {
-                                        title: 'Cancelado',
-                                        value: 'Cancelado',
-                                    },
-                                ]}
-                                value={calendar.end}
-                                onChange={(e) => setCalendar({...calendar, end: e.target.value})}
-                                onBlur={() => setErrors({...errors, end: validateMandatoryStringField(calendar.end)})}
+            {
+                isLoading ? (
+                    <CustomLoading/>
+                ) : (
+                    <form onSubmit={handleSubmit} className={styles.form}>
+                        <CustomLabel title='Título *'>
+                            <CustomInput
+                                type='text'
+                                value={calendar.title}
+                                onChange={(e) => setCalendar({...calendar, title: e.target.value})}
+                                onBlur={() => setErrors({...errors, title: validateMandatoryStringField(calendar.title)})}
+                                error={errors.title}
+                                max={20}
                             />
-                    </CustomLabel>
-                    </span>
-                </div>
-                <span className={styles.buttonContainer}>
-                    <CustomButton text={state ? 'Salvar alteracoes' : 'Cadastrar'} type='submit'/>
-                </span>
-            </form>
+                        </CustomLabel>
+                        <div className={styles.formGroup}>
+                            <CustomLabel title='Data início *'>
+                                <CustomInput
+                                    type='date'
+                                    value={calendar.start}
+                                    onChange={(e) => setCalendar({...calendar, start: e.target.value})}
+                                    onBlur={() => setErrors({...errors, start: validateMandatoryStringField(calendar.start)})}
+                                    error={errors.start}
+                                />
+                            </CustomLabel>
+                            <CustomLabel title='Data encerramento *'>
+                                <CustomInput
+                                    type='date'
+                                    value={calendar.end}
+                                    onChange={(e) => setCalendar({...calendar, end: e.target.value})}
+                                    onBlur={() => setErrors({...errors, end: validateMandatoryStringField(calendar.end)})}
+                                    error={errors.end}
+                                    min={calendar.start}
+                                />
+                            </CustomLabel>
+                        </div>
+                        <div className={styles.formGroup}>
+                            <span className={styles.inputContainer}>
+                                <CustomLabel title='Status *'>
+                                    <CustomSelect
+                                        options={[
+                                            {
+                                                title: 'Ativo',
+                                                value: 'Ativo',
+                                            },
+                                            {
+                                                title: 'Suspenso',
+                                                value: 'Suspenso',
+                                            },
+                                            {
+                                                title: 'Cancelado',
+                                                value: 'Cancelado',
+                                            },
+                                        ]}
+                                        value={calendar.end}
+                                        onChange={(e) => setCalendar({...calendar, end: e.target.value})}
+                                        onBlur={() => setErrors({...errors, end: validateMandatoryStringField(calendar.end)})}
+                                    />
+                            </CustomLabel>
+                            </span>
+                        </div>
+                        <span className={styles.buttonContainer}>
+                            <CustomButton text={state ? 'Salvar alteracoes' : 'Cadastrar'} type='submit'/>
+                        </span>
+                    </form>
+                )
+            }
         </FormContainer>
     )
 }

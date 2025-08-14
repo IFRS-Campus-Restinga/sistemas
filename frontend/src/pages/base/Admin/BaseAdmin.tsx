@@ -2,9 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom"
 import Base from "../../../components/base/Base"
 import CustomNavBar from "../../../components/customNavBar/CustomNavBar"
 import userIcon from '../../../assets/user-svgrepo-com-white.svg'
-import calendar from '../../../assets/calendar-svgrepo-com-white.svg'
 import books from '../../../assets/books-fill-svgrepo-com-white.svg'
-import home from '../../../assets/home-svgrepo-com-white.svg'
 import { useEffect, useState } from "react"
 import { useSetUser, useUser } from "../../../store/userHooks"
 import { hasGroup } from "../../../utils/hasGroup"

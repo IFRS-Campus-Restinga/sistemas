@@ -10,7 +10,6 @@ import CustomInput from '../../../../components/customInput/CustomInput'
 import { validateMandatoryArrayField, validateMandatoryStringField, validateMandatoryUUIDField } from '../../../../utils/validations/generalValidations'
 import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import UserService from '../../../../services/userService'
-import search from '../../../../assets/search-alt-svgrepo-com.svg'
 import clear from '../../../../assets/close-svgrepo-com.svg'
 import CustomOptions from '../../../../components/customOptions/CustomOptions'
 import tableStyles from '../../../../components/table/Table.module.css'
@@ -55,7 +54,7 @@ const CourseForm = () => {
         setSearched(true)
 
         try {
-            const res =  await UserService.listByGroup('coord', undefined, undefined, 'search', true)
+            const res =  await UserService.listByGroup('coord', coordSearch, undefined, 'search', true)
 
             setCoordOptions(res.data.results)
         } catch (error) {
@@ -187,6 +186,11 @@ const CourseForm = () => {
     }
 
     useEffect(() => {
+        setSearched(false)
+        setCoordOptions([])
+    }, [course.coord])
+
+    useEffect(() => {
         if (state) {
             fetchCourse()
         } else {
@@ -201,7 +205,13 @@ const CourseForm = () => {
                 isLoading ? (
                     <CustomLoading/>
                 ) : (
-                    <form className={styles.form} onSubmit={handleSubmit}>
+                    <form className={styles.form} onSubmit={handleSubmit}  
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                            e.preventDefault();
+                            }
+                        }}
+                    >
                         <div className={styles.formGroup}>
                             <CustomLabel title='Nome *'>
                                 <CustomInput
@@ -269,16 +279,26 @@ const CourseForm = () => {
                                 <div className={styles.searchContainer}>
                                     <CustomSearch
                                         onSearch={fetchCoord}
-                                        setSearch={(param) => setCoordSearch(param)}
-                                        setSearched={setSearched}
                                         value={coordSearch}
+                                        setSearch={(param) => {
+                                            setCoordSearch(param)
+                                            if (param.length === 0) {
+                                                setCoordOptions([])
+                                                setSearched(false)
+                                            }
+                                        }}
                                     />
                                     <CustomOptions
                                         options={coordOptions}
                                         onSelect={(option) => {
-                                            setCourse({...course, coord: option.id})
+                                            setCourse((prev) => {
+                                                const updated = prev
+
+                                                updated.coord = option.id
+
+                                                return updated
+                                            })
                                             setCoordSearch(option.title)
-                                            setCoordOptions([])
                                         }}
                                         searched={searched}
                                     />

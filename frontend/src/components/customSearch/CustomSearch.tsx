@@ -16,10 +16,7 @@ const CustomSearch = ({value, setSearch, onSearch, showClear}: CustomSearchProps
             <input
                 type='text'
                 value={value}
-                onChange={(e) => {
-                    setSearch(e.target.value)
-                    onSearch()
-                }}
+                onChange={(e) => {setSearch(e.target.value)}}
                 className={styles.searchInput}
                 onKeyDown={(e) => e.key === 'Enter' ? onSearch() : null}
             />

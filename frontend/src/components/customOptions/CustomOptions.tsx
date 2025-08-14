@@ -9,6 +9,7 @@ interface CustomOptionsProps {
 
 
 const CustomOptions = ({ options, onSelect, searched }: CustomOptionsProps) => {
+
     return (
         <ul className={styles.optionsContainer}>
             {
