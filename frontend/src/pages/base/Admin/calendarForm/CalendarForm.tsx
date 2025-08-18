@@ -8,7 +8,7 @@ import CustomInput from '../../../../components/customInput/CustomInput'
 import { compareDates, validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
 import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import CustomButton from '../../../../components/customButton/CustomButton'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
 
 interface CalendarFormErrors {
@@ -108,7 +108,6 @@ const CalendarForm = () => {
 
     return (
         <FormContainer title='Cadastro de Calendário' formTip="Preencha os campos obrigatórios (*)" width='50%'>
-            <ToastContainer/>
             {
                 isLoading ? (
                     <CustomLoading/>

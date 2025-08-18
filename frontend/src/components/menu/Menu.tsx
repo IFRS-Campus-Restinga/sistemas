@@ -72,7 +72,11 @@ const Menu = () => {
     return (
         <>
             <h2 className={styles.h2}>Sistemas</h2>
-            <Link to={'/session/admin/sistemas/cadastro'} className={styles.addButton}>+</Link>
+            {
+                user.groups?.includes('admin') ? (
+                    <Link to={'/session/admin/sistemas/cadastro'} className={styles.addButton}>+</Link>
+                ) : null
+            }
             <section className={styles.menu}>
                 {
                     prev ? (
@@ -87,14 +91,18 @@ const Menu = () => {
                             <>
                             <button className={styles.systemButton} style={{backgroundColor: system.is_active ? "006b3f" : "#ccc"}} onClick={() => redirectToSystem(system)}>
                                 <p className={styles.systemTitle}>{system.name}</p>
-                                <Actions 
-                                    seeActionsIcon={dots}
-                                    collapseActionsIcon={x} 
-                                    itemId={system.id}
-                                    onView={handleSystemDetails(system) ? () => setIsOpen(true) : undefined}
-                                    onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
-                                    onDelete={user.groups?.includes('admin') ? () => setIsOpen(true) : undefined}
-                                />
+                                {
+                                    handleSystemDetails(system) ? (
+                                        <Actions 
+                                            seeActionsIcon={dots}
+                                            collapseActionsIcon={x} 
+                                            itemId={system.id}
+                                            onView={() => setIsOpen(true)}
+                                            onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
+                                            onDelete={user.groups?.includes('admin') ? () => setIsOpen(true) : undefined}
+                                        />
+                                    ) : null
+                                }
                             </button>
                             {
                                 isOpen ? (

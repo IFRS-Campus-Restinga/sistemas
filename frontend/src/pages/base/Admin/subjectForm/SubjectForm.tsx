@@ -2,7 +2,7 @@ import { useLocation } from 'react-router-dom'
 import styles from './SubjectForm.module.css'
 import { useEffect, useState } from 'react'
 import SubjectService, { type SubjectInterface } from '../../../../services/subjectService'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import { AxiosError } from 'axios'
 import { validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
 import FormContainer from '../../../../components/formContainer/FormContainer'
@@ -121,7 +121,6 @@ const SubjectForm = () => {
 
     return (
         <FormContainer title={state ? 'Editar Disciplina' : 'Cadastrar Disciplina'} formTip={"Preencha os campos obrigatórios (*)"}>
-            <ToastContainer/>
             {
                 isLoading ? (
                     <CustomLoading/>

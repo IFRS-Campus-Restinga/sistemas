@@ -3,7 +3,7 @@ import styles from './GroupForm.module.css'
 import { useEffect, useState } from 'react'
 import GroupService, { type Group } from '../../../../services/groupService'
 import FormContainer from '../../../../components/formContainer/FormContainer'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import PermissionService, {type Permissions} from '../../../../services/permissionService'
 import DualTableTransfer from '../../../../components/table/tablesComponents/DualTableTransfer'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
@@ -190,7 +190,6 @@ const GroupForm = () => {
 
     return (
         <FormContainer title={`${state ? 'Editar' : 'Cadastrar'} Grupo`} formTip={"Preencha os campos obrigatórios (*)\n\nVincule ou Desvincule permissões ao grupo utilizando as tabelas abaixo."}>
-            <ToastContainer/>
             {
                 isLoading ? (
                     <CustomLoading/>

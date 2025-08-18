@@ -8,11 +8,11 @@ import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import { validateMandatoryArrayField, validateMandatoryStringField, validateMandatoryUUIDField } from '../../../../utils/validations/generalValidations'
 import CourseService from '../../../../services/courseService' 
 import { AxiosError } from 'axios'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import CustomSearch from '../../../../components/customSearch/CustomSearch'
 import CustomOptions from '../../../../components/customOptions/CustomOptions'
 import clear from '../../../../assets/close-svgrepo-com-white-thick.svg'
-import deleteIcon from '../../../../assets/delete-svgrepo-com.svg'
+import deleteIcon from '../../../../assets/delete-svgrepo-com-white.svg'
 import editIcon from '../../../../assets/edit-3-svgrepo-com-white.svg'
 import CurriculumTable from '../../../../features/curriculumTable/CurriculumTable'
 import Modal from '../../../../components/modal/Modal'
@@ -264,7 +264,6 @@ const PPCForm = () => {
 
     return (
         <FormContainer title={state ? 'Editar PPC' : 'Cadastrar PPC'} width='60%' formTip={"Preencha os campos obrigatórios (*)\n\nUtilize a barra de pesquisa para buscar/vincular o curso so PPC\n\nUtilize o botão de '+' para adicionar novos períodos ao PPC.\n\nClique no respectivo período para editá-lo"}>
-            <ToastContainer/>
             <form className={styles.form} onSubmit={handleSubmit}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -465,7 +464,7 @@ const PPCForm = () => {
                                                     setSubjects={(updatedSubjects) => {
                                                         setCurriculum((prev) => {
                                                             const updated = prev.map((c) => {
-                                                                if (c.period === periodTitle) {
+                                                                if (c.period.includes(`${periodTitle}`)) {
                                                                     return {
                                                                         ...c,
                                                                         subjects: updatedSubjects

@@ -1,6 +1,5 @@
 import { Outlet, useNavigate } from "react-router-dom"
 import Base from "../../../components/base/Base"
-import styles from './BaseMember.module.css'
 import { useEffect, useState } from "react"
 import { useSetUser, useUser } from "../../../store/userHooks"
 import { hasGroup } from "../../../utils/hasGroup"
@@ -25,7 +24,7 @@ const BaseMember = () => {
             if (error instanceof AxiosError) {
                 if (error?.response?.status === 401) {
                     console.error("Token inválido ou refresh falhou, redirecionando.")
-                    redirect('/')
+                    redirect('/session')
                 } else {
                     console.error("Erro inesperado ao buscar usuário:", error)
                 }

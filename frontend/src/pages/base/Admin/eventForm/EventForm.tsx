@@ -4,7 +4,7 @@ import styles from './EventForm.module.css'
 import { useEffect, useState } from 'react'
 import EventService, { EventCategories, EventTypes, type EventInterface } from '../../../../services/eventService'
 import { AxiosError } from 'axios'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import { compareDates, validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
@@ -121,7 +121,6 @@ const EventForm = () => {
 
     return (
         <FormContainer title='Cadastro de Evento' formTip="Preencha os campos obrigatórios (*)" width='50%'>
-            <ToastContainer/>
             {
                 isLoading ? (
                     <CustomLoading/>

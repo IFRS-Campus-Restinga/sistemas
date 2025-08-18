@@ -129,7 +129,7 @@ const routes = createBrowserRouter([
         ]
     },
     {
-        path: '/auth/membro',
+        path: '/session/membro',
         element: <BaseMember />,
         children: [
             {

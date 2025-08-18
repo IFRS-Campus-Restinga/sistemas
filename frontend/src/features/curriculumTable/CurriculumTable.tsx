@@ -168,7 +168,6 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     return (
         <FormContainer title={`${title}º Período`} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize o botão de '+' para incluir novas linhas na tabela\n\nUtilize a barra de pesquisa para buscar/vincular disciplinas\n\nOs campos de carga horária devem ser preenchidos como horas-aula"}>
-            <ToastContainer/>
             <div className={styles.formGroup}>
                 <CustomLabel title='Grade Curricular *'>
                     {
@@ -207,7 +206,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                     <div className={styles.searchContainer}>
                                                                         {/* Passa o nome para o campo de pesquisa */}
                                                                         <CustomSearch
-                                                                            value={subjects[index].name ?? ''}
+                                                                            value={subjects[index].name}
                                                                             onSearch={() => fetchSubjects(index)}
                                                                             setSearch={(param) => {
                                                                                 const updated = [...subjects]

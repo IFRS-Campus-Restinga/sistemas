@@ -27,7 +27,7 @@ const BaseAdmin = () => {
             if (error instanceof AxiosError) {
                 if (error?.response?.status === 401) {
                     console.error("Token inválido ou refresh falhou, redirecionando.")
-                    redirect('/')
+                    redirect('/session')
                 } else {
                     console.error("Erro inesperado ao buscar usuário:", error)
                 }

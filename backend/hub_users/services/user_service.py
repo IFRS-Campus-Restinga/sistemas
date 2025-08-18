@@ -40,6 +40,7 @@ class UserService:
 
             if access_profile == 'aluno':
                 UserService.add_group(user, 'aluno')
+                UserService.add_group(user, 'membro')
 
             if password and created:
                 PasswordService.create(user, password)

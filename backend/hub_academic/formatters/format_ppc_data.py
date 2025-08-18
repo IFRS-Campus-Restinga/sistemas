@@ -40,7 +40,7 @@ class FormatPPCData:
         for ps in ppc_subjects:
             curriculum_by_period[ps.period].append({
                 'name': ps.subject.name,
-                'preRequisits': [pr.shortname for pr in ps.pre_requisits.all()]
+                'preRequisits': [pr.code for pr in ps.pre_requisits.all()]
             })
 
         result = []

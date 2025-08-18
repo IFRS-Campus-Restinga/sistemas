@@ -4,7 +4,7 @@ import styles from './CourseForm.module.css'
 import CourseService, { type CourseInterface } from '../../../../services/courseService'
 import { useLocation } from 'react-router-dom'
 import { AxiosError } from 'axios'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import { validateMandatoryArrayField, validateMandatoryStringField, validateMandatoryUUIDField } from '../../../../utils/validations/generalValidations'
@@ -200,7 +200,6 @@ const CourseForm = () => {
 
     return (
         <FormContainer title={state ? 'Editar Curso' : 'Cadastrar Curso'} formTip={"Preencha os campos obrigatórios (*)\n\nUse o botão '+' abaixo da tabela\npara adicionar turmas."}>
-            <ToastContainer/>
             {
                 isLoading ? (
                     <CustomLoading/>

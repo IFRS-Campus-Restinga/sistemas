@@ -14,7 +14,7 @@ import CustomButton from '../../../../components/customButton/CustomButton'
 import { SystemService, type System } from '../../../../services/systemService'
 import DynamicTable from '../../../../components/table/tablesComponents/DynamicTable'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import { AxiosError } from 'axios'
 
@@ -165,7 +165,6 @@ const SystemForm = () => {
 
     return (
         <section className={styles.section}>
-            <ToastContainer/>
             <FormContainer
                 title='Cadastro de Sistema' 
                 formTip={"Preencha os campos obrigatórios (*)\n\nPesquise e adicione alunos à equipe de desenvolvimento do projeto\n\nAdicione grupos de acesso ao projeto usando o sinal de '+' na tabela dinâmica abaixo"}
