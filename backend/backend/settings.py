@@ -25,9 +25,7 @@ SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
-LOGIN_URL = os.getenv('LOGIN_URL')
-LOGIN_REDIRECT_URL = os.getenv('LOGIN_REDIRECT_URI')
-
+BASE_SYSTEM_URL = os.getenv('BASE_SYSTEM_URL')
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -40,16 +38,19 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:3000",
+    "http://localhost:3000",
     "http://127.0.0.1:5173",
 ]
 
 CSRF_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
+    "http://localhost:3000",
     "http://127.0.0.1:5173",
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
+    "http://localhost:3000",
     "http://127.0.0.1:5173",
 ]
 

@@ -35,8 +35,13 @@ class CalendarService:
 
     @staticmethod
     def list_calendars(request):
+        status = request.GET.get('status', None)
+
         calendars = Calendar.objects.filter(title__icontains=request.GET.get('search', ''))
 
+        if status:
+            calendars = calendars.filter(status=status)
+        
         if not calendars.exists():
             paginator = CalendarPagination()
             paginated_result = paginator.paginate_queryset([], request)

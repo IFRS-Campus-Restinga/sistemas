@@ -72,7 +72,7 @@ class UserService:
     @staticmethod
     def list_by_group(request, group_name):
         search_param = request.GET.get('search')
-        active = True if request.GET.get('active') == 'true' else None
+        active = True if request.GET.get('active') == 'true' else False
 
         if search_param:
             users = CustomUser.objects.get_by_group_and_param(group_name, search_param, active)

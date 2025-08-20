@@ -15,6 +15,7 @@ urlpatterns = [
     # subject views
     path('subjects/create/', create_subject),
     path('subjects/get/', list_subject),
+    path('subjects/get/course/<str:course_id>/', get_subject_by_course),
     path('subjects/get/<str:subject_id>/', get_subject),
     path('subjects/edit/<str:subject_id>/', edit_subject),
 

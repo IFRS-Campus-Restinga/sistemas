@@ -2,7 +2,7 @@ from django.urls import path
 from hub_users.views.user_views import *
 
 urlpatterns = [
-    # user/
+    # users/
     path('create/', create_account_visitor),
     path('data/', get_user_data),
     path('get/group/<str:group_name>/', list_users_by_group),

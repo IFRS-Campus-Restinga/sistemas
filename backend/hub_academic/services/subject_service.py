@@ -2,6 +2,7 @@ import uuid
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..models.subject import Subject
+from ..models.ppc import Curriculum
 from ..serializers.subject_serializer import SubjectSerializer
 from rest_framework.pagination import PageNumberPagination
 
@@ -28,6 +29,17 @@ class SubjectService:
 
         return serializer.data
     
+    @staticmethod
+    def get_by_course(request, course_id):
+        subjects = Curriculum.objects.filter(
+            ppc__course=uuid.UUID(course_id),
+            subject__name__icontains=request.GET.get('search', '')
+        )
+
+        serializer = SubjectSerializer(subjects, many=True, context={'request', request})
+
+        return serializer.data
+
     @staticmethod
     def list(request):
         subjects = Subject.objects.filter(name__icontains=request.GET.get('search', ''))

@@ -92,7 +92,11 @@ const GroupForm = () => {
         setIsLoadingAvailablePermissions(true)
 
         try {
-            const res = await PermissionService.notAssignedTo(state, pageList1)
+            const req = state ?
+            PermissionService.notAssignedTo(state, pageList1) :
+             PermissionService.list(pageList1)
+
+            const res = await req
 
             setAvailablePermissions((prev) => [...prev, ...res.data.results])
 
