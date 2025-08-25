@@ -7,6 +7,8 @@
 .formGroup {
     display: flex;
     gap: 15px;
+    justify-content: center;
+    align-items: center;
 }
 
 .container {
@@ -116,4 +118,78 @@
 
 .buttonContainer {
     margin: 0px auto 0px auto;
+}
+
+.fileLabel {
+    border-radius: 8px;
+    background-color: #006b3f;
+    color: white;
+    font-weight: 600;
+    padding: 8px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin: 20px auto 20px auto;
+
+    &:hover {
+        cursor: pointer;
+        transform: scale(1.05);
+        transition: all ease-in-out 0.3s;
+    }
+}
+
+.fileInput {
+    display: none;
+}
+
+.uploadIcon {
+    width: 20px;
+    aspect-ratio: 1/1;
+}
+
+.uploadContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.uploadActive, .uploadInactive {
+    width: 15px;
+    height: 15px;
+    border-radius: 2px;
+    border: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    &:focus {
+     outline: none;   
+    }
+}
+
+.uploadActive {
+    background-color: #006b3f;
+}
+
+.uploadInactive {
+    background-color: #ccc;
+}
+
+.uploadMessageActive, .uploadMessageInactive {
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.uploadMessageInactive {
+    color: #ccc;
+}
+
+.uploadMessageActive {
+    color: #006b3f;
+}
+
+.uploadBtnIcon {
+    width: 12px;
 }

@@ -39,7 +39,7 @@ def get_subject(request, subject_id):
     
 @api_view(['GET'])
 @has_permissions(['view_subject'])
-def get_subject_by_course(request, course_id):
+def get_subjects_by_course(request, course_id):
     try:
         subjects = SubjectService.get_by_course(request, course_id)
 

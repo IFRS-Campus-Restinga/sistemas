@@ -9,7 +9,7 @@ from ..services.ppc_service import PPCService
 @has_permissions(['add_ppc'])
 def create_ppc(request):
     try:
-        PPCService.create(request.data)
+        PPCService.create(request)
 
         return Response({'message': 'PPC cadastrado com sucesso'}, status=status.HTTP_200_OK)
     except serializers.ValidationError as e:

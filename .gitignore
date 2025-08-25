@@ -136,6 +136,7 @@ ENV/
 env.bak/
 venv.bak/
 credentials/
+data_to_import/
 
 # Spyder project settings
 .spyderproject

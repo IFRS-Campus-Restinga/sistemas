@@ -26,6 +26,8 @@ class CourseSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('O request não foi fornecido no contexto do serializer.')
 
         data_format = request.GET.get('data_format')
+        course_classes = request.GET.get('course_classes')
+
         if not data_format:
             raise serializers.ValidationError('O parâmetro data_format é obrigatório.')
 
@@ -35,6 +37,6 @@ class CourseSerializer(serializers.ModelSerializer):
             case 'details':
                 return FormatCourseData.details_format(instance)
             case 'search':
-                return FormatCourseData.search_format(instance)
+                return FormatCourseData.search_format(instance, course_classes)
             case _:
                 raise serializers.ValidationError('data_format inválido')

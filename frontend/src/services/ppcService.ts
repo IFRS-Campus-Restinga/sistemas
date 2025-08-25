@@ -19,12 +19,20 @@ export interface PPCInterface {
     id?: string
     title: string
     course: string
-    curriculum: CurriculumInterface[]
+    curriculum: CurriculumInterface[] | File
 }
 
 const PPCService = {
     create: async (params: PPCInterface) => {
-        return api.post('api/academic/ppcs/create/', params)
+        return api.post(
+            'api/academic/ppcs/create/',
+            params,
+            {
+                headers : {
+                    "Content-Type": "multipart/form-data"
+                }
+            }
+        )
     },
 
     list: async (page: number, search: string) => {

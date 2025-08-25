@@ -42,12 +42,12 @@ class CourseService:
     
     @staticmethod
     def list(request):
-        modality = request.GET.get('modality', None)
+        category = request.GET.get('category', None)
 
         courses = Course.objects.filter(name__icontains=request.GET.get('search', ''))
 
-        if modality:
-            courses = courses.filter(modality=modality)
+        if category:
+            courses = courses.filter(category=category)
 
         if not courses.exists():
             paginator = CoursePagination()

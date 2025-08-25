@@ -12,11 +12,24 @@ class FormatCourseData:
         }
     
     @staticmethod
-    def search_format(course: Course):
-        return {
-            'id': course.id,
-            'title': course.name,
-        }
+    def search_format(course: Course, course_classes: str):
+        if course_classes == 'include':
+            return {
+                'id': course.id,
+                'title': course.name,
+                'course_classes': [
+                    {
+                        'id': course_class.id,
+                        'title': course_class.number,
+                    }
+                    for course_class in course.course_class.all()
+                ]
+            }
+        else:
+            return {
+                'id': course.id,
+                'title': course.name,
+            }
     
     @staticmethod
     def details_format(course: Course):

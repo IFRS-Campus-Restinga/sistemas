@@ -5,8 +5,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..models.ppc import PPC, Curriculum
 from ..models.subject import Subject
-from ..serializers.ppc_serializer import PPCSerializer, CurriculumSerializer
+from ..serializers.ppc_serializer import PPCSerializer
 from rest_framework.pagination import PageNumberPagination
+from ..services.file_service import FileService
 
 
 class PPCPagination(PageNumberPagination):
@@ -17,14 +18,27 @@ class PPCPagination(PageNumberPagination):
 class PPCService:
     @staticmethod
     @transaction.atomic
-    def create(ppc_data):
-        serializer = PPCSerializer(data=ppc_data)
+    def create(request):
+        ppc_data = request.data.copy()
+
+        curriculum_file = request.FILES.get("curriculum")
+
+        curriculum_list = ppc_data.get('curriculum')
+
+        if curriculum_file:
+            curriculum_list = FileService.read_file(curriculum_file, ppc_data.get('course'))
+
+        serializer = PPCSerializer(data={
+            "title": ppc_data.get('title'),
+            "course": ppc_data.get('course'),
+            "curriculum": curriculum_list
+        })
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
-
-        return serializer.save()
-
+        
+        serializer.save()
+    
     @staticmethod
     def get(request, ppc_id):
         ppc = get_object_or_404(PPC, pk=uuid.UUID(ppc_id))

@@ -8,12 +8,12 @@ from ..models.course import Course
 class CurriculumSerializer(serializers.ModelSerializer):
     ppc = serializers.PrimaryKeyRelatedField(queryset=PPC.objects.all(), required=False)
     period = serializers.IntegerField()
-    subject = serializers.UUIDField()
+    subject = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all(), required=False)
     pre_requisits = serializers.ListField(required=False)
     subject_teach_workload = serializers.IntegerField()
     subject_ext_workload = serializers.IntegerField()
     subject_remote_workload = serializers.IntegerField()
-    weekly_periods = serializers.IntegerField()
+    weekly_periods = serializers.IntegerField() 
 
     class Meta:
         model = Curriculum
@@ -41,8 +41,8 @@ class CurriculumSerializer(serializers.ModelSerializer):
 
 
 class PPCSerializer(serializers.ModelSerializer):
-    course = serializers.UUIDField()
     title = serializers.CharField()
+    course = serializers.PrimaryKeyRelatedField(queryset=Course.objects.all(), required=False)
     curriculum = CurriculumSerializer(many=True, write_only=True)
 
     class Meta:
@@ -51,16 +51,14 @@ class PPCSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         curriculum_data = validated_data.pop('curriculum')
-        course_id = validated_data.pop('course')
+        course = validated_data.pop('course')
 
         # Busca o course real a partir do UUID recebido
-        course = Course.objects.get(id=course_id)
         ppc = PPC.objects.create(course=course, **validated_data)
 
         for item in curriculum_data:
-            subject_id = item.pop('subject')
+            subject = item.pop('subject')
             pre_req_ids = item.pop('pre_requisits', [])
-            subject = Subject.objects.get(id=subject_id)
 
             curriculum = Curriculum.objects.create(
                 ppc=ppc,
@@ -113,8 +111,6 @@ class PPCSerializer(serializers.ModelSerializer):
                 **other_fields
             )
 
-            print(pre_req_ids)
-
             if pre_req_ids:
                 curriculum.pre_requisits.set(
                     Subject.objects.filter(id__in=pre_req_ids)
@@ -124,7 +120,6 @@ class PPCSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         curriculum = data.get('curriculum', [])
-        course_id = data.get('course')
 
         # 1. Verifica se existem disciplinas no currículo
         if not curriculum:
@@ -135,12 +130,7 @@ class PPCSerializer(serializers.ModelSerializer):
             if item['period'] == 1 and item.get('pre_requisits'):
                 raise serializers.ValidationError({"Pré Requisitos": "Disciplinas do 1º período não podem ter pré-requisitos."})
 
-        # 3. Verifica se há disciplinas repetidas
-        subject_ids = [item['subject'] for item in curriculum]
-        if len(subject_ids) != len(set(subject_ids)):
-            raise serializers.ValidationError({"Disciplinas":"Existem disciplinas repetidas no currículo."})
-
-        # 4. Verifica se disciplinas de períodos posteriores são pré-requisitos de períodos anteriores
+        # 3. Verifica se disciplinas de períodos posteriores são pré-requisitos de períodos anteriores
         period_map = {item['subject']: item['period'] for item in curriculum}
         for item in curriculum:
             current_period = item['period']
@@ -150,7 +140,7 @@ class PPCSerializer(serializers.ModelSerializer):
                     if pre_req_period >= current_period:
                         raise serializers.ValidationError({"Pré Requisito":"Disciplinas de períodos posteriores não podem ser pré-requisitos de períodos anteriores."})
 
-        # 5. Validação da carga horária
+        # 4. Validação da carga horária
         total_teach = sum(item['subject_teach_workload'] for item in curriculum)
         total_ext = sum(item['subject_ext_workload'] for item in curriculum)
         total_remote = sum(item['subject_remote_workload'] for item in curriculum)
@@ -161,11 +151,6 @@ class PPCSerializer(serializers.ModelSerializer):
                     raise serializers.ValidationError({"Carga Horária": "Os campos de carga horária de ensino devem ser maiores que zero"})
 
         total_curriculum_workload = total_teach + total_ext + total_remote
-
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            raise serializers.ValidationError({"Curso":"Curso vinculado não encontrado."})
 
         # if total_curriculum_workload != course.workload:
         #     raise serializers.ValidationError({"Carga Horária":f"Soma das cargas horárias ({total_curriculum_workload}h) não corresponde à carga horária do curso ({course.workload}h)."})

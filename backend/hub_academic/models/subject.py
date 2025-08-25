@@ -3,7 +3,7 @@ from django.db import models
 
 class Subject(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
     code = models.CharField(max_length=15, unique=True)
     objective = models.TextField()
     menu = models.TextField()
