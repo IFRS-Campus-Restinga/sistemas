@@ -8,7 +8,7 @@ class FormatSystemData:
             'name': instance.name,
             'system_url': instance.system_url,
             'is_active': instance.is_active,
-            'dev_team': [id for id in instance.dev_team.all()]
+            'dev_team': [dev.id for dev in instance.dev_team.all()]
         }
     
     @staticmethod

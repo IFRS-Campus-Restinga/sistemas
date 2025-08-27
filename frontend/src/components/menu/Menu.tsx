@@ -10,6 +10,8 @@ import dots from '../../assets/three-dots-line-svgrepo-com-white.svg'
 import x from '../../assets/close-svgrepo-com-white-thick.svg'
 import Modal from '../modal/Modal';
 import FormContainer from '../formContainer/FormContainer';
+import { AxiosError } from 'axios';
+import { toast } from 'react-toastify';
 
 interface SystemInterface {
     id: string
@@ -23,6 +25,7 @@ interface SystemInterface {
 
 const Menu = () => {
     const redirect = useNavigate()
+    const [apiKey, setAPIKey] = useState<string | null>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [systems, setSystems] = useState<SystemInterface[]>([])
     const [currentPage, setCurrentPage] = useState<number>(1)
@@ -48,6 +51,21 @@ const Menu = () => {
             console.error(error)
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const fetchAPIKey = async (systemId: string) => {
+        try {
+            const res = await SystemService.getAPIKey(systemId)
+
+            setAPIKey(res.data)
+            setIsOpen(true)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }
         }
     }
 
@@ -97,7 +115,7 @@ const Menu = () => {
                                             seeActionsIcon={dots}
                                             collapseActionsIcon={x} 
                                             itemId={system.id}
-                                            onView={() => setIsOpen(true)}
+                                            onView={() => fetchAPIKey(system.id)}
                                             onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
                                             onDelete={user.groups?.includes('admin') ? () => setIsOpen(true) : undefined}
                                         />
@@ -111,7 +129,7 @@ const Menu = () => {
                                             <div className={styles.formGroup}>
                                                 ID do sistema
                                                 <p className={styles.content}>
-                                                    {system.id}
+                                                    {apiKey}
                                                 </p>
                                             </div>
                                         </FormContainer>

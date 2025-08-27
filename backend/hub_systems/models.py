@@ -10,6 +10,7 @@ class System(models.Model):
     name = models.CharField(max_length=50, null=False, blank=False, unique=True)
     system_url = models.URLField(max_length=255, null=False, blank=False)
     is_active = models.BooleanField()
+    api_key = models.CharField(max_length=255)
     current_state = models.CharField(choices=CurrentState.choices, blank=False, null=False, max_length=20)
     secret_key = models.CharField(max_length=200, null=False, blank=False)
     dev_team = models.ManyToManyField(CustomUser)

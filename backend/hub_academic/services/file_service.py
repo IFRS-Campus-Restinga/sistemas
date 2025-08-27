@@ -322,23 +322,32 @@ class FileService:
         Busca ou cria uma disciplina com base em nome, ementa e objetivo.
         Gera um código aleatório único de 8 dígitos.
         """
+        try:
 
-        # Função interna para gerar código aleatório
-        def generate_unique_code():
-            while True:
-                code = str(random.randint(10000000, 99999999))  # 8 dígitos
-                if not Subject.objects.filter(code=code).exists():
-                    return code
+            # Função interna para gerar código aleatório
+            def generate_unique_code():
+                while True:
+                    code = str(random.randint(10000000, 99999999))  # 8 dígitos
+                    if not Subject.objects.filter(code=code).exists():
+                        return code
 
-        # Busca por disciplina existente com mesmo nome, ementa e objetivo
-        subj, created = Subject.objects.get_or_create(
-            name=subject['name'],
-            menu=subject['menu'],
-            objective=subject['objective'],
-            code=generate_unique_code()
-        )
+            subj = Subject.objects.get(
+                name=subject['name'],
+                menu=subject['menu'],
+                objective=subject['objective'],
+            )
 
-        return subj
+            return subj
+        except Subject.DoesNotExist:
+            # Busca por disciplina existente com mesmo nome, ementa e objetivo
+                subj = Subject.objects.create(
+                    name=subject['name'],
+                    menu=subject['menu'],
+                    objective=subject['objective'],
+                    code=generate_unique_code()
+                )
+
+                return subj
 
     @staticmethod
     def get_regex_config(course_category: str):

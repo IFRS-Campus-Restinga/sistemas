@@ -50,8 +50,8 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
         try {
             const { next, previous, data } = await fetchData(1, searchParam)
             setListData(data)
-            setNextPage(next ? 2 : null)
-            setPreviousPage(previous ? 0 : null)
+            setNextPage(next ? currentPage + 1 : null)
+            setPreviousPage(previous ? currentPage : null)
         } catch (error) {
             console.error(error)
         } finally {
@@ -61,16 +61,11 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
 
     useEffect(() =>{
         resetAndFetch()
-    }, [title])
+    }, [title, searchParam])
 
     useEffect(() => {
-        handleSearch(currentPage, searchParam)
+        if (currentPage > 1) handleSearch(currentPage, searchParam)
     }, [currentPage])
-
-
-    useEffect(() => {
-        if (searchParam === '') handleSearch(currentPage, searchParam)
-    }, [searchParam])
 
     return (
         <FormContainer title={`Gerenciar ${title}`}>

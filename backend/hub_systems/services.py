@@ -1,6 +1,7 @@
 import uuid
 from django.shortcuts import get_object_or_404
 from hub_groups.service import GroupService
+from hub_auth.services.token_service import TokenService
 from hub_systems.serializers import SystemSerializer
 from rest_framework import serializers
 from django.db import transaction
@@ -80,4 +81,16 @@ class SystemService:
         
         serializer.save()
 
+    @staticmethod
+    def get_api_key(request, system_id):
+        payload = TokenService.decode_token(request.COOKIES.get("access_token"))
+        system = get_object_or_404(System, pk=uuid.UUID(system_id))
 
+        groups = payload.get("groups")
+        user_id = payload.get("user_id")
+
+        if not 'admin' in groups:
+            if not user_id in system.dev_team.all() or system.current_state != "Em desenvolvimento":
+                return None
+                
+        return system.api_key

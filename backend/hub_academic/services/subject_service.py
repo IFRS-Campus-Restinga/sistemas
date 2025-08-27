@@ -1,4 +1,5 @@
 import uuid
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..models.subject import Subject
@@ -42,7 +43,10 @@ class SubjectService:
 
     @staticmethod
     def list(request):
-        subjects = Subject.objects.filter(name__icontains=request.GET.get('search', ''))
+        subjects = Subject.objects.filter(
+            Q (name__icontains=request.GET.get('search', '')) |
+            Q (code__icontains=request.GET.get('search', ''))
+        )
 
         if not subjects.exists():
             paginator = SubjectPagination()

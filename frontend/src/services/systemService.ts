@@ -47,6 +47,10 @@ export const SystemService = {
         })
     },
 
+    getAPIKey: async (systemId: string) => {
+        return api.get(`api/systems/get/api_key/${systemId}/`)
+    },
+
     edit: async (systemId: string, params: System) => {
         return api.put(`api/systems/edit/${systemId}/`, params)
     }
