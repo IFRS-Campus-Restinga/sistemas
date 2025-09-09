@@ -21,13 +21,13 @@ const GroupService = {
         }
     },
 
-    list: async (page: number, search: string) => {
+    list: async (page: number, search: string, fields: string) => {
         try {
             return await api.get('api/groups/get/', {
                 params: {
                     search,
                     page,
-                    data_format: 'list'
+                    fields
                 }
             })
         } catch (error) {
@@ -35,11 +35,11 @@ const GroupService = {
         }
     },
 
-    get: async (groupId: string) => {
+    get: async (groupId: string, fields: string) => {
         try {
             return await api.get(`api/groups/get/${groupId}/`, {
                 params: {
-                    data_format: 'details'
+                    fields
                 }
             });
         } catch (error) {

@@ -1,8 +1,7 @@
 import re
 from rest_framework import serializers
 from hub_users.models import CustomUser
-from hub_users.utils.formatters.format_user_data import FormatUserData
-
+from ..formatter import URLFieldsParser
 
 class CustomUserSerializer(serializers.ModelSerializer):
 
@@ -20,22 +19,15 @@ class CustomUserSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         request = self.context.get('request')
-        data_format = request.GET.get("data_format", None)
+        fields = request.GET.get("fields", None)
 
-        if not data_format:
-            raise serializers.ValidationError('O campo data_format não pode ser nulo.')
-        
-        match data_format:
-            case 'list':
-                return FormatUserData.list_format(instance)
-            case 'search':
-                return FormatUserData.search_format(instance)
-            case 'details':
-                return FormatUserData.details_format(instance)
-            case 'request':
-                return FormatUserData.request_format(instance)
-            case _:
-                raise serializers.ValidationError('Formato de retorno inválido')
+        if not fields:
+            raise serializers.ValidationError('O campo fields não pode ser nulo.')
+
+        return URLFieldsParser.parse(instance, fields)
+
+
+
 
 
 

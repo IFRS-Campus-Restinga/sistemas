@@ -11,6 +11,13 @@ import CustomButton from '../../../../components/customButton/CustomButton';
 import Switch from '../../../../components/switch/Switch';
 import Modal from '../../../../components/modal/Modal';
 
+const translations = {
+    "id": "id",
+    "username": "nome",
+    "email": "email",
+    "access_profile": "perfil de acesso",
+}
+
 const HomeAdmin = () => {
     const [requests, setRequests] = useState<Record<string, any>[]>([])
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -31,7 +38,7 @@ const HomeAdmin = () => {
 
     const fetchRequests = async () => {
         try {
-            const res = await UserService.getRequests(current)
+            const res = await UserService.getRequests(current, 'id, username, email, access_profile')
 
             setRequests(res.data.results)
 
@@ -48,7 +55,7 @@ const HomeAdmin = () => {
         setIsLoadingGroups(true)
 
         try {
-            const res = await GroupService.list(current, '')
+            const res = await GroupService.list(current, '', 'id, name')
 
             setGroups([...groups, ...res.data.results])
             setNext(res.data.next ? current + 1 : null)
@@ -78,9 +85,9 @@ const HomeAdmin = () => {
         setIsModalOpen(true)
         setApprovedRequest({
             id: request.id,
-            access_profile: request.perfil,
+            access_profile: request.access_profile,
             email: request.email,
-            username: request.nome,
+            username: request.username,
             is_abstract: approvedRequest.is_abstract,
             groups: []
         })
@@ -160,6 +167,7 @@ const HomeAdmin = () => {
                                     onApprove: openApproveModal,
                                     onDecline: declineRequest
                                 }}
+                                translations={translations}
                             />
                         ) : (
                             <div className={styles.messageContainer}>
@@ -181,6 +189,9 @@ const HomeAdmin = () => {
                                         access_profile: '',
                                         groups: []
                                     })
+
+                                    setIsModalOpen(isOpen)
+                                    setGroups([])
                                 }
                             }}
 
@@ -233,7 +244,7 @@ const HomeAdmin = () => {
                                         nextList1={next}
                                         prevList1={prev}
                                         getKey={(group) => group.id}
-                                        renderItem={(group) => group.Nome}
+                                        renderItem={(group) => group.name}
                                         title1='Grupos disponíveis'
                                         title2='Grupos do usuário'
                                     />

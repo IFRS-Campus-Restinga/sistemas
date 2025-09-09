@@ -73,7 +73,7 @@ const Calendar = () => {
 
   const fetchCalendar = async () => {
     try {
-      const res = await CalendarService.get(state)
+      const res = await CalendarService.get(state, 'id, title, start, end, status')
       setCalendar(res.data)
     } catch (error) {
       console.error(error)
@@ -86,7 +86,7 @@ const Calendar = () => {
       const month = start.getMonth() + 1
       const year = start.getFullYear()
 
-      const res = await EventService.list(month, year)
+      const res = await EventService.list(month, year, 'id, title, start, end, type')
       const mappedEvents = res.data.map((ev: EventInterface) => ({
         id: ev.id,
         title: ev.title,
@@ -94,7 +94,6 @@ const Calendar = () => {
         end: new Date(new Date(ev.end).setDate(new Date(ev.end).getDate() + 1)),
         type: ev.type,
         category: ev.category,
-        description: ev.description,
       }))
 
       setEvents(mappedEvents)

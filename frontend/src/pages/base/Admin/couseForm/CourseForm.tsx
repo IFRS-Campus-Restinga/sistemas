@@ -54,7 +54,7 @@ const CourseForm = () => {
         setSearched(true)
 
         try {
-            const res =  await UserService.listByGroup('coord', coordSearch, undefined, 'search', true)
+            const res =  await UserService.listByGroup('coord', coordSearch, undefined, 'id, username', true)
 
             setCoordOptions(res.data.results)
         } catch (error) {
@@ -73,17 +73,17 @@ const CourseForm = () => {
 
     const fetchCourse = async () => {
         try {
-            const res  = await CourseService.get(state)
+            const res  = await CourseService.get(state, 'id, name, workload, category, coord.id, coord.username, course_class.id, course_class.number')
 
             setCourse({
                 category: res.data.category,
-                classes: res.data.classes,
+                classes: res.data.course_class,
                 coord: res.data.coord.id,
                 name: res.data.name,
                 workload: res.data.workload,
                 id: res.data.id
             })
-            setCoordSearch(res.data.coord.name)
+            setCoordSearch(res.data.coord.username)
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
@@ -226,12 +226,17 @@ const CourseForm = () => {
                         <div className={styles.formGroup}>
                             <CustomLabel title='Modalidade *'>
                                 <CustomSelect
-                                    onChange={(e) => setCourse({
-                                        ...course, 
-                                        category: e.target.value,
-                                        classes: e.target.value === 'Técnico Subsequente ao Ensino Médio' || 
-                                        e.target.value === 'Técnico Integrado ao Ensino Médio' ? [] : course.classes
-                                    })}
+                                    renderKey='title'
+                                    onSelect={(option) => {
+                                        if ('value' in option) {
+                                            setCourse({
+                                                ...course, 
+                                                category: option.value,
+                                                classes: option.value === 'Técnico Subsequente ao Ensino Médio' || 
+                                                option.value === 'Técnico Integrado ao Ensino Médio' ? [] : course.classes
+                                            })
+                                        }
+                                    }}
                                     options={[
                                         {
                                             title: 'Técnico Subsequente ao Ensino Médio',
@@ -254,7 +259,12 @@ const CourseForm = () => {
                                             value: 'Superior'
                                         },
                                     ]}
-                                    value={course.category}
+                                    selected={
+                                        {
+                                            title: course.category,
+                                            value: course.category
+                                        }
+                                    }
                                 />
                             </CustomLabel>
                         </div>
@@ -297,9 +307,10 @@ const CourseForm = () => {
 
                                                 return updated
                                             })
-                                            setCoordSearch(option.title)
+                                            setCoordSearch(option.username)
                                         }}
                                         searched={searched}
+                                        renderKey='username'
                                     />
                                 </div>
                             </CustomLabel>

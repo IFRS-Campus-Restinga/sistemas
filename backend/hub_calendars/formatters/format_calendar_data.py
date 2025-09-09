@@ -1,22 +1,54 @@
-from hub_calendars.models.calendar import Calendar
-
-class FormatCalendarData:
+class URLFieldsParser:
     @staticmethod
-    def list_format(instance: Calendar):
-        return {
-            'id': instance.id,
-            'titulo': instance.title,
-            "inicio": instance.start.strftime('%d/%m/%Y') if instance.start else None,
-            "fim": instance.end.strftime('%d/%m/%Y') if instance.end else None,
-            'status' : instance.status,
-        }
+    def build_field_map(fields: list[str]) -> dict:
+        field_map: dict = {}
+        for field in fields:
+            parts = field.split(".")
+            current = field_map
+            for i, part in enumerate(parts):
+                if i == len(parts) - 1:
+                    current[part] = True
+                else:
+                    current = current.setdefault(part, {})
+        return field_map
     
     @staticmethod
-    def details_format(instance: Calendar):
-        return {
-            'id': instance.id,
-            'title': instance.title,
-            "start": instance.start,
-            "end": instance.end,
-            'status': instance.status,
-        }
+    def extract_instance_fields(instance, field_map: dict):
+        result = {}
+
+        for field, subfields in field_map.items():
+            if not hasattr(instance, field):
+                result[field] = None
+                continue
+
+            value = getattr(instance, field)
+
+            # ManyToMany / reverse FK
+            if hasattr(value, "all"):
+                items = []
+                for obj in value.all():
+                    if isinstance(subfields, dict):
+                        items.append(URLFieldsParser.extract_instance_fields(obj, subfields))
+                    else:
+                        items.append(obj)
+                result[field] = items
+
+            # FK / OneToOne
+            elif isinstance(subfields, dict):
+                result[field] = URLFieldsParser.extract_instance_fields(value, subfields) if value else None
+
+            # Campo simples
+            else:
+                result[field] = value
+
+        return result
+    
+    @staticmethod
+    def parse(instance, fields_param: str):
+        """
+        Função única que o serializer chama.
+        Recebe a instância e a string de campos da URL (?fields=id,nome,...).
+        """
+        fields = [f.strip() for f in fields_param.split(",")]
+        field_map = URLFieldsParser.build_field_map(fields)
+        return URLFieldsParser.extract_instance_fields(instance, field_map)

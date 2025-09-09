@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import Permission
-from .formatter import FormatPermissionData
+from .formatter import URLFieldsParser
 
 class PermissionSerializer(serializers.ModelSerializer):
 
@@ -10,11 +10,9 @@ class PermissionSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        data_format = request.GET.get("data_format", None)
+        fields = request.GET.get("fields", None)
 
-        if not data_format:
-            raise serializers.ValidationError('O campo data_format não pode ser nulo.')
+        if not fields:
+            raise serializers.ValidationError('O campo fields não pode ser nulo.')
         
-        match data_format:
-            case 'list':
-                return FormatPermissionData.list_format(instance)
+        return URLFieldsParser.parse(instance, fields)

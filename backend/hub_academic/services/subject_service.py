@@ -32,14 +32,18 @@ class SubjectService:
     
     @staticmethod
     def get_by_course(request, course_id):
-        subjects = Curriculum.objects.filter(
-            ppc__course=uuid.UUID(course_id),
-            subject__name__icontains=request.GET.get('search', '')
-        )
+        subjects = Subject.objects.filter(
+            ppc__ppc__course=uuid.UUID(course_id),
+            name__icontains=request.GET.get('search', '')
+        ).distinct()
 
-        serializer = SubjectSerializer(subjects, many=True, context={'request', request})
+        paginator = SubjectPagination()
+        paginator.page_size = 10 
+        result_page = paginator.paginate_queryset(subjects, request)
 
-        return serializer.data
+        serializer = SubjectSerializer(result_page, many=True, context={'request': request})
+
+        return paginator.get_paginated_response(serializer.data)
 
     @staticmethod
     def list(request):

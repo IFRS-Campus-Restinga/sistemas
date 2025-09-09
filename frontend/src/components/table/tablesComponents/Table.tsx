@@ -26,13 +26,14 @@ interface TableProps {
     setCurrent: Dispatch<SetStateAction<number>>
     current: number
     loadingContent: boolean
+    translations: Record<string, string>;
     crudActions?: CRUDActions
     dualActions?: DualActions
     fetchData: (page:  number, param: string) => void
     searchParam?: string
 }
 
-const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, crudActions, dualActions, fetchData, searchParam }: TableProps) => {
+const Table = ({ itemList, next, previous, translations, setCurrent, current, loadingContent, crudActions, dualActions, fetchData, searchParam }: TableProps) => {
     const redirect = useNavigate()
     const firstRef = useRef(null)
     const lastRef = useRef(null)
@@ -85,20 +86,14 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
                     <table className={styles.table}>
                         <thead className={styles.thead}>
                             <tr className={styles.tr}>
-                                {
-                                    Object.keys(itemList[0] ?? {}).map((itemKey) => (
-                                        itemKey !== 'id' ? (
-                                            <th className={styles.th}>{itemKey}</th>
-                                        ) : null
-                                    ))
-                                }
-                                {
-                                    !crudActions && !dualActions ? null : (
-                                        <th className={styles.thAction}>
-                                            Ações
-                                        </th>
-                                    ) 
-                                }
+                            {
+                                Object.keys(itemList[0]).map((key) => (
+                                    key !== 'id' ? (
+                                        <th key={key} className={styles.th}>{translations[key] ?? key}</th>
+                                    ): null
+                                ))
+                            }
+                            {(crudActions || dualActions) && <th className={styles.th}>Ações</th>}
                             </tr>
                         </thead>
                         <tbody className={styles.tbody}>
@@ -110,13 +105,23 @@ const Table = ({ itemList, next, previous, setCurrent, current, loadingContent, 
                                         ref={index === itemList.length - 1 ? lastRef : null}
                                     >
                                         {
-                                            Object.entries(item).map(([key, value]) => (
-                                                key !== 'id' ? (
-                                                    <td className={styles.td}>
-                                                        {value}
-                                                    </td>
-                                                ) : null
-                                            ))
+                                            Object.entries(item).map(([key, value]) => {
+                                                if (key === "id") return null;
+
+                                                // Detecta automaticamente se é uma data válida
+                                                if (value) {
+                                                const date = new Date(value);
+                                                if (!isNaN(date.getTime()) && typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+                                                    value = date.toLocaleDateString("pt-BR"); // converte para DD/MM/YYYY
+                                                }
+                                                }
+
+                                                return (
+                                                <td key={key} className={styles.td}>
+                                                    {value}
+                                                </td>
+                                                );
+                                            })
                                         }
                                         <td className={styles.tdAction}>
                                             <div className={styles.actions}>

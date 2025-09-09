@@ -41,9 +41,7 @@ def get_subject(request, subject_id):
 @has_permissions(['view_subject'])
 def get_subjects_by_course(request, course_id):
     try:
-        subjects = SubjectService.get_by_course(request, course_id)
-
-        return Response(subjects, status=status.HTTP_200_OK)
+        return SubjectService.get_by_course(request, course_id)
     except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:

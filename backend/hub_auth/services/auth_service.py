@@ -38,7 +38,7 @@ class CommonLogin(UserAuthenticationService):
             raise UserValidationException('Usuário não existe')
         
         if not user.is_active:
-            raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active})
+            raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'status': user.status})
         
         if not PasswordService.check(user, password):
             raise UserValidationException('Senha inválida')
@@ -92,7 +92,7 @@ class GoogleLogin(UserAuthenticationService):
 
                 return user_data, refresh, access
             else:
-                raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'is_active': user.is_active}) 
+                raise UserAuthException({'message': 'Conta inativa, contate seu administrador', 'status': user.status}) 
         except Group.DoesNotExist as e:
             raise UserValidationException('Grupo de acesso não encontrado')
         except GoogleAuthError as e:

@@ -1,10 +1,15 @@
 import GroupService from '../../../../services/groupService'
 import ListPage from '../../../../features/listPage/ListPage'
 
+const translations = {
+    "id": "id",
+    "name": "nome",
+}
+
 const GroupList = () => {
 
     const fetchGroups = async (currentPage: number, searchParam: string) => {
-        const res = await GroupService.list(currentPage, searchParam)
+        const res = await GroupService.list(currentPage, searchParam, 'id, name')
 
         return {
             next: res.data.next,
@@ -25,6 +30,7 @@ const GroupList = () => {
             canEdit={true}
             canView={true}
             onDelete={deleteGroup}
+            translations={translations}
         />
     )
 }

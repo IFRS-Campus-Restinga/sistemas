@@ -41,9 +41,9 @@ const GroupForm = () => {
     const fetchGroupData = async () => {
         try {
             const res = await Promise.all([
-                GroupService.get(state),
-                PermissionService.notAssignedTo(state, pageList1),
-                PermissionService.listByGroup(state, pageList2)
+                GroupService.get(state, 'id, name'),
+                PermissionService.notAssignedTo(state, pageList1, 'id, name'),
+                PermissionService.listByGroup(state, pageList2, 'id, name')
             ])
 
             setGroup(res[0].data)
@@ -74,7 +74,7 @@ const GroupForm = () => {
 
         if (state) {
             try {
-                const res =  await PermissionService.listByGroup(state, pageList2)
+                const res =  await PermissionService.listByGroup(state, pageList2, 'id, name')
 
                 setGroupPermissions([...groupPermissions, ...res.data.results])
 
@@ -93,8 +93,8 @@ const GroupForm = () => {
 
         try {
             const req = state ?
-            PermissionService.notAssignedTo(state, pageList1) :
-             PermissionService.list(pageList1)
+            PermissionService.notAssignedTo(state, pageList1, 'id, name') :
+             PermissionService.list(pageList1, 'id, name')
 
             const res = await req
 

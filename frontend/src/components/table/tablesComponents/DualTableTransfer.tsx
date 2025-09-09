@@ -12,7 +12,7 @@ interface DualTableTransferProps<T> {
     setList2: React.Dispatch<React.SetStateAction<T[]>>
     callbackList1?: (item: T) => void
     callbackList2?: (item: T) => void
-    currentList1?: number
+    currentList1: number
     currentList2?: number
     setCurrentList1: React.Dispatch<React.SetStateAction<number>>
     setCurrentList2?: React.Dispatch<React.SetStateAction<number>>
@@ -109,7 +109,7 @@ const DualTableTransfer = <T,>({
     }, [list1, nextList1, loadingList1]);
 
     useEffect(() => {
-        if (currentList1 && currentList1 > 1) fetchData1(currentList1);
+        if (currentList1 > 1) fetchData1(currentList1);
     }, [currentList1]);
 
     // useffect para controlar a paginação da tabela 2 através do scroll

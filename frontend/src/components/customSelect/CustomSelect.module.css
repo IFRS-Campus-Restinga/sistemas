@@ -1,25 +1,59 @@
-.select {
+.selectContainer {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
 }
 
-.select {
+.span {
     width: 100%;
-    padding: 5px;
-    font-family: 'Roboto';
-    color: #7d7d7d;
+    display: flex;
     border: 1px solid #ccc;
-    border-radius: 5px;
+    border-radius: 8px;
+    padding: 5px;
+    justify-content: space-between;
+    min-height: 30px;
 }
 
-.select:focus {
-    outline: none;
+.p {
+    color: #767676;
+    font-size: 14px;
+    font-weight: 400;
+}
+
+.iconDown, .iconUp {
+    width: 15px;
+    aspect-ratio: 1/1;
+    cursor: pointer
+}
+
+.iconUp {
+    rotate: deg(180);
+}
+
+.options {
+    position: absolute;
+    top: 100%;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: white;
+    z-index: 20;
+    width: 100%;
+    list-style: none;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-weight: 400;
 }
 
 .option {
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
 }
 
-.option:hover {
+.icon {
+    width: 15px;
     cursor: pointer;
 }
+

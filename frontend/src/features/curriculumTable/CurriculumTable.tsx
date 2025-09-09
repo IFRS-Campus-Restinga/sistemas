@@ -50,7 +50,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     const fetchPreRequisits = async (index: number) => {
         try {
-            const res = await SubjectService.list(1, preReqSearch[index], 'search')
+            const res = await SubjectService.list(1, preReqSearch[index], 'id, code')
 
             setPreReqOptions((prev) => {
                 const updated = [...prev]
@@ -73,12 +73,17 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     const fetchSubjects = async (index: number) => {
         try {
-            const res = await SubjectService.list(1, subjects[index].name, 'search')
+            const res = await SubjectService.list(1, subjects[index].name, 'id, name, code')
 
             setSubjectOptions((prev) => {
                 const updated = [...prev]
 
-                updated[index] = res.data.results
+                updated[index] = res.data.results.map((subj: any) => {
+                    return {
+                        id: subj.id,
+                        name: `${subj.name} (${subj.code})`
+                    }
+                })
 
                 return updated
             })
@@ -217,6 +222,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                             }}
                                                                         />
                                                                         <CustomOptions
+                                                                            renderKey='name'
                                                                             options={subjectOptions[index]}
                                                                             searched={subjectSearched[index]}
                                                                             onSelect={(option) => {
@@ -231,7 +237,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 setCurriculum(updatedCurriculum);
 
                                                                                 const updatedSubjects = [...subjects];
-                                                                                updatedSubjects[index].name = option.title;
+                                                                                updatedSubjects[index].name = option.name;
                                                                                 setSubjects(updatedSubjects);
 
                                                                                 // Limpa apenas a posição atual
@@ -267,6 +273,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 }}
                                                                             />
                                                                             <CustomOptions
+                                                                                renderKey='code'
                                                                                 options={preReqOptions[index]}
                                                                                 searched={preReqSearched[index]}
                                                                                 onSelect={(option) => {

@@ -6,7 +6,7 @@ export interface CalendarInterface {
     title: string
     start: string
     end: string
-    status: 'Ativo' | 'Suspenso' | 'Cancelado'
+    status: string
 }
 
 const CalendarService = {
@@ -19,20 +19,20 @@ const CalendarService = {
         }
     },
 
-    list: async (page: number = 1, param: string = '') => {
+    list: async (page: number = 1, param: string = '', fields: string) => {
         return await api.get('api/calendars/get/', {
             params: {
-                data_format: 'list',
+                fields,
                 search: param,
                 page
             }
         })
     },
 
-    get: async (calendarId: string) => {
+    get: async (calendarId: string, fields: string) => {
         return await api.get(`api/calendars/get/${calendarId}/`, {
             params: {
-                data_format: 'details'
+                fields
             }
         })
     },

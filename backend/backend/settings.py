@@ -166,7 +166,7 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = 'hub_users.CustomUser' 
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-BR'
 
 TIME_ZONE = 'UTC'
 

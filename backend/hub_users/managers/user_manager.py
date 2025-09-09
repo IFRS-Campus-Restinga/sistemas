@@ -22,39 +22,39 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
     
-    def get_by_group(self, group_name, active=None):
+    def get_by_group(self, group_name, is_active=None):
         queryset = self.filter(groups__name=group_name)
-        if active is not None:
-            queryset = queryset.filter(is_active=active)
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
         return queryset
         
-    def get_by_access_profile(self, access_profile_name, active=None):
+    def get_by_access_profile(self, access_profile_name, is_active=None):
         queryset = self.filter(access_profile=access_profile_name)
-        if active is not None:
-            queryset = queryset.filter(is_active=active)
+        if is_active is not None:
+            queryset = queryset.filter(is_active=is_active)
         return queryset
     
-    def get_by_group_and_param(self, group_name: str, param: str, active=None):
+    def get_by_group_and_param(self, group_name: str, param: str, is_active=None):
         queryset = self.filter(
                 Q (email__icontains=param) | 
-                Q (first_name__icontains=param) |
-                Q (last_name__icontains=param), groups__name=group_name
+                Q (username__icontains=param), 
+                groups__name=group_name
             ).order_by('id')
         
-        if active:
-            queryset = queryset.filter(is_active=active)
+        if is_active:
+            queryset = queryset.filter(is_active=is_active)
 
         return queryset
     
-    def get_by_access_profile_and_param(self, access_profile_name: str, param: str, active=None):
+    def get_by_access_profile_and_param(self, access_profile_name: str, param: str, is_active=None):
         queryset = self.filter(
                 Q (email__icontains=param) | 
-                Q (first_name__icontains=param) |
-                Q (last_name__icontains=param), access_profile=access_profile_name 
+                Q (username__icontains=param), 
+                access_profile=access_profile_name 
             ).order_by('id')
         
-        if active:
-            queryset = queryset.filter(is_active=active)
+        if is_active:
+            queryset = queryset.filter(is_active=is_active)
 
         return queryset
     

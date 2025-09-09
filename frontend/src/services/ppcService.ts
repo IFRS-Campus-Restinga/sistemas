@@ -1,4 +1,5 @@
 import api from "../../config/apiConfig"
+import flattenValues from "../utils/flattenObj"
 
 export interface PreRequisitInterface {
     subject: string
@@ -35,20 +36,31 @@ const PPCService = {
         )
     },
 
-    list: async (page: number, search: string) => {
-        return await api.get('api/academic/ppcs/get/', {
+    list: async (page: number, search: string, fields: string) => {
+        fields = fields.trim()
+        let res = await api.get('api/academic/ppcs/get/', {
             params: {
                 search,
                 page,
-                data_format: 'list'
+                fields
             }
         })
+
+        res.data = flattenValues(res.data)
+        
+        return res
     },
 
-    get: async (PPCId: string, data_format: string = 'view_details') => {
+    get: async (PPCId: string, fields: string) => {
+        fields = fields
+        .split(",")
+        .map(f => f.trim())
+        .filter(f => f)
+        .join(",");
+
         return await api.get(`api/academic/ppcs/get/${PPCId}/`, {
             params: {
-                data_format
+                fields
             }
         });
     },

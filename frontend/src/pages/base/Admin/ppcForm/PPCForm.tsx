@@ -40,6 +40,30 @@ interface Curriculum {
     subjects: Subject[]
 }
 
+function groupSubjectsByPeriod(curriculum: any[]) {
+  const grouped: Record<string, any> = {};
+
+  curriculum.forEach((item) => {
+    const period = item.period; // string
+    const subjectName = item.subject.name;
+    const preReqs = item.pre_requisits?.map((pr: any) => pr.id) || [];
+
+    if (!grouped[period]) {
+      grouped[period] = [];
+    }
+
+    grouped[period].push({
+      name: subjectName,
+      preRequisits: preReqs
+    });
+  });
+
+  // transforma o objeto em array no formato desejado
+  return Object.keys(grouped).map((period) => ({
+    period: period, // mantém como string
+    subjects: grouped[period]
+  }));
+}
 
 const PPCForm = () => {
     const location = useLocation()
@@ -69,11 +93,45 @@ const PPCForm = () => {
 
     const fetchPPC = async () => {
         try {
-            const res = await PPCService.get(state, 'edit_details')
+            const res = await PPCService.get(
+                state, 
+                `
+                    id,
+                    title,
+                    course.id,
+                    course.name,
+                    curriculum.id,
+                    curriculum.subject.id,
+                    curriculum.subject.name,
+                    curriculum.subject_teach_workload,
+                    curriculum.subject_remote_workload,
+                    curriculum.subject_ext_workload,
+                    curriculum.period,
+                    curriculum.pre_requisits.id,
+                    curriculum.pre_requisits.code,
+                `
+            )
 
-            setPPC(res.data.ppc)
-            setCurriculum(res.data.curriculum)
-            setCourse(res.data.course)
+            setPPC({
+                id: res.data.id,
+                course: res.data.course.id,
+                title: res.data.title,
+                curriculum: res.data.curriculum.map((curr: any) => {
+                    return {
+                        id: curr.id,
+                        subject: curr.subject,
+                        subject_teach_workload: curr.subject_teach_workload,
+                        subject_remote_workload: curr.subject_remote_workload,
+                        subject_ext_workload: curr.subject_remote_workload,
+                        period: curr.period,
+                        pre_requisits: curr.pre_requisits.map((preReq: any) => {
+                            return preReq.id
+                        })
+                    }
+                })
+            })
+            setCurriculum(groupSubjectsByPeriod(res.data.curriculum))
+            setCourse(res.data.course.name)
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
@@ -92,7 +150,7 @@ const PPCForm = () => {
         setSearched(true)
 
         try {
-            const res = await CourseService.list(1, course, 'search')
+            const res = await CourseService.list(1, course, 'id, name')
 
             setCourseOptions(res.data.results)
         } catch (error) {
@@ -167,6 +225,10 @@ const PPCForm = () => {
         return Object.values(newErrors).every((error) => error === null || error.every((value: []) => value === null))
     }
 
+    useEffect(() => {
+        console.log(PPC)
+    }, [PPC])
+
     const removeEmtpyItems = () => {
         setPPC((prev) => {
             if (!(prev.curriculum instanceof File)) {
@@ -194,7 +256,7 @@ const PPCForm = () => {
                         })
                         .map((curriculum, idx) => ({
                             ...curriculum,
-                            period: `${idx + 1}º Período`
+                            period: `${idx + 1}`
                         }));
     
                     return updated;
@@ -342,8 +404,9 @@ const PPCForm = () => {
                                         ...prev,
                                         course: option.id
                                     }))
-                                    setCourse(option.title)
+                                    setCourse(option.name)
                                 }}
+                                renderKey='name'
                             />
                         </div>
                     </CustomLabel>

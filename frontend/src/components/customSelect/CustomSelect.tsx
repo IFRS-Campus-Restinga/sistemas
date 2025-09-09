@@ -1,31 +1,81 @@
+import { useState } from 'react'
+import type { OptionProps } from '../customOptions/CustomOptions'
 import styles from './CustomSelect.module.css'
+import arrowDown from '../../assets/chevron-down-svgrepo-com.svg'
 
-export type OptionProps<Key extends string = 'value'> = {
-  title: string
-  extraField?: string
-} & {
-  [K in Key]: string
+// Opção alternativa usada pelo select
+type ValueOption = { value: string; title: string; extraField?: string }
+
+// Interface do select aceita OptionProps<Key> OU ValueOption
+interface CustomSelectProps<Key extends 'title' | 'username' | 'name'> {
+  options: (OptionProps<Key> | ValueOption)[]
+  onSelect: (option: OptionProps<Key> | ValueOption) => void
+  onBlur?: () => void
+  renderKey: Key | 'title'
+  selected: OptionProps<Key> | ValueOption | null
 }
 
+const CustomSelect = <Key extends 'title' | 'username' | 'name'>({
+  options,
+  onSelect,
+  selected,
+  renderKey,
+}: CustomSelectProps<Key>) => {
+  const [isOpen, setIsOpen] = useState(false)
 
-interface CustomSelectProps {
-    options: OptionProps[]
-    value: string
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-    onBlur?: () => void
-}
-
-const CustomSelect = ({ options, value, onChange, onBlur }: CustomSelectProps) => {
-
-    return (
-        <select className={styles.select} value={value} onChange={onChange} onBlur={onBlur}>
+  return (
+    <div className={styles.selectContainer} onClick={() => setIsOpen((prev) => !prev)}>
+      <span className={styles.span}>
+        <p className={styles.p}>
             {
-                options.map((option) => (
-                    <option className={styles.option} value={option.value}>{option.title}</option>
-                ))
+                selected
+                    ? 'id' in selected
+                    ? // OptionProps<Key>
+                        renderKey in selected
+                        ? selected[renderKey as Key]
+                        : '' // fallback caso a chave não exista
+                    : selected.title // ValueOption
+                    : 'Selecione uma opção'
             }
-        </select>
-    )
+        </p>
+        <img
+          className={`${styles.icon} ${isOpen ? styles.iconUp : styles.iconDown}`}
+          src={arrowDown}
+          alt=""
+          onClick={(e) => {
+            e.stopPropagation()
+            setIsOpen((prev) => !prev)
+          }}
+        />
+      </span>
+
+      {isOpen && (
+        <ul className={styles.options}>
+          {options.length > 0
+            ? options.map((option) => (
+                <li
+                  key={'id' in option ? option.id : option.value} 
+                  className={styles.option}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onSelect(option)
+                    setIsOpen(false)
+                  }}
+                >
+                    {
+                        'id' in option
+                        ? renderKey in option
+                        ? option[renderKey as Key]
+                        : ''
+                        : option.title
+                    }
+                </li>
+              ))
+            : null}
+        </ul>
+      )}
+    </div>
+  )
 }
 
 export default CustomSelect

@@ -1,25 +1,25 @@
 import uuid
 from django.db import models
 from hub_users.managers.user_manager import CustomUserManager
-from django.contrib.auth.models import AbstractUser, Permission, Group
+from django.contrib.auth.models import AbstractUser
 from hub_users.enums.categories import Categories
 from hub_users.enums.access_profile import AcessProfile
 
 class CustomUser(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
-    first_name = models.CharField(max_length=30)
-    last_name = models.CharField(max_length=30)
+    username = models.CharField(max_length=100)
     date_joined = models.DateTimeField(auto_now_add=True)
-    is_active = models.BooleanField(default=False)
     is_abstract = models.BooleanField(default=False)
     first_login = models.BooleanField(default=True)
     access_profile = models.CharField(choices=AcessProfile.choices, max_length=12)
+    is_active = models.BooleanField(default=False)
 
     last_login = None
     password = None
-    username = None
     user_permissions = None
+    first_name = None
+    last_name = None
 
     objects = CustomUserManager()
     
@@ -27,7 +27,11 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}' or self.email
+        return f'{self.username}' or self.email
+    
+    @property
+    def status(self):
+        return "Ativo" if self.is_active else "Inativo"
     
 class Password(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

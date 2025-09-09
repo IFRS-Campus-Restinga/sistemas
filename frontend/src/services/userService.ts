@@ -5,7 +5,7 @@ import { extractError } from "../utils/handleAxiosError"
 
 export interface RequestGroup {
     id: string
-    Nome: string
+    name: string
 }
 
 export interface visitorAccountProps {
@@ -41,12 +41,12 @@ const UserService = {
     
     },
 
-    getRequests: async (page: number = 1) => {
+    getRequests: async (page: number = 1, fields: string) => {
         try {
             return await api.get('api/users/request/get/', {
                 params: {
                     page,
-                    data_format: 'request'
+                    fields
                 }
             })
         } catch (error) {
@@ -74,7 +74,7 @@ const UserService = {
         return await api.get<UserState>('api/users/data/')
     },
 
-    listByAccessProfile: async (profile: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
+    listByAccessProfile: async (profile: string, param: string = '', page: number = 1, fields: string, active?: boolean) => {
         const queryParams = new URLSearchParams()
 
         if (param.trim() !== '') queryParams.append('search', param)
@@ -82,13 +82,13 @@ const UserService = {
 
         return api.get(`api/users/get/access_profile/${profile}/?${queryParams.toString()}`, {
             params: {
-                data_format,
+                fields,
                 active
             }
         })
     },
 
-    listByGroup: async (group: string, param: string = '', page: number = 1, data_format: string, active?: boolean) => {
+    listByGroup: async (group: string, param: string = '', page: number = 1, fields: string, active?: boolean) => {
         const queryParams = new URLSearchParams()
 
         if (param.trim() !== '') queryParams.append('search', param)
@@ -96,7 +96,7 @@ const UserService = {
 
         return api.get(`api/users/get/group/${group}/?${queryParams.toString()}`, {
             params: {
-                data_format,
+                fields,
                 active
             }
         })

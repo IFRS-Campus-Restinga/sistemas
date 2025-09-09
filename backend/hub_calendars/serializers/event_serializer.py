@@ -2,7 +2,7 @@ import uuid
 from hub_calendars.models.calendar import Calendar
 from rest_framework import serializers
 from hub_calendars.models.event import Event
-from hub_calendars.formatters.format_event_data import FormatEventData
+from hub_calendars.formatters.format_event_data import URLFieldsParser
 
 class EventSerializer(serializers.ModelSerializer):
 
@@ -13,9 +13,7 @@ class EventSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         start = attrs.get('start', None)
         end = attrs.get('end', None)
-        calendarId = attrs.get('calendar', None)
-
-        calendar = Calendar.objects.get(pk=uuid.UUID(calendarId))
+        calendar = attrs.get('calendar', None)
 
         if not start or not end:
             raise serializers.ValidationError('As datas de início e encerramento são obrigatórias')
@@ -30,15 +28,9 @@ class EventSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         request = self.context.get('request', None)
-        data_format = request.GET.get('data_format', None)
+        fields = request.GET.get('fields', None)
 
-        if not data_format:
-            raise serializers.ValidationError('O parâmetro data_format é obrigatório')
+        if not fields:
+            raise serializers.ValidationError('O parâmetro fields é obrigatório')
         
-        match data_format:
-            case 'list':
-                return FormatEventData.list_format(instance)
-            case 'details':
-                return FormatEventData.details_format(instance)
-            case _:
-                raise serializers.ValidationError('data_format inválido')
+        return URLFieldsParser.parse(instance, fields)

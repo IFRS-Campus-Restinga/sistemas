@@ -2,6 +2,13 @@ import { useLocation } from 'react-router-dom'
 import CourseService from '../../../../services/courseService'
 import ListPage from '../../../../features/listPage/ListPage'
 
+const translations = {
+    "id": "id",
+    "name": "nome",
+    "workload": "carga-horária",
+    "category": "categoria"
+}
+
 const CourseList = () => {
     const location = useLocation()
 
@@ -27,6 +34,7 @@ const CourseList = () => {
             onDelete={deleteCourse}
             canEdit={true}
             canView={true}
+            translations={translations}
         />
     )
 }

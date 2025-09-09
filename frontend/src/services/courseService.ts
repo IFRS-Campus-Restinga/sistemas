@@ -19,20 +19,20 @@ const CourseService = {
         return api.post('api/academic/courses/create/', params)
     },
 
-    list: async (page: number, search: string, data_format: string = 'list') => {
+    list: async (page: number, search: string, fields: string) => {
         return await api.get('api/academic/courses/get/', {
             params: {
                 search,
                 page,
-                data_format
+                fields
             }
         })
     },
 
-    get: async (courseId: string) => {
+    get: async (courseId: string, fields: string) => {
         return await api.get(`api/academic/courses/get/${courseId}/`, {
             params: {
-                data_format: 'details'
+                fields
             }
         });
     },

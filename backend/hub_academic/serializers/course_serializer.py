@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from ..models.course import Course
-from ..formatters.format_course_data import FormatCourseData
+from ..formatters.format_course_data import URLFieldsParser
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,18 +25,11 @@ class CourseSerializer(serializers.ModelSerializer):
         if not request:
             raise serializers.ValidationError('O request não foi fornecido no contexto do serializer.')
 
-        data_format = request.GET.get('data_format')
-        course_classes = request.GET.get('course_classes')
+        fields = request.GET.get('fields')
 
-        if not data_format:
-            raise serializers.ValidationError('O parâmetro data_format é obrigatório.')
+        if not fields:
+            raise serializers.ValidationError('O parâmetro fields é obrigatório.')
+        
+        return URLFieldsParser.parse(instance, fields)
 
-        match data_format:
-            case 'list':
-                return FormatCourseData.list_format(instance)
-            case 'details':
-                return FormatCourseData.details_format(instance)
-            case 'search':
-                return FormatCourseData.search_format(instance, course_classes)
-            case _:
-                raise serializers.ValidationError('data_format inválido')
+        

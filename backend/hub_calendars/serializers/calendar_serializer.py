@@ -1,10 +1,9 @@
 from django.db.models import Q
 from rest_framework import serializers
 from hub_calendars.models.calendar import Calendar
-from hub_calendars.formatters.format_calendar_data import FormatCalendarData
+from hub_calendars.formatters.format_calendar_data import URLFieldsParser
 
 class CalendarSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Calendar
         fields = '__all__'
@@ -40,15 +39,9 @@ class CalendarSerializer(serializers.ModelSerializer):
     
     def to_representation(self, instance):
         request = self.context.get('request', None)
-        data_format = request.GET.get('data_format', None)
+        fields = request.GET.get('fields', None)
 
-        if not data_format:
-            raise serializers.ValidationError('O parâmetro data_format é obrigatório')
+        if not fields:
+            raise serializers.ValidationError('O parâmetro fields é obrigatório')
         
-        match data_format:
-            case 'list':
-                return FormatCalendarData.list_format(instance)
-            case 'details':
-                return FormatCalendarData.details_format(instance)
-            case _:
-                raise serializers.ValidationError('data_format inválido')
+        return URLFieldsParser.parse(instance, fields)

@@ -37,7 +37,7 @@ const CalendarForm = () => {
 
     const fetchCalendar = async () => {
         try {
-            const res = await CalendarService.get(state)
+            const res = await CalendarService.get(state, 'id, title, start, end, status, description')
 
             setCalendar(res.data)
         } catch (error) {
@@ -103,7 +103,11 @@ const CalendarForm = () => {
     }
 
     useEffect(() => {
-        if (state) fetchCalendar()
+        if (state) {
+            fetchCalendar()
+        } else {
+            setIsLoading(false)
+        }
     }, [state])
 
     return (
@@ -148,6 +152,7 @@ const CalendarForm = () => {
                             <span className={styles.inputContainer}>
                                 <CustomLabel title='Status *'>
                                     <CustomSelect
+                                        renderKey='title'
                                         options={[
                                             {
                                                 title: 'Ativo',
@@ -162,8 +167,17 @@ const CalendarForm = () => {
                                                 value: 'Cancelado',
                                             },
                                         ]}
-                                        value={calendar.end}
-                                        onChange={(e) => setCalendar({...calendar, end: e.target.value})}
+                                        selected={
+                                            {
+                                                title: calendar.status,
+                                                value: calendar.status
+                                            }
+                                        }
+                                        onSelect={(option) => {
+                                            if ('value' in option) {
+                                                setCalendar({...calendar, status: option.value})
+                                            }
+                                        }}
                                         onBlur={() => setErrors({...errors, end: validateMandatoryStringField(calendar.end)})}
                                     />
                             </CustomLabel>

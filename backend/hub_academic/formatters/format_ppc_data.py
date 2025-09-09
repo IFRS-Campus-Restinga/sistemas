@@ -1,83 +1,54 @@
-import uuid
-from ..models.ppc import PPC, Curriculum
-from collections import defaultdict
-
-class FormatPPCData:
+class URLFieldsParser:
     @staticmethod
-    def get_curriculum_data(ppc_id):
-        ppc_subjects = (
-            Curriculum.objects
-            .filter(ppc__id=uuid.UUID(ppc_id))
-            .select_related('subject')
-        )
+    def build_field_map(fields: list[str]) -> dict:
+        field_map: dict = {}
+        for field in fields:
+            parts = field.split(".")
+            current = field_map
+            for i, part in enumerate(parts):
+                if i == len(parts) - 1:
+                    current[part] = True
+                else:
+                    current = current.setdefault(part, {})
+        return field_map
+    
+    @staticmethod
+    def extract_instance_fields(instance, field_map: dict):
+        result = {}
 
-        result = []
-        for ps in ppc_subjects:
-            result.append({
-                'id': ps.id,
-                'subject': ps.subject.id,
-                'subject_teach_workload': ps.subject_teach_workload,
-                'subject_ext_workload': ps.subject_ext_workload,
-                'subject_remote_workload': ps.subject_remote_workload,
-                'period': ps.period,
-                'weekly_periods': ps.weekly_periods,
-                'pre_requisits': [{'subject': pre_req.id} for pre_req in ps.pre_requisits.all()]
-            })
+        for field, subfields in field_map.items():
+            if not hasattr(instance, field):
+                result[field] = None
+                continue
+
+            value = getattr(instance, field)
+
+            # ManyToMany / reverse FK
+            if hasattr(value, "all"):
+                items = []
+                for obj in value.all():
+                    if isinstance(subfields, dict):
+                        items.append(URLFieldsParser.extract_instance_fields(obj, subfields))
+                    else:
+                        items.append(obj)
+                result[field] = items
+
+            # FK / OneToOne
+            elif isinstance(subfields, dict):
+                result[field] = URLFieldsParser.extract_instance_fields(value, subfields) if value else None
+
+            # Campo simples
+            else:
+                result[field] = value
 
         return result
     
     @staticmethod
-    def get_curriculum(ppc_id):
-        ppc_subjects = (
-            Curriculum.objects
-            .filter(ppc__id=uuid.UUID(ppc_id))
-            .select_related('subject')
-            .prefetch_related('pre_requisits')
-        )
-
-        curriculum_by_period = defaultdict(list)
-
-        for ps in ppc_subjects:
-            curriculum_by_period[ps.period].append({
-                'name': ps.subject.name,
-                'preRequisits': [pr.code for pr in ps.pre_requisits.all()]
-            })
-
-        result = []
-        for period, subjects in sorted(curriculum_by_period.items()):
-            result.append({
-                'period': f'{period}º Período',
-                'subjects': subjects
-            })
-
-        return result
-    
-    @staticmethod
-    def list_format(ppc: PPC):
-        return {
-            'id': ppc.id,
-            'titulo': ppc.title,
-            'curso': ppc.course.name,
-            'ano': ppc.created_at.year
-        }
-    
-    @staticmethod
-    def edit_details(ppc: PPC):
-        return {
-            'course': ppc.course.name,
-            'curriculum': FormatPPCData.get_curriculum(str(ppc.id)),
-            'ppc': {
-                'id': ppc.id,
-                'title': ppc.title,
-                'course': ppc.course.id,
-                'curriculum': FormatPPCData.get_curriculum_data(str(ppc.id))
-            },
-        }
-    
-    @staticmethod
-    def view_details(ppc: PPC):
-        return {
-            'id': ppc.id,
-            'title': ppc.title,
-            'course': ppc.course.name,
-        }
+    def parse(instance, fields_param: str):
+        """
+        Função única que o serializer chama.
+        Recebe a instância e a string de campos da URL (?fields=id,nome,...).
+        """
+        fields = [f.strip() for f in fields_param.split(",")]
+        field_map = URLFieldsParser.build_field_map(fields)
+        return URLFieldsParser.extract_instance_fields(instance, field_map)

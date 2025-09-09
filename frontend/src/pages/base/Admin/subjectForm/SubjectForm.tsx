@@ -38,7 +38,7 @@ const SubjectForm = () => {
 
     const fetchSubject = async () => {
         try {
-            const res = await SubjectService.get(state)
+            const res = await SubjectService.get(state, 'id, name, code, menu, objective')
 
             setSubject(res.data)
         } catch (error) {

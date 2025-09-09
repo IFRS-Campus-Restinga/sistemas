@@ -3,8 +3,8 @@ import uuid
 import unicodedata
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
-from .formatter import FormatGroupData
 from .models import GroupUUIDMap
+from .formatter import URLFieldsParser
 
 def format_string(text: str) -> str:
     # Converte para minúsculas
@@ -39,16 +39,13 @@ class GroupSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        data_format = request.GET.get("data_format", None)
+        fields = request.GET.get("fields", None)
 
-        if not data_format:
-            raise serializers.ValidationError('O campo data_format não pode ser nulo.')
+        if not fields:
+            raise serializers.ValidationError('O campo fields não pode ser nulo.')
         
-        match data_format:
-            case 'list':
-                return FormatGroupData.list_format(instance)
-            case 'details':
-                return FormatGroupData.details_format(instance)
+        return URLFieldsParser.parse(instance, fields)
+        
 
     def create(self, validated_data):
         permissions_to_add = validated_data.pop('permissions_to_add', [])

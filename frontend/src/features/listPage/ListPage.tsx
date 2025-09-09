@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import CustomLoading from '../../components/customLoading/CustomLoading'
 import FormContainer from "../../components/formContainer/FormContainer"
 import SearchBar from "../../components/searchBar/SearchBar"
 import Table from "../../components/table/tablesComponents/Table"
@@ -13,10 +12,11 @@ interface ListPageProps {
     canEdit: boolean
     canView: boolean
     onDelete: (id: string) => void
+    translations: Record<string, string>
 }
 
 
-const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }: ListPageProps) => {
+const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete, translations }: ListPageProps) => {
     const navigate = useNavigate()
     const [listData, setListData] = useState<Record<string, any>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
@@ -94,6 +94,7 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete }:
                         onDelete: onDelete
                     }}
                     searchParam={searchParam}
+                    translations={translations}
                 />
         </FormContainer>
     )

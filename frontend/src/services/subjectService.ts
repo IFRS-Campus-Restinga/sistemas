@@ -13,20 +13,20 @@ const SubjectService = {
         return api.post('api/academic/subjects/create/', params)
     },
 
-    list: async (page: number, search: string, data_format: string = 'list') => {
+    list: async (page: number, search: string, fields: string) => {
         return await api.get('api/academic/subjects/get/', {
             params: {
                 search,
                 page,
-                data_format
+                fields
             }
         })
     },
 
-    get: async (subjectId: string) => {
+    get: async (subjectId: string, fields: string) => {
         return await api.get(`api/academic/subjects/get/${subjectId}/`, {
             params: {
-                data_format: 'details'
+                fields
             }
         });
     },

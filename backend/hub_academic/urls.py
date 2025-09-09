@@ -19,7 +19,6 @@ urlpatterns = [
     path('subjects/get/<str:subject_id>/', get_subject),
     path('subjects/edit/<str:subject_id>/', edit_subject),
 
-    
     # ppc views
     path('ppcs/create/', create_ppc),
     path('ppcs/get/', list_ppc),

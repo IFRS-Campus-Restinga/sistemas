@@ -7,11 +7,11 @@ export interface Permissions {
 }
 
 const PermissionService = {
-    list: async (page: number = 1) => {
+    list: async (page: number = 1, fields: string) => {
         try {
             return api.get(`api/permissions/get/`, {
                 params: {
-                    data_format: 'list',
+                    fields,
                     page
                 }
             })
@@ -21,11 +21,11 @@ const PermissionService = {
         }
     },
 
-    listByGroup: async (groupId: string, page: number = 1) => {
+    listByGroup: async (groupId: string, page: number = 1, fields: string) => {
         try {
             return api.get(`api/permissions/get/${groupId}/`, {
                 params: {
-                    data_format: 'list',
+                    fields,
                     page
                 }
             })
@@ -35,11 +35,11 @@ const PermissionService = {
         }
     },
 
-    notAssignedTo: async (groupId: string, page: number = 1) => {
+    notAssignedTo: async (groupId: string, page: number = 1, fields: string) => {
         try {
             return api.get(`api/permissions/get/${groupId}/not_assigned/`, {
                 params: {
-                    data_format: 'list',
+                    fields,
                     page
                 }
             })

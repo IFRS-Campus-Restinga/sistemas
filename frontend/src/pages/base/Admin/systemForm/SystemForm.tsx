@@ -4,7 +4,8 @@ import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import styles from './SystemForm.module.css'
 import tableStyles from '../../../../components/table/Table.module.css'
 import { validateMandatoryArrayField, validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
-import CustomSelect, { type OptionProps } from '../../../../components/customSelect/CustomSelect'
+import CustomSelect from '../../../../components/customSelect/CustomSelect'
+import { type OptionProps } from '../../../../components/customOptions/CustomOptions'
 import CustomOptions from '../../../../components/customOptions/CustomOptions'
 import search from '../../../../assets/search-alt-svgrepo-com.svg'
 import x from '../../../../assets/close-svgrepo-com.svg'
@@ -53,7 +54,7 @@ const SystemForm = () => {
 
     const searchUsers = async () => {
         try {
-            const res = await UserService.listByAccessProfile('aluno', inputSearch, undefined, 'search', true)
+            const res = await UserService.listByAccessProfile('aluno', inputSearch, undefined, 'id, username', true)
 
             if (res.status !== 200) throw new Error(res.data?.message)
 
@@ -87,10 +88,10 @@ const SystemForm = () => {
         setDevTeamViewList(devTeamViewList.filter((_, index) => userIndex !== index))
     }
 
-    const addUser = (option: OptionProps<'id'>) => {
+    const addUser = (option: OptionProps<'username'>) => {
         if (!systemForm.dev_team.includes(option.id)) {
             setSystemForm({...systemForm, dev_team: [...systemForm.dev_team, option.id]})
-            setDevTeamViewList([...devTeamViewList, option.title])
+            setDevTeamViewList([...devTeamViewList, option.username])
         }
 
         setOptionsOpen(false)
@@ -228,8 +229,17 @@ const SystemForm = () => {
                 <div className={styles.formGroup}>
                     <CustomLabel title='Estado atual *'>
                         <CustomSelect
-                            value={systemForm.current_state}
-                            onChange={(e) => setSystemForm({ ...systemForm, current_state: e.target.value })}
+                            selected={
+                                {
+                                    title: systemForm.current_state,
+                                    value: systemForm.current_state
+                                }
+                            }
+                            onSelect={(option) => {
+                                if ('value' in option) {
+                                    setSystemForm({ ...systemForm, current_state: option.value })
+                                }
+                            }}
                             options={[
                                 {
                                     title: 'Em desenvolvimento',
@@ -240,12 +250,22 @@ const SystemForm = () => {
                                     value: 'Implantado',
                                 },
                             ]}
+                            renderKey='title'
                         />
                     </CustomLabel>
                     <CustomLabel title='Ativo/Inativo *'>
                         <CustomSelect
-                            value={systemForm.is_active ? 'Ativo' : 'Inativo'}
-                            onChange={(e) => setSystemForm({ ...systemForm, is_active: e.target.value === 'Ativo' ? true : false })}
+                            selected={
+                                {
+                                    title: systemForm.is_active ? 'Ativo' : 'Inativo',
+                                    value: systemForm.is_active ? 'Ativo' : 'Inativo'
+                                }
+                            }
+                            onSelect={(option) => {
+                                if ('value' in option) {
+                                    setSystemForm({ ...systemForm, is_active: option.value === 'Ativo' ? true : false })
+                                }
+                            }}
                             options={[
                                 {
                                     title: 'Ativo',
@@ -256,6 +276,7 @@ const SystemForm = () => {
                                     value: "Inativo",
                                 },
                             ]}
+                            renderKey='title'
                         />
                     </CustomLabel>
                 </div>
@@ -287,6 +308,7 @@ const SystemForm = () => {
                                                     addUser(option)
                                                     setInputSearch('')
                                                 }}
+                                                renderKey='username'
                                             />
                                         ) : null
                                     }

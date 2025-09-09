@@ -27,14 +27,13 @@ class UserService:
                 if access_profile != 'convidado':
                     raise UserValidationException('Servidores e alunos podem autenticar apenas pela conta google')
                 
-                user_serializer = CustomUserSerializer(data={'email': email, 'first_name': first_name, 'last_name': last_name, 'access_profile': access_profile})
+                user_serializer = CustomUserSerializer(data={'email': email, 'username': f'{first_name} {last_name}', 'access_profile': access_profile})
 
                 if not user_serializer.is_valid():
                     raise serializers.ValidationError(user_serializer.errors)
 
             user, created = CustomUser.objects.get_or_create(email=email, defaults={
-                'first_name': first_name,
-                'last_name': last_name,
+                'username': f'{first_name} {last_name}',
                 'access_profile': access_profile
             })
 
@@ -63,7 +62,7 @@ class UserService:
     def build_user_data(user: CustomUser, picture=None):
         return {
             'id': user.id,
-            'username': f'{user.first_name} {user.last_name}',
+            'username': {user.username},
             'first_login': user.first_login,
             'profile_picture': picture,
             'groups': [group.name for group in user.groups.all()],
@@ -72,12 +71,16 @@ class UserService:
     @staticmethod
     def list_by_group(request, group_name):
         search_param = request.GET.get('search')
-        active = True if request.GET.get('active') == 'true' else False
+        status = request.GET.get('status', None)
+        is_active = None
+
+        if status:
+            is_active = True if status == 'Ativo' else 'Inativo'   
 
         if search_param:
-            users = CustomUser.objects.get_by_group_and_param(group_name, search_param, active)
+            users = CustomUser.objects.get_by_group_and_param(group_name, search_param, is_active)
         else:
-            users = CustomUser.objects.get_by_group(group_name, active)
+            users = CustomUser.objects.get_by_group(group_name, status)
 
         if not users.exists():
             paginator = UserPagination()
@@ -94,12 +97,17 @@ class UserService:
     @staticmethod
     def list_by_access_profile(request, access_profile_name):
         search_param = request.GET.get('search')
-        active = True if request.GET.get('active') == 'true' else None
+        status = request.GET.get('status')
+        status = request.GET.get('status', None)
+        is_active = None
+
+        if status:
+            is_active = True if status == 'Ativo' else 'Inativo'
 
         if search_param:
-            users = CustomUser.objects.get_by_access_profile_and_param(access_profile_name, search_param, active)
+            users = CustomUser.objects.get_by_access_profile_and_param(access_profile_name, search_param, is_active)
         else:
-            users = CustomUser.objects.get_by_access_profile(access_profile_name, active)
+            users = CustomUser.objects.get_by_access_profile(access_profile_name, status)
 
         if not users.exists():
             paginator = UserPagination()
@@ -134,6 +142,8 @@ class UserService:
         user_id = id
         group_list = request_data.get('groups')
         is_abstract = request_data.get('is_abstract')
+
+        print(group_list)
 
         if not user_id or not group_list:
             raise ValueError("ID do usuário e lista de grupos são obrigatórios.")

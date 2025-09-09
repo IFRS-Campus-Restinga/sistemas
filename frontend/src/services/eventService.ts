@@ -34,20 +34,20 @@ const EventService = {
         return await api.post('api/calendars/events/create/', param)
     },
 
-    list: async (month: number = new Date().getMonth(), year: number = new Date().getFullYear()) => {
+    list: async (month: number = new Date().getMonth(), year: number = new Date().getFullYear(), fields: string) => {
         return await api.get('api/calendars/events/get/', {
             params: {
-                data_format: 'list',
+                fields,
                 month,
                 year,
             }
         })
     },
 
-    get: async (eventId: string) => {
+    get: async (eventId: string, fields: string) => {
         return await api.get(`api/calendars/events/get/${eventId}/`, {
             params: {
-                data_format: 'details'
+                fields
             }
         })
     },

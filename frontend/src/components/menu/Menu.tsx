@@ -127,7 +127,7 @@ const Menu = () => {
                                     <Modal setIsOpen={setIsOpen}>
                                         <FormContainer title={system.name} formTip={"Copie e cole este código no arquivo de configurações do backend do seu projeto"} width='50%'>
                                             <div className={styles.formGroup}>
-                                                ID do sistema
+                                                Chave de API do sistema
                                                 <p className={styles.content}>
                                                     {apiKey}
                                                 </p>

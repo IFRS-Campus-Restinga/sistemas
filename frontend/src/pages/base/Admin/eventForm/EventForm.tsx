@@ -45,7 +45,7 @@ const EventForm = () => {
         setIsLoading(true)
 
         try {
-            const res = await EventService.get(eventId!)
+            const res = await EventService.get(eventId!, 'id, title, start, end, type, category, description')
 
             setEvent(res.data)
         } catch (error) {
@@ -170,13 +170,21 @@ const EventForm = () => {
                                             value: v
                                         }
                                     })}
-                                    onChange={(event) =>
-                                        setEvent((prev) => ({
-                                        ...prev,
-                                        type: event.target.value as EventTypes,
-                                        }))
+                                    onSelect={(option) => {
+                                        if ('value' in option) {
+                                            setEvent((prev) => ({
+                                                ...prev,
+                                                type: option.value as EventTypes,
+                                            }))
+                                        }
+                                    }}
+                                    selected={
+                                        {
+                                            title: event.type,
+                                            value: event.type
+                                        }
                                     }
-                                    value={event.type}
+                                    renderKey='title'
                                 />
                             </CustomLabel>
                             <CustomLabel title='Categoria *'>
@@ -187,13 +195,21 @@ const EventForm = () => {
                                             value: v
                                         }
                                     })}
-                                    onChange={(event) =>
-                                        setEvent((prev) => ({
-                                            ...prev,
-                                            category: event.target.value as EventCategories,
-                                        }))
+                                    onSelect={(option) => {
+                                        if ('value' in option) {
+                                            setEvent((prev) => ({
+                                                ...prev,
+                                                category: option.value as EventCategories,
+                                            }))
+                                        }
+                                    }}
+                                    selected={
+                                        {
+                                            title: event.category,
+                                            value: event.category
+                                        }
                                     }
-                                    value={event.category}
+                                    renderKey='title'
                                 />
                             </CustomLabel>
                         </div>

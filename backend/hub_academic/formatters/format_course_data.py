@@ -1,43 +1,54 @@
-from ..models.course import Course
+class URLFieldsParser:
+    @staticmethod
+    def build_field_map(fields: list[str]) -> dict:
+        field_map: dict = {}
+        for field in fields:
+            parts = field.split(".")
+            current = field_map
+            for i, part in enumerate(parts):
+                if i == len(parts) - 1:
+                    current[part] = True
+                else:
+                    current = current.setdefault(part, {})
+        return field_map
+    
+    @staticmethod
+    def extract_instance_fields(instance, field_map: dict):
+        result = {}
 
-class FormatCourseData:
-    @staticmethod
-    def list_format(course: Course):
-        return {
-            'id': course.id,
-            'nome': course.name,
-            'modalidade': course.category,
-            'carga horária': course.workload,
-            'coordenador': course.coord.email,
-        }
+        for field, subfields in field_map.items():
+            if not hasattr(instance, field):
+                result[field] = None
+                continue
+
+            value = getattr(instance, field)
+
+            # ManyToMany / reverse FK
+            if hasattr(value, "all"):
+                items = []
+                for obj in value.all():
+                    if isinstance(subfields, dict):
+                        items.append(URLFieldsParser.extract_instance_fields(obj, subfields))
+                    else:
+                        items.append(obj)
+                result[field] = items
+
+            # FK / OneToOne
+            elif isinstance(subfields, dict):
+                result[field] = URLFieldsParser.extract_instance_fields(value, subfields) if value else None
+
+            # Campo simples
+            else:
+                result[field] = value
+
+        return result
     
     @staticmethod
-    def search_format(course: Course, course_classes: str):
-        if course_classes == 'include':
-            return {
-                'id': course.id,
-                'title': course.name,
-                'course_classes': [
-                    {
-                        'id': course_class.id,
-                        'title': course_class.number,
-                    }
-                    for course_class in course.course_class.all()
-                ]
-            }
-        else:
-            return {
-                'id': course.id,
-                'title': course.name,
-            }
-    
-    @staticmethod
-    def details_format(course: Course):
-        return {
-            'id': course.id,
-            'name': course.name,
-            'category': course.category,
-            'workload': course.workload,
-            'coord': {'id': course.coord.id, 'name': f'{course.coord.first_name} {course.coord.last_name}'},
-            'classes': [{'id': course_class.id, 'number': course_class.number, 'course': course.id} for course_class in course.course_class.all()]
-        }
+    def parse(instance, fields_param: str):
+        """
+        Função única que o serializer chama.
+        Recebe a instância e a string de campos da URL (?fields=id,nome,...).
+        """
+        fields = [f.strip() for f in fields_param.split(",")]
+        field_map = URLFieldsParser.build_field_map(fields)
+        return URLFieldsParser.extract_instance_fields(instance, field_map)

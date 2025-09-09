@@ -1,7 +1,7 @@
 from uuid import UUID
 from rest_framework import serializers
 from ..models.ppc import PPC, Curriculum
-from ..formatters.format_ppc_data import FormatPPCData
+from ..formatters.format_ppc_data import URLFieldsParser
 from ..models.subject import Subject
 from ..models.course import Course
 
@@ -160,20 +160,12 @@ class PPCSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request', None)
-        data_format = request.GET.get('data_format', None)
+        fields = request.GET.get('fields', None)
 
-        if not data_format:
-            raise serializers.ValidationError('O parâmetro data_format é obrigatório')
+        if not fields:
+            raise serializers.ValidationError('O parâmetro fields é obrigatório')
         
-        match data_format:
-            case 'list':
-                return FormatPPCData.list_format(instance)
-            case 'edit_details':
-                return FormatPPCData.edit_details(instance)
-            case 'view_details':
-                return FormatPPCData
-            case _:
-                raise serializers.ValidationError('data_format inválido')
+        return URLFieldsParser.parse(instance, fields)
         
 
             
