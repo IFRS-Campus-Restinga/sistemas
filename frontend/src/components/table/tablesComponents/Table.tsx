@@ -93,7 +93,7 @@ const Table = ({ itemList, next, previous, translations, setCurrent, current, lo
                                     ): null
                                 ))
                             }
-                            {(crudActions || dualActions) && <th className={styles.th}>Ações</th>}
+                            {(crudActions || dualActions) && <th className={styles.thAction}>Ações</th>}
                             </tr>
                         </thead>
                         <tbody className={styles.tbody}>

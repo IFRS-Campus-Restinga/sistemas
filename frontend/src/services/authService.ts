@@ -12,9 +12,13 @@ export interface visitorLoginProps {
 }
 
 const AuthService = {
-    login: async (params: visitorLoginProps) => {
+    login: async (params: visitorLoginProps, system: string | null) => {
         try {
-            const res = await api.post('session/login/', params)
+            const res = await api.post('session/login/', params, {
+                params: {
+                    system
+                }
+            })
 
             return res
         } catch (error: any) {
@@ -22,9 +26,13 @@ const AuthService = {
         }
     },
 
-    googleLogin: async (params: AuthParams) => {
+    googleLogin: async (params: AuthParams, system: string | null) => {
         try {
-            const res = await api.post('session/login/google/', params)
+            const res = await api.post('session/login/google/', params, {
+                params: {
+                    system
+                }
+            })
 
             return res
         } catch (error) {

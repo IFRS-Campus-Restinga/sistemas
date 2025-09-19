@@ -1,7 +1,7 @@
-import type { AxiosResponse } from "axios"
 import api from "../../config/apiConfig"
-import type { UserState } from "../store/userSlice"
 import { extractError } from "../utils/handleAxiosError"
+import flattenValues from "../utils/flattenObj"
+import type { UserInterface } from "../pages/base/Admin/userForm/UserForm"
 
 export interface RequestGroup {
     id: string
@@ -31,14 +31,7 @@ const UserService = {
                 accessProfile: 'convidado'
             }
     
-            try {
-                const res = await api.post('api/users/create/', params)
-    
-                return res
-            } catch (error: any) {
-                throw extractError(error)
-            }
-    
+            return await api.post('api/users/create/', params)
     },
 
     getRequests: async (page: number = 1, fields: string) => {
@@ -55,23 +48,27 @@ const UserService = {
     },
 
     approveRequest: async (request: RequestInterface) => {
-        try {
-            return await api.put(`api/users/request/${request.id}/approve/`, request)
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.put(`api/users/request/${request.id}/approve/`, request)
     },
 
     declineRequest: async (requestId: string) => {
-        try {
-            return await api.delete(`api/users/request/${requestId}/decline/`)
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.delete(`api/users/request/${requestId}/decline/`)
     },
 
-    getData: async (): Promise<AxiosResponse<UserState, Error>> => {
-        return await api.get<UserState>('api/users/data/')
+    get: async (userId: string, fields: string) => {
+        let res = await api.get(`api/users/get/${userId}/`, {
+            params: {
+                fields
+            }
+        })
+
+        res.data = flattenValues(res.data)
+
+        return res
+    },
+
+    getData: async () => {
+        return await api.get('api/users/get/data/')
     },
 
     listByAccessProfile: async (profile: string, param: string = '', page: number = 1, fields: string, active?: boolean) => {
@@ -101,6 +98,10 @@ const UserService = {
             }
         })
     },
+
+    edit: async (userId: string, params: UserInterface) => {
+        return await api.put(`api/users/edit/${userId}/`, params)
+    }
 }
 
 export default UserService

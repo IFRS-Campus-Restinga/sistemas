@@ -26,6 +26,7 @@ interface DualTableTransferProps<T> {
     fetchData2?: (page: number) => void
     loadingList1: boolean
     loadingList2?: boolean
+    validate?: (item: T, targetList: T[]) => string | null
 }
 
 const DualTableTransfer = <T,>({ 
@@ -49,6 +50,7 @@ const DualTableTransfer = <T,>({
     fetchData2,
     loadingList1,
     loadingList2,
+    validate
 }: DualTableTransferProps<T>) => {
     const firstRefList1 = useRef(null)
     const lastRefList1 = useRef(null)
@@ -58,18 +60,25 @@ const DualTableTransfer = <T,>({
     const sendToList2 = (itemIndex: number) => {
         const item = list1[itemIndex];
 
-        // Remover o item da list1
+        if (validate) {
+            const error = validate(item, list2);
+            if (error) {
+                console.log(error)
+                return;
+            }
+        }
+
         const updatedList1 = list1.filter((_, index) => index !== itemIndex);
 
-        // Verificar se item já está em list2
         const alreadyInList2 = list2.some((i) => getKey(i) === getKey(item));
         if (!alreadyInList2) {
             const updatedList2 = [...list2, item];
             setList2(updatedList2);
         }
 
-        setList1(updatedList1); // Isso deve vir **depois**
-        if (callbackList1) callbackList1(item)
+        setList1(updatedList1);
+
+        if (callbackList1) callbackList1(item);
     };
 
     const sendToList1 = (itemIndex: number) => {
@@ -147,7 +156,7 @@ const DualTableTransfer = <T,>({
                     <thead className={styles.thead}>
                         <tr className={styles.tr}>
                             <th className={styles.th}>{title1}</th>
-                            <th className={styles.thAction}/>
+                            <th className={styles.thDualAction}/>
                         </tr>
                     </thead>
                     <tbody className={styles.tbody}>
@@ -162,7 +171,7 @@ const DualTableTransfer = <T,>({
                                 }
                             >
                                 <td className={styles.td}>{renderItem(item)}</td>
-                                <td className={styles.tdAction}>
+                                <td className={styles.tdDualAction}>
                                     <img src={doubleArrow} alt="Vincular" className={styles.action} onClick={() => sendToList2(index)}/>
                                 </td>
                             </tr>
@@ -181,7 +190,7 @@ const DualTableTransfer = <T,>({
                 <table className={styles.table}>
                     <thead className={styles.thead}>
                         <tr className={styles.tr}>
-                            <th className={styles.thAction}/>
+                            <th className={styles.thDualAction}/>
                             <th className={styles.th}>{title2}</th>
                         </tr>
                     </thead>
@@ -196,7 +205,7 @@ const DualTableTransfer = <T,>({
                                     null
                                 }
                             >
-                                <td className={styles.tdAction}>
+                                <td className={styles.tdDualAction}>
                                     <img src={doubleArrow} alt="Desvincular" style={{rotate: '180deg'}} className={styles.action} onClick={() => sendToList1(index)}/>
                                 </td>
                                 <td className={styles.td}>{renderItem(item)}</td>

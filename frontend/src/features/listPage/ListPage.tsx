@@ -8,15 +8,14 @@ import { useNavigate } from "react-router-dom"
 interface ListPageProps {
     title: string
     fetchData: (currentPage: number, searchParam: string) => Promise<{ next: number, previous: number, data: Record<string, any>[] }>
-    registerUrl: string
+    registerUrl?: string
     canEdit: boolean
     canView: boolean
-    onDelete: (id: string) => void
     translations: Record<string, string>
 }
 
 
-const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete, translations }: ListPageProps) => {
+const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translations }: ListPageProps) => {
     const navigate = useNavigate()
     const [listData, setListData] = useState<Record<string, any>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
@@ -78,7 +77,11 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete, t
                     }}
                     searchParam={searchParam}
                 />
-                <div className={styles.addIcon} onClick={() => navigate(registerUrl)}>+</div>
+                {
+                    registerUrl ? (
+                        <div className={styles.addIcon} onClick={() => navigate(registerUrl)}>+</div>
+                    ) : null
+                }
             </div>
                 <Table 
                     itemList={listData}
@@ -91,7 +94,6 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, onDelete, t
                     crudActions={{
                         canEdit: canEdit,
                         canView: canView,
-                        onDelete: onDelete
                     }}
                     searchParam={searchParam}
                     translations={translations}

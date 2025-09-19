@@ -1,11 +1,10 @@
 import { createBrowserRouter } from 'react-router-dom'
+// Base
 import Login from './pages/login/Login'
+
+// Admin
 import BaseAdmin from './pages/base/Admin/BaseAdmin'
-import BaseMember from './pages/base/Member/BaseMember'
-import BaseVisitor from './pages/base/Visitor/BaseVisitor'
 import HomeAdmin from './pages/base/Admin/home/HomeAdmin'
-import HomeMember from './pages/base/Member/home/HomeMember'
-import HomeVisitor from './pages/base/Visitor/home/HomeVisitor'
 import SystemForm from './pages/base/Admin/systemForm/SystemForm'
 import UserList from './pages/base/Admin/userList/UserList'
 import GroupList from './pages/base/Admin/groupList/GroupList'
@@ -20,6 +19,18 @@ import SubjectList from './pages/base/Admin/subjectList/SubjectList'
 import SubjectForm from './pages/base/Admin/subjectForm/SubjectForm'
 import PPCList from './pages/base/Admin/ppcList/PPCList'
 import PPCForm from './pages/base/Admin/ppcForm/PPCForm'
+import UserForm from './pages/base/Admin/userForm/UserForm'
+
+// User
+import BaseUser from './pages/base/Member/BaseUser'
+import HomeUser from './pages/base/Member/home/HomeUser'
+import CalendarUser from './pages/base/Member/calendar/Calendar'
+import CalendarListUser from './pages/base/Member/calendarList/CalendarList'
+import CourseListUser from './pages/base/Member/courseList/CourseList'
+import PPCListUser from './pages/base/Member/ppcList/PPCList'
+import SubjectListUser from './pages/base/Member/subjectList/SubjectList'
+import CourseDetails from './pages/base/Member/courseDetails/CourseDetails'
+import EventDetails from './pages/base/Member/eventDetails/EventDetails'
 
 const routes = createBrowserRouter([
     {
@@ -35,15 +46,15 @@ const routes = createBrowserRouter([
                 element: <HomeAdmin />
             },
             {
-                path: 'aluno/',
+                path: 'alunos/',
                 element: <UserList />
             },
             {
-                path: 'servidor/',
+                path: 'servidores/',
                 element: <UserList />
             },
             {
-                path: 'convidado/',
+                path: 'convidados/',
                 element: <UserList />
             },
             {
@@ -125,29 +136,66 @@ const routes = createBrowserRouter([
             {
                 path: 'ppcs/:ppcId/edit/',
                 element: <PPCForm/>
-            }
+            },
+            {
+                path: 'alunos/:alunoId/edit/',
+                element: <UserForm/>
+            },
+            {
+                path: 'servidores/:servidorId/edit/',
+                element: <UserForm/>
+            },
+            {
+                path: 'convidados/:convidadoId/edit/',
+                element: <UserForm/>
+            },
         ]
     },
     {
-        path: '/session/membro',
-        element: <BaseMember />,
+        path: '/session/user',
+        element: <BaseUser />,
         children: [
             {
                 path: 'home',
-                element: <HomeMember />
+                element: <HomeUser />
+            },
+            {
+                path: 'calendarios/',
+                element: <CalendarListUser/>
+            },
+            {
+                path: 'calendarios/:calendarioId/',
+                element: <CalendarUser/>
+            },
+            {
+                path: 'calendarios/:calendarioId/eventos/:eventoId/',
+                element: <EventDetails/>
+            },
+            {
+                path: 'cursos/',
+                element: <CourseListUser/>
+            },
+            {
+                path: 'cursos/:cursoId/',
+                element: <CourseDetails/>
+            },
+            {
+                path: 'ppcs/',
+                element: <PPCListUser/>
+            },
+            {
+                path: 'ppcs/:ppcId/',
+            },
+            {
+                path: 'disciplinas/',
+                element: <SubjectListUser/>,
+            },
+            {
+                path: 'disciplinas/:subjectId/',
             }
+
         ]
     },
-    {
-        path: '/auth/visitante',
-        element: <BaseVisitor />,
-        children: [
-            {
-                path: 'home',
-                element: <HomeVisitor />
-            }
-        ]
-    }
 ])
 
 export default routes

@@ -75,6 +75,16 @@ class GroupService:
 
         serializer = GroupSerializer(paginated_result, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
+    
+    @staticmethod
+    def list_available(request, user_id):    
+        groups = Group.objects.exclude(user__id=uuid.UUID(user_id))
+
+        paginator = GroupPagination()
+        paginated_result = paginator.paginate_queryset(groups, request)
+
+        serializer = GroupSerializer(paginated_result, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     @staticmethod
     def get_group_data(group_id: str, request):

@@ -22,15 +22,6 @@ class SystemService:
     @staticmethod
     @transaction.atomic
     def create(system_data):
-        groups = system_data.pop('groups', None)
-
-        if not groups:
-            raise SystemException('Todo sistema deve conter grupos')
-        
-        created_groups = [GroupService.create({'name': group}).id for group in groups]
-
-        system_data['groups'] = created_groups
-
         serializer = SystemSerializer(data=system_data)
 
         if not serializer.is_valid():
@@ -49,10 +40,8 @@ class SystemService:
         return serializer.data
     
     @staticmethod
-    def get_menu(request):
-        user_id = request.GET.get('user_id', None)
-        
-        systems = System.objects.list_menu(user_id)
+    def list(request):
+        systems = System.objects.all()
 
         if not systems:
             return Response({'results': []}, status=status.HTTP_200_OK)
@@ -68,29 +57,9 @@ class SystemService:
     def edit(system_data, system_id):
         system = get_object_or_404(System, pk=uuid.UUID(system_id))
 
-        system_groups = system_data.get('groups', [])
-
-        groups = [GroupService.create({'name': group_name}) for group_name in system_groups]
-
-        system_data['groups'] = [group.pk for group in groups]
-
         serializer = SystemSerializer(instance=system, data=system_data)
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
         
         serializer.save()
-
-    @staticmethod
-    def get_api_key(request, system_id):
-        payload = TokenService.decode_token(request.COOKIES.get("access_token"))
-        system = get_object_or_404(System, pk=uuid.UUID(system_id))
-
-        groups = payload.get("groups")
-        user_id = payload.get("user_id")
-
-        if not 'admin' in groups:
-            if not user_id in system.dev_team.all() or system.current_state != "Em desenvolvimento":
-                return None
-                
-        return system.api_key

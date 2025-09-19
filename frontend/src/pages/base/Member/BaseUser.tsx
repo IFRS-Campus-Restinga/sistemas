@@ -7,8 +7,7 @@ import CustomLoading from "../../../components/customLoading/CustomLoading"
 import UserService from "../../../services/userService"
 import { AxiosError } from "axios"
 
-
-const BaseMember = () => {
+const BaseUser = () => {
     const redirect = useNavigate()
     const user = useUser()
     const setUser = useSetUser()
@@ -19,14 +18,14 @@ const BaseMember = () => {
             const res = await UserService.getData()
 
             setUser(res.data)
-            setAuthorized(hasGroup('membro', res.data))
+            setAuthorized(hasGroup('user', res.data))
         } catch (error) {
             if (error instanceof AxiosError) {
                 if (error?.response?.status === 401) {
                     console.error("Token inválido ou refresh falhou, redirecionando.")
                     redirect('/session')
                 } else {
-                    console.error("Erro inesperado ao buscar usuário:", error)
+                    console.error(error)
                 }
             }
         }
@@ -62,4 +61,4 @@ const BaseMember = () => {
     )
 }
 
-export default BaseMember
+export default BaseUser

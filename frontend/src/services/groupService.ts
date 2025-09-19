@@ -47,6 +47,19 @@ const GroupService = {
         }
     },
 
+    getAvailable: async (userId: string, page: number, fields: string) => {
+        try {
+            return await api.get(`api/groups/get/available/${userId}/`, {
+                params: {
+                    fields,
+                    page
+                }
+            });
+        } catch (error) {
+            throw extractError(error);
+        }
+    },
+
     edit: async (params: GroupData, group_id: string) => {
         try {
             return api.put(`api/groups/edit/${group_id}/`, params)

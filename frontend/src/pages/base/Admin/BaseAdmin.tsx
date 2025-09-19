@@ -70,15 +70,15 @@ const BaseAdmin = () => {
                             dropdownTitle: 'Usuários & Acesso', dropdownIcon: userIcon, items: [
                                 {
                                     title: 'Alunos',
-                                    link: '/session/admin/aluno',
+                                    link: '/session/admin/alunos',
                                 },
                                 {
                                     title: 'Servidores',
-                                    link: '/session/admin/servidor',
+                                    link: '/session/admin/servidores',
                                 },
                                 {
                                     title: 'Convidados',
-                                    link: '/session/admin/convidado',
+                                    link: '/session/admin/convidados',
                                 },
                                 {
                                     title: 'Grupos',

@@ -38,9 +38,10 @@ class Password(models.Model):
     password = models.CharField(max_length=128)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='custom_password')
     
-class StudentAdditionalInfos(models.Model):
-    category = models.CharField(choices=Categories.choices, max_length=15, null=False, blank=False)
+class AdditionalInfos(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     birth_date = models.DateField()
     telephone_number = models.CharField(max_length=13, null=False, blank=False)
-    registration = models.CharField(max_length=30, null=False, blank=False)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    registration = models.CharField(max_length=11, null=True, blank=True)
+    cpf = models.CharField(max_length=11)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='additional_infos')

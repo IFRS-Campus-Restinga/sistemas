@@ -69,6 +69,7 @@
 .btnText {
     width: 2rem;
     padding: 5px;
+    left: 1rem;
     transform: translateX(0);
     transition: right 0.5s ease;
     position: absolute;

@@ -19,7 +19,6 @@ interface SystemInterface {
     system_url: string
     current_state:  string
     is_active: boolean
-    groups: string[]
     dev_team: string[]
 }
 
@@ -35,14 +34,14 @@ const Menu = () => {
     const user = useUser()
 
     const redirectToSystem = (system: SystemInterface) => {
-        const url = `${system.system_url}/session/token/?system=${system.id}&user=${user.id}&profilePicture=${sessionStorage.getItem('profilePicture')}`;
+        const url = `${system.system_url}/session/token/?user=${user.id}&profilePicture=${sessionStorage.getItem('profilePicture')}`;
 
-        window.open(url, '_blank')
+        window.location.href = url
     }
 
     const fetchSystems = async () => {
         try {
-            const res = await SystemService.list(user.id!, currentPage)
+            const res = await SystemService.list(user.id!, currentPage, 'id, name, system_url, dev_team.id, current_state, is_active')
             
             setSystems(res.data.results)
             setNext(res.data.next ? currentPage + 1 : null)
@@ -56,9 +55,9 @@ const Menu = () => {
 
     const fetchAPIKey = async (systemId: string) => {
         try {
-            const res = await SystemService.getAPIKey(systemId)
+            const res = await SystemService.get(systemId, 'api_key')
 
-            setAPIKey(res.data)
+            setAPIKey(res.data.api_key)
             setIsOpen(true)
         } catch (error) {
             if (error instanceof AxiosError) {
@@ -79,6 +78,7 @@ const Menu = () => {
 
     useEffect(() => {
         fetchSystems()
+        console.log(systems)
     }, [currentPage])
 
     if (isLoading) return (
@@ -126,6 +126,12 @@ const Menu = () => {
                                 isOpen ? (
                                     <Modal setIsOpen={setIsOpen}>
                                         <FormContainer title={system.name} formTip={"Copie e cole este código no arquivo de configurações do backend do seu projeto"} width='50%'>
+                                            <div className={styles.formGroup}>
+                                                ID do sistema
+                                                <p className={styles.content}>
+                                                    {system.id}
+                                                </p>
+                                            </div>
                                             <div className={styles.formGroup}>
                                                 Chave de API do sistema
                                                 <p className={styles.content}>

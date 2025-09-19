@@ -89,9 +89,13 @@
 }
 
 .thAction, .tdAction {
+    width: 80px;
+    padding: 3px;
+}
+
+.thDualAction, .tdDualAction {
     width: 0;
     padding: 3px;
-
 }
 
 .td {
@@ -102,7 +106,7 @@
 
 .actions {
     display: flex;
-    width: fit-content;
+    width: 100%;
     gap: 4px;
     margin-right: 5px;
     justify-content: center;

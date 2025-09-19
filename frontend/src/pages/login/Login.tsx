@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Base from "../../components/base/Base"
 import styles from './Login.module.css'
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
@@ -11,6 +11,8 @@ import CustomLoading from "../../components/customLoading/CustomLoading"
 import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/validations/authValidations"
 import { useSetUser } from "../../store/userHooks"
 import UserService, {type visitorAccountProps} from "../../services/userService"
+import { SystemService } from "../../services/systemService"
+import { AxiosError } from "axios"
 
 export interface visitorAccountErrorProps {
     first_name: string | null
@@ -28,6 +30,9 @@ export interface visitorLoginErrorProps {
 const Login = () => {
     const setUser = useSetUser()
     const redirect = useNavigate()
+    const queryParams = new URLSearchParams(location.search);
+    const systemId = queryParams.get('system')
+    const [systemURL, setSystemURL] = useState<string>('')
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
     const [accessProfile, setAccessProfile] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
     const [loginWithExternalAccount, setLoginWithExternalAccount] = useState<boolean>(false)
@@ -74,54 +79,48 @@ const Login = () => {
     const handleSuccess = async (response: CredentialResponse) => {
         setIsDisabled(true)
 
-        const req = AuthService.googleLogin({ credential: response.credential, accessProfile: accessProfile })
-
-        toast.promise(
-            (async () => {
-                try {
-                    const res = await req;
-
-                    if (!res.data.user) {
-                        setAccessRequested(true)
-                    } else {
-                        setUser(res.data.user)
-
-                        if (res.data.user.profile_picture) sessionStorage.setItem('profilePicture', res.data.user.profile_picture)
-
-                        setErrors({
-                            email: null,
-                            first_name: null,
-                            last_name: null,
-                            password: null,
-                            passwordConfirmation: null
-                        });
-
-                        if (res.data.user.groups) {
-                            const groups = res.data.user.groups
-
-                            for (let group of groups) {
-                                if (group === 'admin') redirect(`/session/admin/home`)
-                                if (group === 'membro') redirect(`/session/membro/home`)
-                                if (group === 'visit') redirect(`/session/visit/home`)
-                            }
+        try {
+            const res = await AuthService.googleLogin({ credential: response.credential, accessProfile: accessProfile }, systemId)
+            
+            if (!res.data.user) {
+                setAccessRequested(true)
+            } else {
+                if (!systemURL) {
+                    console.log(res.data.user)
+                    setUser(res.data.user)
+    
+                    if (res.data.user.profile_picture) sessionStorage.setItem('profilePicture', res.data.user.profile_picture)
+    
+                    setErrors({
+                        email: null,
+                        first_name: null,
+                        last_name: null,
+                        password: null,
+                        passwordConfirmation: null
+                    });
+    
+                    if (res.data.user.groups) {
+                        const groups = res.data.user.groups
+    
+                        for (let group of groups) {
+                            if (group === 'admin') redirect(`/session/admin/home`)
+                            if (group === 'user') redirect(`/session/user/home`)
                         }
-
                     }
-
-                    return res;
-                } finally {
-                    setIsDisabled(false);
-                }
-            })(),
-            {
-                success: 'Solicitação finalizada com sucesso!',
-                error: {
-                    render({ data }: { data: any }) {
-                        return data.message || 'Erro ao solicitar login'
-                    }
+                } 
+                 else {
+                    const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+    
+                    window.location.href = url
                 }
             }
-        );
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }
+        }
     }
 
     const handleError = () => {
@@ -132,6 +131,7 @@ const Login = () => {
         e.preventDefault()
 
         setIsDisabled(true)
+
         if (!validateRegisterForm()) return
 
         if ('first_name' in visitorAccountData) {
@@ -156,61 +156,62 @@ const Login = () => {
                     }
                 }
             )
+
+            setTimeout(() => {
+               setAccessRequested(false) 
+            }, 2000);
         }
     }
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!validateLoginForm()) return
 
-
-        if (!createAccount) {
-            toast.promise(
-                (async () => {
-                    const req = AuthService.login(visitorAccountData)
-
-                    try {
-                        const res = await req;
-
-                        if ('is_active' in res.data) {
-                            setAccessRequested(true)
-                        } else {
-                            setUser(res.data.user)
-
-                            setErrors({
-                                email: null,
-                                first_name: null,
-                                last_name: null,
-                                password: null,
-                                passwordConfirmation: null
-                            });
-
-                            if (res.data.user.groups) {
-                                const groups = res.data.user.groups
-
-                                for (let group of groups) {
-                                    if (group === 'admin') redirect(`/session/admin/home`)
-                                    if (group === 'membro') redirect(`/session/membro/home`)
-                                    if (group === 'visit') redirect(`/session/visit/home`)
-                                }
+        try {
+            if (!createAccount) {
+                const req = AuthService.login(visitorAccountData, systemId)
+    
+                const res = await req;
+    
+                if ('is_active' in res.data) {
+                    setAccessRequested(true)
+                } else {
+                    if (!systemURL) {
+                        setUser(res.data.user)
+    
+                        setErrors({
+                            email: null,
+                            first_name: null,
+                            last_name: null,
+                            password: null,
+                            passwordConfirmation: null
+                        });
+    
+                        if (res.data.user.groups) {
+                            const groups = res.data.user.groups
+    
+                            for (let group of groups) {
+                                if (group === 'admin') redirect(`/session/admin/home`)
+                                if (group === 'user') redirect(`/session/user/home`)
                             }
                         }
-
-                        return res;
-                    } finally {
-                        setIsDisabled(false);
-                    }
-                })(),
-                {
-                    success: 'Login finalizado com sucesso!',
-                    error: {
-                        render({ data }: any) {
-                            return data.message || 'Erro ao autenticar'
-                        }
+                    } 
+                     else {
+                        const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+    
+                        window.location.href = url
                     }
                 }
-            )
+    
+                return res;
+            }
+        } catch (error) {
+             if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }
         }
 
     }
@@ -275,6 +276,23 @@ const Login = () => {
         return Object.values(newErrors).every((error) => error === null)
     }
 
+    const fetchSystem = async () => {
+        try {
+            const res = await SystemService.get(systemId!, 'system_url')
+
+            setSystemURL(res.data.system_url)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }
+        }
+    }
+
+    useEffect(() => {
+        if (systemId) fetchSystem()
+    }, [systemId])
 
     return (
         <Base navBar={<></>}>

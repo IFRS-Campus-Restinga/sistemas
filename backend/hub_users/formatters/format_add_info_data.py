@@ -1,5 +1,3 @@
-
-
 class URLFieldsParser:
     @staticmethod
     def build_field_map(fields: list[str]) -> dict:

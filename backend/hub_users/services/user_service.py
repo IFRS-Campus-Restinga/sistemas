@@ -15,39 +15,56 @@ class UserPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 30
 
-class UserValidationException(Exception):
-    pass
-
 class UserService:
     @staticmethod
     @transaction.atomic
-    def create_user(email: str, first_name: str, last_name: str, access_profile: str, password: str = None) -> tuple[CustomUser, bool]:
-        try:
-            if password:
-                if access_profile != 'convidado':
-                    raise UserValidationException('Servidores e alunos podem autenticar apenas pela conta google')
-                
-                user_serializer = CustomUserSerializer(data={'email': email, 'username': f'{first_name} {last_name}', 'access_profile': access_profile})
+    def create_user(data) -> tuple[CustomUser, bool]:
+        email = data.get('email', None)
+        first_name = data.get('first_name', None)
+        last_name = data.get('last_name', None)
+        access_profile = data.get('access_profile', None)
+        password = data.get('password', None)
 
-                if not user_serializer.is_valid():
-                    raise serializers.ValidationError(user_serializer.errors)
+        if password:
+            if access_profile != 'convidado':
+                raise serializers.ValidationError('Servidores e alunos podem autenticar apenas pela conta google')
 
-            user, created = CustomUser.objects.get_or_create(email=email, defaults={
-                'username': f'{first_name} {last_name}',
-                'access_profile': access_profile
-            })
+        user, created = CustomUser.objects.get_or_create(email=email, defaults={
+            'username': f'{first_name} {last_name}',
+            'access_profile': access_profile
+        })
 
-            if access_profile == 'aluno':
-                UserService.add_group(user, 'aluno')
-                UserService.add_group(user, 'membro')
+        if access_profile == 'aluno':
+            UserService.add_group(user, 'user')
 
-            if password and created:
-                PasswordService.create(user, password)
+        if password and created:
+            PasswordService.create(user, password)
 
-            return user, created
-        except serializers.ValidationError as e:
-            raise e
+        return user, created
 
+    @staticmethod
+    def edit(request, user_id):
+        data = request.data.copy()
+
+        user = get_object_or_404(CustomUser, pk=uuid.UUID(user_id))
+
+        data['groups'] = [Group.objects.get(uuid_map__uuid=uuid.UUID(group['id'])).id for group in request.data.get('groups', None)]
+
+        serializer = CustomUserSerializer(instance=user, data=data)
+
+        if not serializer.is_valid():
+            raise serializers.ValidationError(serializer.errors)
+        
+        serializer.save()
+
+    @staticmethod
+    def get(request, user_id):
+        user = get_object_or_404(CustomUser, pk=uuid.UUID(user_id))
+
+        serializer = CustomUserSerializer(user, context={'request': request})
+
+        return serializer.data
+    
     @staticmethod
     def add_group(user: CustomUser, group_name: str) -> None:
         group = Group.objects.get(name=group_name)
@@ -60,14 +77,21 @@ class UserService:
 
     @staticmethod
     def build_user_data(user: CustomUser, picture=None):
-        return {
-            'id': user.id,
-            'username': {user.username},
+        data = {
+            'id': str(user.id),
+            'username': user.username,
             'first_login': user.first_login,
-            'profile_picture': picture,
             'groups': [group.name for group in user.groups.all()],
         }
+
+        if not user.is_abstract:
+            data['is_abstract'] = user.is_abstract,
+
+        if picture:
+            data['profile_picture'] = picture
     
+        return data
+        
     @staticmethod
     def list_by_group(request, group_name):
         search_param = request.GET.get('search')
@@ -80,7 +104,7 @@ class UserService:
         if search_param:
             users = CustomUser.objects.get_by_group_and_param(group_name, search_param, is_active)
         else:
-            users = CustomUser.objects.get_by_group(group_name, status)
+            users = CustomUser.objects.get_by_group(group_name, is_active)
 
         if not users.exists():
             paginator = UserPagination()
@@ -97,7 +121,6 @@ class UserService:
     @staticmethod
     def list_by_access_profile(request, access_profile_name):
         search_param = request.GET.get('search')
-        status = request.GET.get('status')
         status = request.GET.get('status', None)
         is_active = None
 
@@ -107,7 +130,7 @@ class UserService:
         if search_param:
             users = CustomUser.objects.get_by_access_profile_and_param(access_profile_name, search_param, is_active)
         else:
-            users = CustomUser.objects.get_by_access_profile(access_profile_name, status)
+            users = CustomUser.objects.get_by_access_profile(access_profile_name, is_active)
 
         if not users.exists():
             paginator = UserPagination()

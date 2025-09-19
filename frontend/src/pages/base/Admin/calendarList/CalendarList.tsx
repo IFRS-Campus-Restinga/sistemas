@@ -20,10 +20,6 @@ const CalendarList = () => {
         }
     }
 
-    const deleteCalendar = async (calendarId: string) => {
-
-    }
-
     return (
         <ListPage
             title='Calendários'
@@ -31,7 +27,6 @@ const CalendarList = () => {
             registerUrl='/session/admin/calendarios/create/'
             canEdit={true}
             canView={true}
-            onDelete={deleteCalendar}
             translations={translations}
         />
     )

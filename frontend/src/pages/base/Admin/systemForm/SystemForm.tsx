@@ -13,7 +13,6 @@ import UserService from '../../../../services/userService'
 import ErrorMessage from '../../../../components/errorMessage/ErrorMessage'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import { SystemService, type System } from '../../../../services/systemService'
-import DynamicTable from '../../../../components/table/tablesComponents/DynamicTable'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import FormContainer from '../../../../components/formContainer/FormContainer'
@@ -24,7 +23,6 @@ export interface SystemFormErrors {
     system_url: string | null
     dev_team: string | null
     secret_key: string |null
-    groups: string | null
 }
 
 const SystemForm = () => {
@@ -40,7 +38,6 @@ const SystemForm = () => {
         name: null,
         system_url: null,
         secret_key: null,
-        groups: null
     })
     const [systemForm, setSystemForm] = useState<System>({
         system_url: '',
@@ -49,7 +46,6 @@ const SystemForm = () => {
         is_active: false,
         name: '',
         secret_key: '',
-        groups: []
     })
 
     const searchUsers = async () => {
@@ -67,10 +63,18 @@ const SystemForm = () => {
 
     const fetchSystem = async () => {
         try {
-            const res = await SystemService.get(state)
+            const res = await SystemService.get(state, 'id, name, system_url, current_state, is_active, secret_key, dev_team.id, dev_team.username')
 
-            setSystemForm(res.data.system)
-            setDevTeamViewList(res.data.dev_team)
+            setSystemForm({
+                id: res.data.id,
+                name: res.data.name,
+                system_url: res.data.system_url,
+                current_state: res.data.current_state,
+                is_active: res.data.is_active,
+                secret_key: res.data.secret_key,
+                dev_team: res.data.dev_team.map((user: any) => user.id)
+            })
+            setDevTeamViewList(res.data.dev_team.map((user: any) => user.username))
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
@@ -79,6 +83,8 @@ const SystemForm = () => {
                         position: 'bottom-center'
                     }
                 )
+            } else {
+                console.error(error)
             }
         }
     }
@@ -100,7 +106,6 @@ const SystemForm = () => {
     const validateForm = () => {
         let errors: SystemFormErrors = {
             dev_team: null,
-            groups: null,
             name: null,
             secret_key: null,
             system_url: null,
@@ -119,9 +124,6 @@ const SystemForm = () => {
                     break;
                 case 'dev_team':
                     errors.dev_team = validateMandatoryArrayField(systemForm[field], 'A equipe de desenvolvimento deve possuir ao menos 1 aluno')
-                    break;
-                case 'groups':
-                    errors.groups = validateMandatoryArrayField(systemForm[field], 'O sistema deve possuir ao menos um grupo de acesso')
                     break;
                 default:
                     break;
@@ -341,15 +343,6 @@ const SystemForm = () => {
                                     </tbody>
                                 </table>
                             </div>
-                        </div>
-                        <div className={styles.tableFormGroup}>
-                            <h2 className={styles.h2}>Grupos de acesso *</h2>
-                            {errors.groups ? <ErrorMessage message={errors.groups}/> : null}
-                            <DynamicTable
-                                itemTitle='Grupos'
-                                items={systemForm.groups}
-                                setItems={(newGroups) => setSystemForm((prev) => ({ ...prev, groups: newGroups }))}
-                            />
                         </div>
                     </div>
                 </div>

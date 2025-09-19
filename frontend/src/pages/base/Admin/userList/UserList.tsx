@@ -14,28 +14,32 @@ const UserList = () => {
     const location = useLocation()
     const accessProfile = location.pathname.split('/')[3]
 
+    
     const fetchUsers = async (page: number = 1, searchParam: string) => {
-        const res = await UserService.listByAccessProfile(accessProfile, searchParam, page, 'id, username, email, status, date_joined')
-
-        return {
-            next: res.data.next,
-            previous: res.data.previous,
-            data: res.data.results
+        const profileMap = {
+            'servidores': 'servidor',
+            'convidados': 'convidado',
+            'alunos':'aluno'
         }
-    }
 
-    const deleteUser = async (userId: string) => {
-
+        if (profileMap[accessProfile]) {
+            const res = await UserService.listByAccessProfile(profileMap[accessProfile], searchParam, page, 'id, username, email, status, date_joined')
+    
+            return {
+                next: res.data.next,
+                previous: res.data.previous,
+                data: res.data.results
+            }
+        }
+        
     }
 
     return (
         <ListPage
             title={accessProfile}
             fetchData={fetchUsers}
-            registerUrl='/session/admin/usuarios/create/'
-            onDelete={deleteUser}
             canEdit={true}
-            canView={true}
+            canView={false}
             translations={translations}
         />
     )

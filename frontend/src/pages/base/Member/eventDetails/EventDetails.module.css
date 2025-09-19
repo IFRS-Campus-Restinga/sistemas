@@ -1,0 +1,11 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sectionGroup {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}

@@ -9,9 +9,10 @@ interface CustomTextAreaProps {
     onKeyDown?: (e?: React.KeyboardEvent) => void
     placeholder?: string
     maxLength?: number
+    disabled?: boolean
 }
 
-const CustomTextArea = ({ value, error, onBlur, onChange, placeholder, maxLength}: CustomTextAreaProps) => {
+const CustomTextArea = ({ value, error, onBlur, onChange, placeholder, maxLength, disabled}: CustomTextAreaProps) => {
 
     return (
         <div className={styles.textAreaContainer}>
@@ -22,6 +23,7 @@ const CustomTextArea = ({ value, error, onBlur, onChange, placeholder, maxLength
                 onChange={onChange} 
                 maxLength={maxLength}
                 placeholder={placeholder}
+                disabled={disabled}
             />
             {
                 <ErrorMessage message={error}/>

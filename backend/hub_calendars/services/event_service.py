@@ -30,23 +30,15 @@ class EventService:
 
     @staticmethod
     def list_by_month(request, month, year):
-        from calendar import monthrange
-        from datetime import date
-
         month = int(month)
         year = int(year)
 
         start_of_month = date(year, month, 1)
         end_of_month = date(year, month, monthrange(year, month)[1])
 
-        print(f"[DEBUG] Start: {start_of_month}, End: {end_of_month}")
-
         events = Event.objects.filter(
             Q(start__lte=end_of_month) & Q(end__gte=start_of_month)
         )
-
-        for e in events:
-            print(f"[EVENTO] {e.title}: {e.start} -> {e.end}")
 
         serializer = EventSerializer(instance=events, context={'request': request}, many=True)
         return serializer.data

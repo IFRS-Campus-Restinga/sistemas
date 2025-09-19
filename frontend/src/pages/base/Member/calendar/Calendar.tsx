@@ -81,7 +81,7 @@ const Calendar = () => {
 
   const fetchCalendar = async () => {
     try {
-      const res = await CalendarService.get(state)
+      const res = await CalendarService.get(state, 'id, title, start, end, status')
       setCalendar(res.data)
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -103,7 +103,7 @@ const Calendar = () => {
       const month = start.getMonth() + 1
       const year = start.getFullYear()
 
-      const res = await EventService.list(month, year)
+      const res = await EventService.list(month, year, 'id, title, start, end, type')
       const mappedEvents = res.data.map((ev: EventInterface) => ({
         id: ev.id,
         title: ev.title,
@@ -135,16 +135,12 @@ const Calendar = () => {
   
   // Navega para edição do evento
   const handleSelectEvent = (event: BigCalendarEvent) => {
-    // Se quiser bloquear edição de eventos passados, cheque aqui
-    if (event.start! >= today) {
-      navigate(`eventos/${event.id}/details/`)
-    }
+    navigate(`eventos/${event.id}/`)
   }
   
   // Estilo dos eventos, bloqueando interação e mudando cursor em eventos passados
   const eventStyleGetter = (event: BigCalendarEvent) => {
     const backgroundColor = colorMap[event.type] || '#3174ad'
-    const isClickable = event.start! >= today
 
       const style: CSSProperties = {
         backgroundColor,
@@ -152,27 +148,15 @@ const Calendar = () => {
         color: 'white',
         border: 'none',
         padding: '2px 5px',
-        opacity: isClickable ? 1 : 0.5,
-        pointerEvents: isClickable ? 'auto' : 'none',
-        cursor: isClickable ? 'pointer' : 'not-allowed',
+        opacity: 1,
+        pointerEvents: 'auto',
+        cursor: 'pointer',
       }
 
       return {
-        className: isClickable ? styles.clickableEvent : styles.disabledEvent,
+        className: styles.clickableEvent,
         style,
       }
-  }
-  
-  // Estiliza dias anteriores bloqueando cursor e mudando visual
-  const dayPropGetter = (date: Date) => {
-    if (date < today) {
-      return {
-        className: styles.disabledDay,
-      }
-    }
-    return {
-      className: styles.enabledDay,
-    }
   }
 
   useEffect(() => {
@@ -198,10 +182,8 @@ const Calendar = () => {
         view={currentView}
         onView={handleViewChange}
         date={currentDate}
-        selectable
         onSelectEvent={handleSelectEvent}
         eventPropGetter={eventStyleGetter}
-        dayPropGetter={dayPropGetter}
         messages={messages}
         min={today}
       />

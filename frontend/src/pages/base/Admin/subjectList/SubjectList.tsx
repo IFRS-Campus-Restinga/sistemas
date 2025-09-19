@@ -18,18 +18,13 @@ const SubjectList = () => {
         }
     }
 
-    const deleteSubject = async (subjectId: string) => {
-
-    }
-
     return (
         <ListPage
             title={'Disciplinas'}
             fetchData={fetchSubjects}
             registerUrl='/session/admin/disciplinas/create/'
-            onDelete={deleteSubject}
             canEdit={true}
-            canView={true}
+            canView={false}
             translations={translations}
         />
     )

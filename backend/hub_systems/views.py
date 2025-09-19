@@ -1,4 +1,5 @@
-import uuid
+import logging
+from datetime import datetime
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
@@ -7,11 +8,12 @@ from rest_framework.response import Response
 from rest_framework import status, serializers
 from hub_systems.models import System
 from hub_systems.services import SystemService, SystemException
-from hub_auth.services.token_service import TokenService
+
+logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 @has_permissions(['add_system', 'add_group'])
-def create(request):
+def create_system(request):
     try:
         SystemService.create(request.data)
 
@@ -19,11 +21,13 @@ def create(request):
     except (serializers.ValidationError, SystemException) as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao cadastrar sistema", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
 @has_permissions(['view_system'])
-def get(request, system_id):
+def get_system(request, system_id):
     try:
         system = SystemService.get_data(request, system_id)
 
@@ -31,25 +35,12 @@ def get(request, system_id):
     except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao obter sistema {system_id}", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
-@has_permissions(['view_system'])
-def get_api_key(request, system_id):
-    try:
-        api_key = SystemService.get_api_key(request, system_id)
-
-        if api_key == None:
-            return Response({'message': "Acesso negado"}, status=status.HTTP_403_FORBIDDEN)
-
-        return Response(api_key, status=status.HTTP_200_OK)
-    except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-@api_view(['GET'])
-def validate(request, api_key):
+def validate_system(request, api_key):
     try:
         get_object_or_404(System, api_key=api_key)
 
@@ -57,21 +48,25 @@ def validate(request, api_key):
     except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'message': str (e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao validar sistema {api_key}", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
 @has_permissions(['view_system'])
-def menu_list(request):
+def list_systems(request):
     try:
-        return SystemService.get_menu(request)
+        return SystemService.list(request)
     except serializers.ValidationError as e:
         return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao listar sistemas", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['PUT'])
 @has_permissions(['change_system', 'add_group'])
-def edit(request, system_id):
+def edit_system(request, system_id):
     try:
         SystemService.edit(request.data, system_id)
 
@@ -81,4 +76,6 @@ def edit(request, system_id):
     except Http404 as e:
         return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)    
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao editar sistema {system_id}", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  

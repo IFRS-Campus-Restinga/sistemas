@@ -2,7 +2,7 @@ from rest_framework import serializers
 from hub_systems.models import System
 from hub_users.models import CustomUser
 from django.contrib.auth.models import Group
-from .formatter import FormatSystemData
+from .formatter import URLFieldsParser
 import secrets
 
 import secrets
@@ -27,13 +27,9 @@ class SystemSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        data_format = request.GET.get("data_format", None)
+        fields = request.GET.get("fields", None)
 
-        if not data_format:
-            raise serializers.ValidationError('O campo data_format não pode ser nulo.')
+        if not fields:
+            raise serializers.ValidationError('O campo fields não pode ser nulo.')
         
-        match data_format:
-            case 'list':
-                return FormatSystemData.list_format(instance)
-            case 'details':
-                return FormatSystemData.details_format(instance)
+        return URLFieldsParser.parse(request, instance, fields)

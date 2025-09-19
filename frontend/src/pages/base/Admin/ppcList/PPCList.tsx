@@ -19,18 +19,13 @@ const PPCList = () => {
         }
     }
 
-    const deletePPC = async (ppcId: string) => {
-
-    }
-
     return (
         <ListPage
             title={'Projeto Pedag. de Curso (PPC)'}
             fetchData={fetchPPCs}
             registerUrl='/session/admin/ppcs/create/'
-            onDelete={deletePPC}
             canEdit={true}
-            canView={true}
+            canView={false}
             translations={translations}
         />
     )

@@ -18,18 +18,13 @@ const GroupList = () => {
         }
     }
 
-    const deleteGroup = async (groupId: string) => {
-
-    }
-
     return (
         <ListPage
             title='Grupos'
             fetchData={fetchGroups}
             registerUrl='/session/admin/grupos/create/'
             canEdit={true}
-            canView={true}
-            onDelete={deleteGroup}
+            canView={false}
             translations={translations}
         />
     )

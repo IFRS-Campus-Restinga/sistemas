@@ -1,4 +1,5 @@
 import api from "../../config/apiConfig"
+import flattenValues from "../utils/flattenObj"
 import { extractError } from "../utils/handleAxiosError"
 
 export interface System {
@@ -9,7 +10,6 @@ export interface System {
     secret_key: string
     current_state: string
     dev_team: string[]
-    groups: string[]
 }
 
 export const SystemService = {
@@ -23,15 +23,17 @@ export const SystemService = {
         }
     },
 
-    list: async (user_id: string, page: number) => {
+    list: async (user_id: string, page: number, fields: string) => {
         try {
-            const res = await api.get('api/systems/menu/', {
+            let res = await api.get('api/systems/get/', {
                 params: {
                     user_id,
                     page,
-                    data_format: 'list'
+                    fields
                 }
             })
+
+            res.data = flattenValues(res.data) 
 
             return res
         } catch (error) {
@@ -39,16 +41,12 @@ export const SystemService = {
         }
     },
 
-    get: async (systemId: string) => {
+    get: async (systemId: string, fields: string) => {
         return api.get(`api/systems/get/${systemId}/`, {
             params: {
-                data_format: 'details'
+                fields
             }
         })
-    },
-
-    getAPIKey: async (systemId: string) => {
-        return api.get(`api/systems/get/api_key/${systemId}/`)
     },
 
     edit: async (systemId: string, params: System) => {

@@ -6,10 +6,12 @@ import { toast } from 'react-toastify';
 import Table from '../../../../components/table/tablesComponents/Table';
 import FormContainer from '../../../../components/formContainer/FormContainer';
 import DualTableTransfer from '../../../../components/table/tablesComponents/DualTableTransfer';
-import GroupService from '../../../../services/groupService';
+import GroupService, { type Group } from '../../../../services/groupService';
 import CustomButton from '../../../../components/customButton/CustomButton';
 import Switch from '../../../../components/switch/Switch';
 import Modal from '../../../../components/modal/Modal';
+import ErrorMessage from '../../../../components/errorMessage/ErrorMessage';
+import { AxiosError } from 'axios';
 
 const translations = {
     "id": "id",
@@ -27,7 +29,8 @@ const HomeAdmin = () => {
     const [prev, setPrev] = useState<number | null>(null)
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
     const [groups, setGroups] = useState<RequestGroup[]>([])
-    const [approvedRequest, setApprovedRequest] = useState<RequestInterface>({
+    const [error, setError] = useState<string | null>(null)
+    const [selectedRequest, setSelectedRequest] = useState<RequestInterface>({
         id: '',
         username: '',
         email: '',
@@ -68,7 +71,7 @@ const HomeAdmin = () => {
     }
 
     const setUserGroups = (newGroups: React.SetStateAction<RequestGroup[]>) => {
-        setApprovedRequest(prevReq => {
+        setSelectedRequest(prevReq => {
             // Se newGroups for função, chama ela com prevReq.groups para obter o novo array
             const updatedGroups = typeof newGroups === 'function'
             ? (newGroups as (prev: RequestGroup[]) => RequestGroup[])(prevReq.groups)
@@ -83,12 +86,12 @@ const HomeAdmin = () => {
 
     const openApproveModal = async (request: Record<string, any>) => {
         setIsModalOpen(true)
-        setApprovedRequest({
+        setSelectedRequest({
             id: request.id,
             access_profile: request.access_profile,
             email: request.email,
             username: request.username,
-            is_abstract: approvedRequest.is_abstract,
+            is_abstract: selectedRequest.is_abstract,
             groups: []
         })
         
@@ -98,51 +101,95 @@ const HomeAdmin = () => {
     const approveRequest = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        try {
-            await UserService.approveRequest(approvedRequest)
-
-            setRequests((prev) => prev.filter((req) => req.id !== approvedRequest.id))
-            setIsModalOpen(false)
-            setApprovedRequest({
-                access_profile: '',
-                email: '',
-                id: '',
-                is_abstract: false,
-                username: '',
-                groups: []
-            })
-        } catch (error) {
-            if (error instanceof Error) {
-                toast.error(
-                    error.message,
-                    {
-                        autoClose: 3000,
-                        position: 'bottom-center'
+        toast.promise(
+            UserService.approveRequest(selectedRequest),
+            {
+                pending: "Salvando alterações...",
+                success: {
+                    render({ data }) {
+                       return data.data.message
                     }
-                )
-            } else {
-                console.error(error)
+                },
+                error: {
+                    render({ data }) {
+                        if (data instanceof AxiosError) {
+                            return data.response?.data.message || 'Ocorreu um erro'
+                        }
+                    }
+                }
             }
-        }
+        )
+
+        setRequests((prev) => prev.filter((req) => req.id !== selectedRequest.id))
+        setError(null)
+        setIsModalOpen(false)
+        setGroups([])
+        setSelectedRequest({
+            access_profile: '',
+            email: '',
+            id: '',
+            is_abstract: false,
+            username: '',
+            groups: []
+        })
     }
 
     const declineRequest = async (requestId: string) => {
-        try {
-            await UserService.declineRequest(requestId)
-            
-            setRequests((prev) => prev.filter((req) => req.id !== requestId))
-        } catch (error) {
-            if (error instanceof Error) {
-                toast.error(
-                    error.message,
-                    {
-                        autoClose: 3000,
-                        position: 'bottom-center'
+        toast.promise(
+            UserService.declineRequest(requestId),
+            {
+                pending: "Salvando alterações...",
+                success: {
+                    render({ data }) {
+                       return data.data.message
                     }
-                )
+                },
+                error: {
+                    render({ data }) {
+                        if (data instanceof AxiosError) {
+                            return data.response?.data.message || 'Ocorreu um erro'
+                        }
+                    }
+                }
             }
-        }
+
+        )
+
+        setRequests((prev) => prev.filter((req) => req.id !== requestId))
+        setError(null)
+        setIsModalOpen(false)
+        setGroups([])
+        setSelectedRequest({
+            access_profile: '',
+            email: '',
+            id: '',
+            is_abstract: false,
+            username: '',
+            groups: []
+        })
     }
+
+    const validateGroups = (group: Group, userGroups: Group[]) => {
+            const groupName = group.name
+    
+            if (groupName === 'user' && userGroups.find((group) => group.name === 'admin')) {
+                setError('O grupo admin não pode coexistir com o grupo user')
+                return 'O grupo admin não pode coexistir com o grupo user'
+            }
+    
+            if (groupName === 'admin' && userGroups.find((group) => group.name === 'user')) {
+                setError('O grupo admin não pode coexistir com o grupo user')
+                return 'O grupo admin não pode coexistir com o grupo user'
+            }
+    
+            if ((groupName === 'admin' && selectedRequest.access_profile === 'aluno') ||
+            (groupName === 'admin' && selectedRequest.access_profile === 'convidado')) {
+                setError('Apenas usuários com perfil de acesso de Servidor podem possuir o grupo admin')
+                return 'Apenas usuários com perfil de acesso de Servidor podem possuir o grupo admin'
+            }
+    
+            return null
+        }
 
     useEffect(() => {
         fetchRequests()
@@ -181,7 +228,7 @@ const HomeAdmin = () => {
                         <Modal 
                             setIsOpen={(isOpen) => {
                                 if (!isOpen) {
-                                    setApprovedRequest({
+                                    setSelectedRequest({
                                         id: '',
                                         username: '',
                                         email: '',
@@ -202,40 +249,41 @@ const HomeAdmin = () => {
                                         <div className={styles.data}>
                                             <label className={styles.dataLabel}>
                                                 Nome
-                                                <p className={styles.requestParam}>{approvedRequest.username}</p>
+                                                <p className={styles.requestParam}>{selectedRequest.username}</p>
                                             </label>
                                         </div>
                                         <div className={styles.data}>
                                             <label className={styles.dataLabel}>
                                                 Email
-                                                <p className={styles.requestParam}>{approvedRequest.email}</p>
+                                                <p className={styles.requestParam}>{selectedRequest.email}</p>
                                             </label>
                                         </div>
                                         <div className={styles.data}>
                                             <label className={styles.dataLabel}>
                                                 Perfil
-                                                <p className={styles.requestParam}>{approvedRequest.access_profile}</p>
+                                                <p className={styles.requestParam}>{selectedRequest.access_profile}</p>
                                             </label>
                                         </div>
                                     </div>
                                     <div className={styles.switchContainer}>
-                                        Tipo de usuário
+                                        Tipo de Conta
                                         <Switch
                                             stateHandler={(value) =>
-                                                setApprovedRequest(prev => ({
+                                                setSelectedRequest(prev => ({
                                                     ...prev,
-                                                    is_abstract: value === 'Abstrato'
+                                                    is_abstract: value === 'Depart.'
                                                 }))
                                             }                                                
-                                            value={approvedRequest.is_abstract ? 'Abstrato' : 'Pessoal'}
-                                            value1='Abstrato'
+                                            value={selectedRequest.is_abstract ? 'Depart.' : 'Pessoal'}
+                                            value1='Depart.'
                                             value2='Pessoal'
+                                            width='11.5 rem'
                                         />
                                     </div>
                                     <DualTableTransfer
                                         list1={groups}
                                         setList1={setGroups}
-                                        list2={approvedRequest.groups!}
+                                        list2={selectedRequest.groups!}
                                         setList2={setUserGroups}
                                         fetchData1={fetchGroups}
                                         loadingList1={isLoadingGroups}
@@ -247,7 +295,9 @@ const HomeAdmin = () => {
                                         renderItem={(group) => group.name}
                                         title1='Grupos disponíveis'
                                         title2='Grupos do usuário'
+                                        validate={validateGroups}
                                     />
+                                    {error ? <ErrorMessage align='center' message={error}/> : null}
                                     <div className={styles.buttonContainer}>
                                         <CustomButton type='submit' text='Ativar conta'/>
                                     </div>
