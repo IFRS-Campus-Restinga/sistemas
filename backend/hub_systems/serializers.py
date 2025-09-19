@@ -5,8 +5,6 @@ from django.contrib.auth.models import Group
 from .formatter import URLFieldsParser
 import secrets
 
-import secrets
-
 class SystemSerializer(serializers.ModelSerializer):
     dev_team = serializers.PrimaryKeyRelatedField(
         many=True, queryset=CustomUser.objects.filter(access_profile='aluno', is_active=True)

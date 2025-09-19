@@ -20,7 +20,7 @@ class URLFieldsParser:
     @staticmethod
     def get_api_key(request, system_id):
         payload = TokenService.decode_token(request.COOKIES.get("access_token"))
-        system = get_object_or_404(System, pk=uuid.UUID(system_id))
+        system = get_object_or_404(System, pk=system_id)
 
         groups = payload.get("groups")
         user_id = payload.get("user_id")
@@ -34,7 +34,7 @@ class URLFieldsParser:
     @staticmethod
     def get_secret_key(request, system_id):
         payload = TokenService.decode_token(request.COOKIES.get("access_token"))
-        system = get_object_or_404(System, pk=uuid.UUID(system_id))
+        system = get_object_or_404(System, pk=system_id)
 
         groups = payload.get("groups")
         user_id = payload.get("user_id")
