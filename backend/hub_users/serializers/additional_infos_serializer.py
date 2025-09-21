@@ -56,7 +56,7 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
             # precisa ser admin ou dono
             if "admin" not in groups and str(user_id) != str(validated_data.get("user").id):
                 raise AccessDeniedException("Você só pode criar informações para você mesmo.")
-
+            
         elif system_token:
             raise AccessDeniedException("Credencial de sistema não pode criar informações.")
 
@@ -87,6 +87,11 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
             groups = list(groups.values_list("name", flat=True))
         else:
             groups = list(groups)
+
+        # -------- Valida tipo de conta --------
+        is_abstract = getattr(user, "is_abstract")
+        if is_abstract:
+            raise serializers.ValidationError("Contas de Departamento não podem estar vinculadas à informações adicionais")
 
         # -------- Valida CPF --------
         cpf = data.get("cpf")
@@ -161,6 +166,18 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         self._check_access_create(validated_data)
+
+        user = validated_data.get("user")
+        request = self.context.get("request")
+        if request and user:
+            access_token = request.COOKIES.get("access_token")
+            if access_token:
+                payload = TokenService.decode_token(access_token)
+                user_id = payload.get("user_id")
+                if str(user_id) == str(user.id):
+                    user.first_login = False
+                    user.save(update_fields=["first_login"])
+
         return super().create(validated_data)
 
     def update(self, instance, validated_data):

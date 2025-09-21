@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import styles from './CourseForm.module.css'
 import CourseService, { type CourseInterface } from '../../../../services/courseService'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AxiosError } from 'axios'
 import { toast } from 'react-toastify'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
@@ -31,6 +31,7 @@ interface ErrorsCourseForm {
 const CourseForm = () => {
     const location = useLocation()
     const {state} = location
+    const redirect = useNavigate()
     const [searched, setSearched] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [coordSearch, setCoordSearch] = useState<string>('')
@@ -59,12 +60,7 @@ const CourseForm = () => {
             setCoordOptions(res.data.results)
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message,
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.log(error)
             }
@@ -86,12 +82,7 @@ const CourseForm = () => {
             setCoordSearch(res.data.coord.username)
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message,
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.log(error)
             }
@@ -104,18 +95,14 @@ const CourseForm = () => {
         toast.promise(
             CourseClassService.delete(classId),
             {
-                pending: 'Excluindo turma',
+                pending: 'Excluindo turma...',
                 success: "Turma excluida com sucesso",
                 error: {
-                    render({ data }: { data: any }) {
-                        return data.message || 'Erro ao alterar dados'
+                    render({ data }) {
+                        if (data instanceof AxiosError) return data.response?.data.message
                     }
                 }
             },
-            {
-                autoClose: 2000,
-                position: 'bottom-center'
-            }
         )
 
         setCourse({...course, classes: course.classes.filter((_, index) => index !== classIndex)})
@@ -165,23 +152,33 @@ const CourseForm = () => {
 
         if (validateForm()) {
             toast.promise(
-                (state ? CourseService.edit(state, course) : CourseService.create(course))
-                    .then(async (res) => {
-                        if (state) {
-                            await fetchCourse()
-                        }
-                        return res
-                    }),
+                state ? CourseService.edit(state, course) : CourseService.create(course), 
                 {
-                    pending: state ? 'Salvando alterações...' : 'Cadastrando curso...',
-                    success: state ? 'Alterações salvas com sucesso' : 'Curso cadastrado com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data?.message || 'Erro ao alterar dados'
+                    pending: state ? "Salvando alterações..." : "Cadastrando Curso...",
+                    success: {
+                        render({ data }) {
+                            return data.data.message;
+                        },
+                    },
+                    error: "Erro ao cadastrar",
+                }).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect("/session/admin/cursos/");
+                        }, 2000);
+                    }
+                }).catch((err) => {
+                    if (err instanceof AxiosError) {
+                        const errors = err.response?.data?.message;
+        
+                        if (Array.isArray(errors)) {
+                            errors.forEach((msg: string) => toast.error(msg));
+                        } else {
+                            toast.error(errors);
                         }
                     }
                 }
-            )
+            );
         }
     }
 
@@ -326,7 +323,7 @@ const CourseForm = () => {
                                                 <thead className={tableStyles.thead}>
                                                     <tr className={tableStyles.tr}>
                                                         <th className={tableStyles.th}>Turmas *</th>
-                                                        <th className={tableStyles.thAction}/>
+                                                        <th className={tableStyles.thDynamicAction}/>
                                                     </tr>
                                                 </thead>
                                                 <tbody className={tableStyles.tbody}>
@@ -365,7 +362,7 @@ const CourseForm = () => {
                                                                         error={errors.classes[index]}
                                                                     />
                                                                 </td>
-                                                                <td className={tableStyles.tdAction}>
+                                                                <td className={tableStyles.tdDynamicAction}>
                                                                     <img className={tableStyles.action} src={classData.id ? deleteIcon : clear} alt="" 
                                                                     onClick={() => {
                                                                         if (classData.id) {

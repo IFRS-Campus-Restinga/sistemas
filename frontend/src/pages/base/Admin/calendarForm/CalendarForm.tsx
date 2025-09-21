@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import styles from './CalendarForm.module.css'
 import CalendarService, { type CalendarInterface } from '../../../../services/calendarService'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
@@ -10,6 +10,7 @@ import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import { toast } from 'react-toastify'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
+import { AxiosError } from 'axios'
 
 interface CalendarFormErrors {
     title: string | null
@@ -21,6 +22,7 @@ interface CalendarFormErrors {
 const CalendarForm = () => {
     const location = useLocation()
     const { state } = location
+    const redirect = useNavigate()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [errors, setErrors] = useState<CalendarFormErrors>({
         title: null,
@@ -41,7 +43,11 @@ const CalendarForm = () => {
 
             setCalendar(res.data)
         } catch (error) {
-            console.error(error)
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }
         } finally {
             setIsLoading(false)
         }
@@ -82,25 +88,43 @@ const CalendarForm = () => {
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+        e.preventDefault();
 
         if (validateForm()) {
+            const request = state
+                ? CalendarService.edit(calendar, state)
+                : CalendarService.create(calendar);
+    
             toast.promise(
-                state ?
-                CalendarService.edit(calendar, state):
-                CalendarService.create(calendar),
+                request, 
                 {
-                    pending: state ? 'Salvando alterações...' : 'Criando calendário...',
-                    success: state ? 'Registro atualizado com sucesso' : 'Calendário criado com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data.message || 'Erro ao alterar dados'
+                    pending: state ? "Salvando alterações..." : "Criando calendário...",
+                    success: {
+                        render({ data }) {
+                            return data.data.message;
+                        },
+                    },
+                    error: "Erro ao cadastrar",
+                }).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect("/session/admin/calendarios/");
+                        }, 2000);
+                    }
+                }).catch((err) => {
+                    if (err instanceof AxiosError) {
+                        const errors = err.response?.data?.message;
+        
+                        if (Array.isArray(errors)) {
+                            errors.forEach((msg: string) => toast.error(msg));
+                        } else {
+                            toast.error(errors);
                         }
                     }
                 }
-            )
+            );
         }
-    }
+    };
 
     useEffect(() => {
         if (state) {

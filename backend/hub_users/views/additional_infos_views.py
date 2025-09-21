@@ -6,6 +6,8 @@ from rest_framework import status, serializers
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from hub_users.services.additional_infos_service import *
+from ..utils.format_validation_errors import format_validation_errors
+from ..serializers.additional_infos_serializer import AdditionalInfosSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ def create_additional_infos(request):
 
         return Response({'message': 'Dados adicionados com sucesso'}, status=status.HTTP_201_CREATED)
     except serializers.ValidationError as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': format_validation_errors(e.detail, AdditionalInfosSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except AccessDeniedException as e:
         return Response({'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Exception as e:
@@ -32,10 +34,12 @@ def get_additional_infos(request, user_id):
         additional_infos = AdditionalInfosService.get(request, user_id)
 
         return Response(additional_infos, status=status.HTTP_200_OK)
+    except serializers.ValidationError as e:
+        return Response({'message': format_validation_errors(e.detail, AdditionalInfosSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except AccessDeniedException as e:
         return Response({'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
     except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': "Nenhuma informação adicional vinculada a este usuário foi encontrada"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao obter informações adicionais do usuário {user_id}", exc_info=True)
@@ -48,12 +52,12 @@ def edit_additional_infos(request, user_id):
         AdditionalInfosService.edit(request, user_id)
 
         return Response({'message': 'Dados atualizados com sucesso'}, status=status.HTTP_200_OK)
+    except serializers.ValidationError as e:
+        return Response({'message': format_validation_errors(e.detail, AdditionalInfosSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except AccessDeniedException as e:
         return Response({'message': str(e)}, status=status.HTTP_403_FORBIDDEN)
-    except serializers.ValidationError as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': "Nenhuma informação adicional encontrada"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao atualizar informações adicionais do usuário {user_id}", exc_info=True)

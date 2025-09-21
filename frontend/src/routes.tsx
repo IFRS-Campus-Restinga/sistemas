@@ -31,6 +31,9 @@ import PPCListUser from './pages/base/Member/ppcList/PPCList'
 import SubjectListUser from './pages/base/Member/subjectList/SubjectList'
 import CourseDetails from './pages/base/Member/courseDetails/CourseDetails'
 import EventDetails from './pages/base/Member/eventDetails/EventDetails'
+import ProfileForm from './pages/base/Member/profileForm/Profile'
+import SubjectDetails from './pages/base/Member/subjectDetails/SubjectDetails'
+import PPCDetails from './features/ppcDetails/PPCDetails'
 
 const routes = createBrowserRouter([
     {
@@ -130,6 +133,10 @@ const routes = createBrowserRouter([
                 element: <PPCList/>
             },
             {
+                path: 'ppcs/:ppcId/',
+                element: <PPCDetails/>
+            },
+            {
                 path: 'ppcs/create/',
                 element: <PPCForm/>
             },
@@ -160,6 +167,10 @@ const routes = createBrowserRouter([
                 element: <HomeUser />
             },
             {
+                path: 'profile',
+                element: <ProfileForm/>
+            },
+            {
                 path: 'calendarios/',
                 element: <CalendarListUser/>
             },
@@ -185,6 +196,7 @@ const routes = createBrowserRouter([
             },
             {
                 path: 'ppcs/:ppcId/',
+                element: <PPCDetails/>
             },
             {
                 path: 'disciplinas/',
@@ -192,8 +204,8 @@ const routes = createBrowserRouter([
             },
             {
                 path: 'disciplinas/:subjectId/',
+                element: <SubjectDetails/>
             }
-
         ]
     },
 ])

@@ -6,6 +6,8 @@ from rest_framework.decorators import api_view
 from fs_auth_middleware.decorators import has_permissions
 from rest_framework.response import Response
 from ..services.course_service import CourseService
+from ..utils.format_validation_errors import format_validation_errors
+from ..serializers.course_serializer import CourseSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +19,7 @@ def create_course(request):
 
         return Response({'message': 'Curso cadastrado com sucesso'}, status=status.HTTP_200_OK)
     except serializers.ValidationError as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': format_validation_errors(e.detail, CourseSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao cadastrar curso", exc_info=True)
@@ -28,6 +30,8 @@ def create_course(request):
 def list_course(request):
     try:
         return CourseService.list(request)
+    except serializers.ValidationError as e:
+        return Response({'message': format_validation_errors(e.detail, CourseSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao listar cursos", exc_info=True)
@@ -37,11 +41,11 @@ def list_course(request):
 @has_permissions(['view_course', 'view_courseclass'])
 def get_course(request, course_id):
     try:
-        course = CourseService.get(request, course_id)
-
-        return Response(course, status=status.HTTP_200_OK)
+        return Response(CourseService.get(request, course_id), status=status.HTTP_200_OK)
     except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': "Curso não enccontrado"}, status=status.HTTP_404_NOT_FOUND)
+    except serializers.ValidationError as e:
+        return Response({'message': format_validation_errors(e.detail, CourseSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao obter curso {course_id}", exc_info=True)
@@ -55,9 +59,9 @@ def edit_course(request, course_id):
 
         return Response({'message': 'Curso atualizado com sucesso'}, status=status.HTTP_200_OK)
     except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': "Curso não encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except serializers.ValidationError as e:
-            return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': format_validation_errors(e.detail, CourseSerializer)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao editar curso {course_id}", exc_info=True)

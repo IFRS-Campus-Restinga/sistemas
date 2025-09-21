@@ -13,3 +13,28 @@ export function groupByPeriod(curriculum: CurriculumInterface[]): number[] {
 
     return result
 }
+
+export function groupSubjectsByPeriod(curriculum: any[]) {
+  const grouped: Record<string, any> = {};
+
+  curriculum.forEach((item) => {
+    const period = item.period; // string
+    const subjectName = item.subject.name;
+    const preReqs = item.pre_requisits?.map((pr: any) => pr.id) || [];
+
+    if (!grouped[period]) {
+      grouped[period] = [];
+    }
+
+    grouped[period].push({
+      name: subjectName,
+      preRequisits: preReqs
+    });
+  });
+
+  // transforma o objeto em array no formato desejado
+  return Object.keys(grouped).map((period) => ({
+    period: period, // mantém como string
+    subjects: grouped[period]
+  }));
+}

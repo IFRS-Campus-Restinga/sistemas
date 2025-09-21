@@ -13,7 +13,6 @@ import CustomTextArea from '../../../../components/customTextArea/CustomTextArea
 const EventDetails = () => {
     const location = useLocation()
     const calendarId = useParams().calendarId
-    const eventId = useParams().eventId
     const { state } = location
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [event, setEvent] = useState<EventInterface>({
@@ -31,7 +30,7 @@ const EventDetails = () => {
         setIsLoading(true)
 
         try {
-            const res = await EventService.get(eventId!, 'id, title, start, end, type, category, description')
+            const res = await EventService.get(state, 'id, title, start, end, type, category, description')
 
             setEvent(res.data)
         } catch (error) {
@@ -48,6 +47,8 @@ const EventDetails = () => {
     useEffect(() => {
         if (state) {
             fetchEvent()
+        } else {
+            setIsLoading(false)
         }
     }, [state])
 

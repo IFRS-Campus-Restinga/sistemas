@@ -1,5 +1,4 @@
 import api from "../../config/apiConfig"
-import { extractError } from "../utils/handleAxiosError"
 import flattenValues from "../utils/flattenObj"
 import type { UserInterface } from "../pages/base/Admin/userForm/UserForm"
 
@@ -35,16 +34,12 @@ const UserService = {
     },
 
     getRequests: async (page: number = 1, fields: string) => {
-        try {
-            return await api.get('api/users/request/get/', {
-                params: {
-                    page,
-                    fields
-                }
-            })
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.get('api/users/request/get/', {
+            params: {
+                page,
+                fields
+            }
+        })
     },
 
     approveRequest: async (request: RequestInterface) => {

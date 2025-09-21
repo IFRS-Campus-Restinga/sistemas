@@ -1,4 +1,4 @@
-import { useLocation, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import styles from './EventForm.module.css'
 import { useEffect, useState } from 'react'
@@ -21,6 +21,7 @@ interface EventFormErrors {
 
 const EventForm = () => {
     const location = useLocation()
+    const redirect = useNavigate()
     const calendarId = useParams().calendarId
     const eventId = useParams().eventId
     const { state } = location
@@ -50,7 +51,9 @@ const EventForm = () => {
             setEvent(res.data)
         } catch (error) {
             if (error instanceof AxiosError) {
-                console.error(error.response?.data.message)
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
             }
         } finally {
             setIsLoading(false)
@@ -97,14 +100,30 @@ const EventForm = () => {
                 EventService.create(event),
                 {
                     pending: eventId ? 'Salvando alterações...' : 'Criando evento...',
-                    success: eventId ? 'Registro salvo com sucesso' : 'Evento criado com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data.message || 'Erro ao alterar dados'
+                    success: {
+                        render({data}) {
+                            return data.data.message
                         }
+                    },
+                    error: "Erro de validação"
+                }
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/calendarios/${calendarId}/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
                     }
                 }
-            )
+            })
         }
     }
 

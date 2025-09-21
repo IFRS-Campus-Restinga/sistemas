@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from google.auth.transport import requests as google_requests
@@ -20,24 +21,21 @@ class CommonLogin:
 
     @staticmethod
     def login(email: str, password: str) -> tuple[any, RefreshToken, AccessToken]:
-        user = CustomUser.objects.get(email=email)
+        user = get_object_or_404(CustomUser, email=email)
 
         CommonLogin.check_login(user)
-
-        if CustomUser.DoesNotExist:
-            raise serializers.ValidationError('Usuário não existe')
         
         if not user.is_active:
-            raise serializers.ValidationError({'message': 'Conta inativa, contate seu administrador', 'status': user.status})
+            raise serializers.ValidationError('Conta inativa, contate seu administrador')
         
         if not PasswordService.check(user, password):
             raise serializers.ValidationError('Senha inválida')
         
         user_data = UserService.build_user_data(user)
                 
-        token = TokenService.pair_token(user)
+        access, refresh = TokenService.pair_token(user)
         
-        return user_data, token, token.access_token
+        return user_data, access, refresh
     
 
 class GoogleLogin:
@@ -71,7 +69,7 @@ class GoogleLogin:
 
             GoogleLogin.check_login(user)
 
-            if not CustomUser.objects.filter(access_profile=access_profile).exists():
+            if user.access_profile != access_profile:
                 raise serializers.ValidationError("Grupo de acesso inválido para esta conta")
 
             if created:

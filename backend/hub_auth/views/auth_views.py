@@ -1,10 +1,12 @@
 import logging
+from django.http import Http404
 from datetime import datetime
 from rest_framework.decorators import api_view
 from hub_auth.services.auth_service import *
 from rest_framework.response import Response
 from rest_framework import status
 from google.auth.exceptions import GoogleAuthError
+from ..utils.format_validation_errors import format_validation_errors
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +43,7 @@ def login_with_google(request):
 
         return response
     except (serializers.ValidationError, GoogleAuthError, ValueError)  as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao autenticar com google", exc_info=True)
@@ -70,9 +72,8 @@ def login(request):
                 httponly=True,
                 secure=False,
                 samesite="Lax",
-                max_age=3600 * 24 * 7,
+                max_age=3600*24*7,
                 path="/session/",
-                domain='127.0.0.1'
             )
 
             response.set_cookie(
@@ -82,12 +83,13 @@ def login(request):
                 secure=False,
                 samesite="Lax",
                 path="/",
-                domain='127.0.0.1'
             )
 
         return response
     except serializers.ValidationError  as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': format_validation_errors(e.detail)}, status=status.HTTP_400_BAD_REQUEST)
+    except Http404 as e:
+        return Response({'message': "Usuário não encontrado"})
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao autenticar", exc_info=True)

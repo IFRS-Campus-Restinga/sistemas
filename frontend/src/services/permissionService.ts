@@ -1,5 +1,4 @@
 import api from "../../config/apiConfig"
-import { extractError } from "../utils/handleAxiosError"
 
 export interface Permissions {
     id: string
@@ -8,45 +7,30 @@ export interface Permissions {
 
 const PermissionService = {
     list: async (page: number = 1, fields: string) => {
-        try {
-            return api.get(`api/permissions/get/`, {
-                params: {
-                    fields,
-                    page
-                }
-            })
-            
-        } catch (error) {
-            throw extractError(error)
-        }
+        return api.get(`api/permissions/get/`, {
+            params: {
+                fields,
+                page
+            }
+        })
     },
 
     listByGroup: async (groupId: string, page: number = 1, fields: string) => {
-        try {
-            return api.get(`api/permissions/get/${groupId}/`, {
-                params: {
-                    fields,
-                    page
-                }
-            })
-            
-        } catch (error) {
-            throw extractError(error)
-        }
+        return api.get(`api/permissions/get/${groupId}/`, {
+            params: {
+                fields,
+                page
+            }
+        })
     },
 
     notAssignedTo: async (groupId: string, page: number = 1, fields: string) => {
-        try {
-            return api.get(`api/permissions/get/${groupId}/not_assigned/`, {
-                params: {
-                    fields,
-                    page
-                }
-            })
-            
-        } catch (error) {
-            throw extractError(error)
-        }
+        return api.get(`api/permissions/get/${groupId}/not_assigned/`, {
+            params: {
+                fields,
+                page
+            }
+        })
     }
 }
 

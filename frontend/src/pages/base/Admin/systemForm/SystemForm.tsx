@@ -17,6 +17,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import { AxiosError } from 'axios'
+import CustomLoading from '../../../../components/customLoading/CustomLoading'
 
 export interface SystemFormErrors {
     name: string | null
@@ -33,6 +34,7 @@ const SystemForm = () => {
     const [optionsOpen, setOptionsOpen] = useState<boolean>(false)
     const [userOptions, setUserOptions] = useState([])
     const [devTeamViewList, setDevTeamViewList] = useState<string[]>([])
+    const [isLoading, setIsLoading] = useState<boolean>(true)
     const [errors, setErrors] = useState<SystemFormErrors>({
         dev_team: null,
         name: null,
@@ -77,15 +79,12 @@ const SystemForm = () => {
             setDevTeamViewList(res.data.dev_team.map((user: any) => user.username))
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message,
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.error(error)
             }
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -142,28 +141,40 @@ const SystemForm = () => {
                 SystemService.edit(state, systemForm) :
                 SystemService.create(systemForm),
                 {
-                    pending: "Cadastrando sistema...",
-                    success: "Sistema cadastrado com sucesso!",
-                    error: {
-                        render({ data }: any) {
-                            return data.message || 'Erro ao cadastrar'
+                    pending: state ? "Salvando alterações..." : "Cadastrando sistema...",
+                    success: {
+                        render({data}) {
+                            return data.data.message
                         }
-                    } 
-                },
-                {
-                    autoClose: 2000,
-                    position: 'bottom-center'
+                    },
+                    error: "Erro de validação"
                 }
-            ).then(() => {
-                setTimeout(() => {
-                    redirect('/session/admin/home')
-                }, 2000);
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/home/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
+                    }
+                }
             })
         }
     }
 
     useEffect(() => {
-        if (state) fetchSystem()
+        if (state) {
+            fetchSystem()
+        } else {
+            setIsLoading(false)
+        }
     }, [state])
 
     return (
@@ -179,176 +190,184 @@ const SystemForm = () => {
                     }
                 }}
             >
-                <div className={styles.formGroup}>
-                    <CustomLabel title='Nome *'>
-                        <CustomInput
-                            type='text'
-                            value={systemForm.name}
-                            max={50}
-                            error={errors.name}
-                            onChange={(e) => {
-                                setSystemForm({ ...systemForm, name: e.target.value })
-                            }}
-                            onBlur={() => {
-                                setErrors({ ...errors, name: validateMandatoryStringField(systemForm.name) })
-                            }}
-                        />
-                    </CustomLabel>
-                </div>
-                <div className={styles.formGroup}>
-                    <CustomLabel title='URL/Domínio do sistema *'>
-                        <CustomInput
-                            type='text'
-                            value={systemForm.system_url}
-                            max={255}
-                            error={errors.system_url}
-                            onChange={(e) => {
-                                setSystemForm({ ...systemForm, system_url: e.target.value })
-                            }}
-                            onBlur={() => {
-                                setErrors({ ...errors, system_url: validateMandatoryStringField(systemForm.system_url) })
-                            }}
-                        />
-                    </CustomLabel>
-                </div>
-                <div className={styles.formGroup}>
-                    <CustomLabel title='Secret Key *'>
-                        <CustomInput
-                            type='text'
-                            value={systemForm.secret_key}
-                            max={255}
-                            error={errors.secret_key}
-                            placeholder='Insira a SECRET_KEY que consta na configurações do projeto'
-                            onChange={(e) => {
-                                setSystemForm({ ...systemForm, secret_key: e.target.value })
-                            }}
-                            onBlur={() => {
-                                setErrors({ ...errors, secret_key: validateMandatoryStringField(systemForm.secret_key) })
-                            }}
-                        />
-                    </CustomLabel>
-                </div>
-                <div className={styles.formGroup}>
-                    <CustomLabel title='Estado atual *'>
-                        <CustomSelect
-                            selected={
-                                {
-                                    title: systemForm.current_state,
-                                    value: systemForm.current_state
-                                }
-                            }
-                            onSelect={(option) => {
-                                if ('value' in option) {
-                                    setSystemForm({ ...systemForm, current_state: option.value })
-                                }
-                            }}
-                            options={[
-                                {
-                                    title: 'Em desenvolvimento',
-                                    value: 'Em desenvolvimento',
-                                },
-                                {
-                                    title: 'Implantado',
-                                    value: 'Implantado',
-                                },
-                            ]}
-                            renderKey='title'
-                        />
-                    </CustomLabel>
-                    <CustomLabel title='Ativo/Inativo *'>
-                        <CustomSelect
-                            selected={
-                                {
-                                    title: systemForm.is_active ? 'Ativo' : 'Inativo',
-                                    value: systemForm.is_active ? 'Ativo' : 'Inativo'
-                                }
-                            }
-                            onSelect={(option) => {
-                                if ('value' in option) {
-                                    setSystemForm({ ...systemForm, is_active: option.value === 'Ativo' ? true : false })
-                                }
-                            }}
-                            options={[
-                                {
-                                    title: 'Ativo',
-                                    value: 'Ativo',
-                                },
-                                {
-                                    title: 'Inativo',
-                                    value: "Inativo",
-                                },
-                            ]}
-                            renderKey='title'
-                        />
-                    </CustomLabel>
-                </div>
-                <div className={styles.formGroupContainer}>
-                    <div className={styles.formGroup}>
-                        <div className={styles.tableFormGroup}>
-                            <div className={styles.searchContainer}>
-                                <div className={styles.inputContainer}>
+                {
+                    isLoading ? (
+                        <CustomLoading/>
+                    ) : (
+                        <>
+                            <div className={styles.formGroup}>
+                                <CustomLabel title='Nome *'>
                                     <CustomInput
                                         type='text'
-                                        placeholder='Pesquise um aluno por nome, email ou matrícula'
-                                        value={inputSearch}
+                                        value={systemForm.name}
                                         max={50}
+                                        error={errors.name}
                                         onChange={(e) => {
-                                            setInputSearch(e.target.value)
+                                            setSystemForm({ ...systemForm, name: e.target.value })
                                         }}
-                                        onKeyDown={(e) => {
-                                            if (e && e.key === 'Enter') {
-                                                searchUsers()
-                                            }
+                                        onBlur={() => {
+                                            setErrors({ ...errors, name: validateMandatoryStringField(systemForm.name) })
                                         }}
                                     />
-                                    {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
-                                    {
-                                        optionsOpen ? (
-                                            <CustomOptions
-                                                options={userOptions}
-                                                onSelect={(option) => {
-                                                    addUser(option)
+                                </CustomLabel>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <CustomLabel title='URL/Domínio do sistema *'>
+                                    <CustomInput
+                                        type='text'
+                                        value={systemForm.system_url}
+                                        max={255}
+                                        error={errors.system_url}
+                                        onChange={(e) => {
+                                            setSystemForm({ ...systemForm, system_url: e.target.value })
+                                        }}
+                                        onBlur={() => {
+                                            setErrors({ ...errors, system_url: validateMandatoryStringField(systemForm.system_url) })
+                                        }}
+                                    />
+                                </CustomLabel>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <CustomLabel title='Secret Key *'>
+                                    <CustomInput
+                                        type='text'
+                                        value={systemForm.secret_key}
+                                        max={255}
+                                        error={errors.secret_key}
+                                        placeholder='Insira a SECRET_KEY que consta na configurações do projeto'
+                                        onChange={(e) => {
+                                            setSystemForm({ ...systemForm, secret_key: e.target.value })
+                                        }}
+                                        onBlur={() => {
+                                            setErrors({ ...errors, secret_key: validateMandatoryStringField(systemForm.secret_key) })
+                                        }}
+                                    />
+                                </CustomLabel>
+                            </div>
+                            <div className={styles.formGroup}>
+                                <CustomLabel title='Estado atual *'>
+                                    <CustomSelect
+                                        selected={
+                                            {
+                                                title: systemForm.current_state,
+                                                value: systemForm.current_state
+                                            }
+                                        }
+                                        onSelect={(option) => {
+                                            if ('value' in option) {
+                                                setSystemForm({ ...systemForm, current_state: option.value })
+                                            }
+                                        }}
+                                        options={[
+                                            {
+                                                title: 'Em desenvolvimento',
+                                                value: 'Em desenvolvimento',
+                                            },
+                                            {
+                                                title: 'Implantado',
+                                                value: 'Implantado',
+                                            },
+                                        ]}
+                                        renderKey='title'
+                                    />
+                                </CustomLabel>
+                                <CustomLabel title='Ativo/Inativo *'>
+                                    <CustomSelect
+                                        selected={
+                                            {
+                                                title: systemForm.is_active ? 'Ativo' : 'Inativo',
+                                                value: systemForm.is_active ? 'Ativo' : 'Inativo'
+                                            }
+                                        }
+                                        onSelect={(option) => {
+                                            if ('value' in option) {
+                                                setSystemForm({ ...systemForm, is_active: option.value === 'Ativo' ? true : false })
+                                            }
+                                        }}
+                                        options={[
+                                            {
+                                                title: 'Ativo',
+                                                value: 'Ativo',
+                                            },
+                                            {
+                                                title: 'Inativo',
+                                                value: "Inativo",
+                                            },
+                                        ]}
+                                        renderKey='title'
+                                    />
+                                </CustomLabel>
+                            </div>
+                            <div className={styles.formGroupContainer}>
+                                <div className={styles.formGroup}>
+                                    <div className={styles.tableFormGroup}>
+                                        <div className={styles.searchContainer}>
+                                            <div className={styles.inputContainer}>
+                                                <CustomInput
+                                                    type='text'
+                                                    placeholder='Pesquise um aluno por nome, email ou matrícula'
+                                                    value={inputSearch}
+                                                    max={50}
+                                                    onChange={(e) => {
+                                                        setInputSearch(e.target.value)
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e && e.key === 'Enter') {
+                                                            searchUsers()
+                                                        }
+                                                    }}
+                                                />
+                                                {errors.dev_team ? <ErrorMessage message={errors.dev_team}/> : null}
+                                                {
+                                                    optionsOpen ? (
+                                                        <CustomOptions
+                                                            options={userOptions}
+                                                            onSelect={(option) => {
+                                                                addUser(option)
+                                                                setInputSearch('')
+                                                            }}
+                                                            renderKey='username'
+                                                        />
+                                                    ) : null
+                                                }
+                                            </div>
+                                            <div className={styles.searchTools}>
+                                                <img className={styles.tool} src={search} alt="search" onClick={() => searchUsers()} />
+                                                <img className={styles.tool} src={x} alt="clear" onClick={() => {
                                                     setInputSearch('')
-                                                }}
-                                                renderKey='username'
-                                            />
-                                        ) : null
-                                    }
-                                </div>
-                                <div className={styles.searchTools}>
-                                    <img className={styles.tool} src={search} alt="search" onClick={() => searchUsers()} />
-                                    <img className={styles.tool} src={x} alt="clear" onClick={() => {
-                                        setInputSearch('')
-                                        setOptionsOpen(false)
-                                    }} />
+                                                    setOptionsOpen(false)
+                                                }} />
+                                            </div>
+                                        </div>
+                                        <div className={tableStyles.tableContainer}>
+                                            <table className={tableStyles.table}>
+                                                <thead className={tableStyles.thead}>
+                                                    <tr className={tableStyles.tr}>
+                                                        <th className={tableStyles.th}>Alunos</th>
+                                                        <th className={tableStyles.thDynamicAction}/>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className={tableStyles.tbody}>
+                                                    {devTeamViewList.map((option, index) => (
+                                                        <tr className={tableStyles.tr}>
+                                                            <td className={tableStyles.td}>{option}</td>
+                                                            <td className={tableStyles.tdDynamicAction}>
+                                                                <img src={x} className={tableStyles.remove} alt="remover" onClick={() => removeUser(index)}/>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div className={tableStyles.tableContainer}>
-                                <table className={tableStyles.table}>
-                                    <thead className={tableStyles.thead}>
-                                        <tr className={tableStyles.tr}>
-                                            <th className={tableStyles.th}>Alunos</th>
-                                            <th className={tableStyles.thAction}/>
-                                        </tr>
-                                    </thead>
-                                    <tbody className={tableStyles.tbody}>
-                                        {devTeamViewList.map((option, index) => (
-                                            <tr className={tableStyles.tr}>
-                                                <td className={tableStyles.td}>{option}</td>
-                                                <td className={tableStyles.tdAction}>
-                                                    <img src={x} className={tableStyles.remove} alt="remover" onClick={() => removeUser(index)}/>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                            <div className={styles.buttonContainer}>
+                                <CustomButton text='Cadastrar' type='submit'/>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div className={styles.buttonContainer}>
-                    <CustomButton text='Cadastrar' type='submit'/>
-                </div>
+                        </>
+                    )
+                }
             </form>
             </FormContainer>
         </section>

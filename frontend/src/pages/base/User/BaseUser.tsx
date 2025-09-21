@@ -6,6 +6,7 @@ import { hasGroup } from "../../../utils/hasGroup"
 import CustomLoading from "../../../components/customLoading/CustomLoading"
 import UserService from "../../../services/userService"
 import { AxiosError } from "axios"
+import { toast } from "react-toastify"
 
 const BaseUser = () => {
     const redirect = useNavigate()
@@ -18,11 +19,14 @@ const BaseUser = () => {
             const res = await UserService.getData()
 
             setUser(res.data)
+            
+            if (res.data.first_login) redirect('/session/user/profile/')
+
             setAuthorized(hasGroup('user', res.data))
         } catch (error) {
             if (error instanceof AxiosError) {
                 if (error?.response?.status === 401) {
-                    console.error("Token inválido ou refresh falhou, redirecionando.")
+                    toast.error("Token inválido ou refresh falhou, redirecionando...")
                     redirect('/session')
                 } else {
                     console.error(error)
@@ -48,8 +52,8 @@ const BaseUser = () => {
     if (authorized === false) {
         if (Object.values(user).every((value) => value !== null)) {
             for (let group in user.groups) {
-                if (group === 'membro') redirect('/membro/home/')
-                if (group === 'visit') redirect('/visit/home/')
+                if (group === 'user') redirect('/user/home/')
+                if (group === 'admin') redirect('/admin/home/')
             }
         }
     }

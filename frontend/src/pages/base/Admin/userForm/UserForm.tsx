@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styles from './UserForm.module.css'
 import { useEffect, useState } from 'react'
 import UserService from '../../../../services/userService'
@@ -45,6 +45,8 @@ interface AdditionalInfosErrors {
 const UserForm = () => {
     const location = useLocation()
     const { state } = location
+    const profile = location.pathname.split('/')[3]
+    const redirect = useNavigate()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isLoadingGroups, setIsLoadingGroups] = useState<boolean>(true)
     const [stage, setStage] = useState<"user"|"addInfo">("user")
@@ -91,11 +93,7 @@ const UserForm = () => {
             setUserForm(res[0].value.data)
         } else {
             const error = res[0].reason
-            if (error instanceof AxiosError && error.response?.status !== 500) {
-                toast.error(error.response?.data.message)
-            } else {
-                toast.error("Ocorreu um erro")
-            }
+            if (error instanceof AxiosError) toast.error(error.response?.data.message)
         }
 
         setAddInfoForm((prev) => {
@@ -256,16 +254,25 @@ const UserForm = () => {
                             return data.data.message
                         }
                     },
-                    error: {
-                        render({ data }) {
-                            if (data instanceof AxiosError) {
-                                if (data.status === 500) return "Ocorreu um erro"
-                                return data.response?.data.message
-                            }
-                        }
+                    error: "Erro de validação"
+                }
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/${profile}/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
                     }
                 }
-            )
+            })
         }
 
     }
@@ -464,7 +471,7 @@ const UserForm = () => {
                                         />
                                     </CustomLabel>
                                     {
-                                        !userForm.groups.find((group) => group.name === 'guest') ? (
+                                        userForm.access_profile !== 'convidado' ? (
                                             <CustomLabel title='Matrícula *'>
                                                 <CustomInput
                                                     type='text'

@@ -30,7 +30,7 @@ def refresh_token(request):
         return response
 
     except Http404 as e:
-        return Response({"message": str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"message": "Usuário não encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except TokenValidationError as e:
         return Response({"message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -50,7 +50,7 @@ def pair_token(request):
 
         return Response({'access': access_token, 'refresh': refresh_token}, status=status.HTTP_200_OK)
     except Http404 as e:
-        return Response({'message': str(e)}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': "Usuário não encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao gerar par de tokens", exc_info=True)

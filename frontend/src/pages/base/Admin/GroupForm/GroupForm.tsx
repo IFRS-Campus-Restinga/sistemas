@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styles from './GroupForm.module.css'
 import { useEffect, useState } from 'react'
 import GroupService, { type Group } from '../../../../services/groupService'
@@ -11,10 +11,12 @@ import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import { validateMandatoryStringField } from '../../../../utils/validations/generalValidations'
 import CustomButton from '../../../../components/customButton/CustomButton'
+import { AxiosError } from 'axios'
 
 const GroupForm = () => {
     const location = useLocation()
     const { state } = location
+    const redirect = useNavigate()
     const [pageList1, setPageList1] = useState<number>(1)
     const [pageList2, setPageList2] = useState<number>(1)
     const [nextPageList1, setNextPageList1] = useState<number | null>(null)
@@ -56,11 +58,10 @@ const GroupForm = () => {
             setNextPageList2(res[2].data.next ? pageList2 + 1 : null)
             setPrevPageList2(res[2].data.prev ? pageList2 - 1 : null)
         } catch (error) {
-            if (error instanceof Error) {
-                toast.error(error.message, {
-                    autoClose: 2000,
-                    position: 'bottom-center',
-                })
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
             }
         } finally {
             setIsLoading(false)
@@ -81,7 +82,11 @@ const GroupForm = () => {
                 setNextPageList2(res.data.next ? pageList2 + 1 : null)
                 setPrevPageList2(res.data.previous ? pageList2 - 1 : null)
             } catch (error) {
-                console.log()
+                if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+                } else {
+                    console.error(error)
+                }            
             } finally {
                 setIsLoadingGroupPermissions(false)
             }
@@ -103,7 +108,11 @@ const GroupForm = () => {
             setNextPageList1(res.data.next ? pageList1 + 1 : null)
             setPrevPageList1(res.data.previous ? pageList1 - 1 : null)
         } catch (error) {
-            console.error(error)
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            } else {
+                console.error(error)
+            }        
         } finally {
             setIsLoading(false)
             setIsLoadingAvailablePermissions(false)
@@ -148,18 +157,30 @@ const GroupForm = () => {
                 req,
                 {
                     pending: state ? 'Salvando alterações...' : 'Criando grupo...',
-                    success: state ? 'Registro atualizado com sucesso' : 'Grupo criado com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data.message || 'Erro ao alterar dados'
+                    success: {
+                        render({data}) {
+                            return data.data.message
                         }
-                    }
-                },
-                {
-                    autoClose: 2000,
-                    position: 'bottom-center'
+                    },
+                    error: "Erro de validação"
                 }
-            )
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/grupos/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
+                    }
+                }
+            })
         }
     }
 

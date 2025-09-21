@@ -25,7 +25,7 @@ const PPCList = () => {
             fetchData={fetchPPCs}
             registerUrl='/session/admin/ppcs/create/'
             canEdit={true}
-            canView={false}
+            canView={true}
             translations={translations}
         />
     )

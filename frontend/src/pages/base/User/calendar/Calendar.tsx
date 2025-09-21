@@ -133,9 +133,9 @@ const Calendar = () => {
     setCurrentView(view)
   }
   
-  // Navega para edição do evento
+  // Navega para visualização do evento
   const handleSelectEvent = (event: BigCalendarEvent) => {
-    navigate(`eventos/${event.id}/`)
+    navigate(`eventos/${event.id}/`, {state: event.id})
   }
   
   // Estilo dos eventos, bloqueando interação e mudando cursor em eventos passados

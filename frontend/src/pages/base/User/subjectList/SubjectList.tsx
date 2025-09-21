@@ -22,8 +22,8 @@ const SubjectList = () => {
         <ListPage
             title={'Disciplinas'}
             fetchData={fetchSubjects}
-            canEdit={true}
-            canView={false}
+            canEdit={false}
+            canView={true}
             translations={translations}
         />
     )

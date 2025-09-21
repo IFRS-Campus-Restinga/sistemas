@@ -5,7 +5,7 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
 import LoginGroupList from "../../components/loginGroupList/LoginGroupList"
 import VisitorForm from "../../components/visitorForm/VisitorForm"
 import AuthService, { type visitorLoginProps } from "../../services/authService"
-import { toast, ToastContainer } from "react-toastify"
+import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import CustomLoading from "../../components/customLoading/CustomLoading"
 import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/validations/authValidations"
@@ -84,9 +84,12 @@ const Login = () => {
             
             if (!res.data.user) {
                 setAccessRequested(true)
+
+                setTimeout(() => {
+                    setAccessRequested(false)
+                }, 3000);
             } else {
                 if (!systemURL) {
-                    console.log(res.data.user)
                     setUser(res.data.user)
     
                     if (res.data.user.profile_picture) sessionStorage.setItem('profilePicture', res.data.user.profile_picture)
@@ -109,7 +112,7 @@ const Login = () => {
                     }
                 } 
                  else {
-                    const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+                    const url = `${systemURL}/session/token?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
     
                     window.location.href = url
                 }
@@ -117,6 +120,7 @@ const Login = () => {
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
+                setIsDisabled(false)
             } else {
                 console.error(error)
             }
@@ -176,6 +180,9 @@ const Login = () => {
     
                 if ('is_active' in res.data) {
                     setAccessRequested(true)
+                    setTimeout(() => {
+                        setAccessRequested(false)
+                    }, 3000);
                 } else {
                     if (!systemURL) {
                         setUser(res.data.user)
@@ -198,7 +205,7 @@ const Login = () => {
                         }
                     } 
                      else {
-                        const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+                        const url = `${systemURL}/session/token?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
     
                         window.location.href = url
                     }
@@ -209,6 +216,7 @@ const Login = () => {
         } catch (error) {
              if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
+                setIsDisabled(false)
             } else {
                 console.error(error)
             }
@@ -296,7 +304,6 @@ const Login = () => {
 
     return (
         <Base navBar={<></>}>
-            <ToastContainer />
             {
                 accessRequested ? (
                     <section className={styles.sectionMessage}>

@@ -1,5 +1,4 @@
 import api from "../../config/apiConfig"
-import { extractError } from "../utils/handleAxiosError"
 import { type Permissions } from "./permissionService"
 
 export interface Group {
@@ -14,58 +13,38 @@ export interface GroupData extends Group {
 
 const GroupService = {
     create: async (param: GroupData) => {
-        try {
-            return api.post('api/groups/create/', param)
-        } catch (error) {
-            throw extractError(error)
-        }
+        return api.post('api/groups/create/', param)
     },
 
     list: async (page: number, search: string, fields: string) => {
-        try {
-            return await api.get('api/groups/get/', {
-                params: {
-                    search,
-                    page,
-                    fields
-                }
-            })
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.get('api/groups/get/', {
+            params: {
+                search,
+                page,
+                fields
+            }
+        })
     },
 
     get: async (groupId: string, fields: string) => {
-        try {
-            return await api.get(`api/groups/get/${groupId}/`, {
-                params: {
-                    fields
-                }
-            });
-        } catch (error) {
-            throw extractError(error);
-        }
+        return await api.get(`api/groups/get/${groupId}/`, {
+            params: {
+                fields
+            }
+        });
     },
 
     getAvailable: async (userId: string, page: number, fields: string) => {
-        try {
-            return await api.get(`api/groups/get/available/${userId}/`, {
-                params: {
-                    fields,
-                    page
-                }
-            });
-        } catch (error) {
-            throw extractError(error);
-        }
+        return await api.get(`api/groups/get/available/${userId}/`, {
+            params: {
+                fields,
+                page
+            }
+        });
     },
 
     edit: async (params: GroupData, group_id: string) => {
-        try {
-            return api.put(`api/groups/edit/${group_id}/`, params)
-        } catch (error) {
-            throw extractError(error)
-        }
+        return api.put(`api/groups/edit/${group_id}/`, params)
     }
 }
 

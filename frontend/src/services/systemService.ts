@@ -1,6 +1,5 @@
 import api from "../../config/apiConfig"
 import flattenValues from "../utils/flattenObj"
-import { extractError } from "../utils/handleAxiosError"
 
 export interface System {
     id?: string
@@ -14,31 +13,21 @@ export interface System {
 
 export const SystemService = {
     create: async (params: System) => {
-        try {
-            const res = await api.post('api/systems/create/', params)
-
-            return res
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.post('api/systems/create/', params)
     },
 
     list: async (user_id: string, page: number, fields: string) => {
-        try {
-            let res = await api.get('api/systems/get/', {
-                params: {
-                    user_id,
-                    page,
-                    fields
-                }
-            })
+        let res = await api.get('api/systems/get/', {
+            params: {
+                user_id,
+                page,
+                fields
+            }
+        })
 
-            res.data = flattenValues(res.data) 
+        res.data = flattenValues(res.data) 
 
-            return res
-        } catch (error) {
-            throw extractError(error)
-        }
+        return res
     },
 
     get: async (systemId: string, fields: string) => {

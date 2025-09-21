@@ -9,9 +9,6 @@ class SystemSerializer(serializers.ModelSerializer):
     dev_team = serializers.PrimaryKeyRelatedField(
         many=True, queryset=CustomUser.objects.filter(access_profile='aluno', is_active=True)
     )
-    groups = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Group.objects.all()
-    )
     api_key = serializers.CharField(required=False)
 
     class Meta:

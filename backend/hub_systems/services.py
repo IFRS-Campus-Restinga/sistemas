@@ -2,7 +2,7 @@ import uuid
 from django.shortcuts import get_object_or_404
 from hub_groups.service import GroupService
 from hub_auth.services.token_service import TokenService
-from hub_systems.serializers import SystemSerializer
+from hub_systems.serializer import SystemSerializer
 from rest_framework import serializers
 from django.db import transaction
 from hub_systems.models import System
@@ -14,9 +14,6 @@ class SystemPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 30
-
-class SystemException(Exception):
-    pass
 
 class SystemService:
     @staticmethod

@@ -1,5 +1,4 @@
 import api from "../../config/apiConfig"
-import { extractError } from "../utils/handleAxiosError"
 
 export interface CalendarInterface {
     id?: string
@@ -11,12 +10,7 @@ export interface CalendarInterface {
 
 const CalendarService = {
     create: async (param: CalendarInterface) => {
-        try {
-            return await api.post('api/calendars/create/', param)
-            
-        } catch (error) {
-            throw extractError(error)
-        }
+        return await api.post('api/calendars/create/', param)
     },
 
     list: async (page: number = 1, param: string = '', fields: string) => {

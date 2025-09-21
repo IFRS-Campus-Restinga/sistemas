@@ -80,9 +80,12 @@ class UserService:
         data = {
             'id': str(user.id),
             'username': user.username,
-            'first_login': user.first_login,
             'groups': [group.name for group in user.groups.all()],
+            'access_profile': user.access_profile,
         }
+
+        if user.first_login:
+            data['first_login'] = user.first_login
 
         if not user.is_abstract:
             data['is_abstract'] = user.is_abstract,

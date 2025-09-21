@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import styles from './SubjectForm.module.css'
 import { useEffect, useState } from 'react'
 import SubjectService, { type SubjectInterface } from '../../../../services/subjectService'
@@ -22,6 +22,7 @@ interface ErrorSubjectForm {
 const SubjectForm = () => {
     const location = useLocation()
     const {state} = location
+    const redirect = useNavigate()
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [subject, setSubject] = useState<SubjectInterface>({
         menu: '',
@@ -43,12 +44,7 @@ const SubjectForm = () => {
             setSubject(res.data)
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message, 
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.error(error)
             }
@@ -96,18 +92,30 @@ const SubjectForm = () => {
                 (state ? SubjectService.edit(state, subject) : SubjectService.create(subject)),
                 {
                     pending: state ? 'Salvando alterações...' : 'Cadastrando disciplina...',
-                    success: state ? 'Alterações salvas com sucesso' : 'Disciplina cadastrada com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data?.message || 'Erro ao alterar dados'
+                    success: {
+                        render({data}) {
+                            return data.data.message
                         }
-                    }
-                },
-                {
-                    autoClose: 2000,
-                    position: 'bottom-center'
+                    },
+                    error: "Erro de validação"
                 }
-            )
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/disciplinas/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
+                    }
+                }
+            })
         }
     }
 

@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import styles from './PPCForm.module.css'
 import { useEffect, useState } from 'react'
@@ -21,7 +21,7 @@ import Modal from '../../../../components/modal/Modal'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import PPCService from '../../../../services/ppcService'
 import ErrorMessage from '../../../../components/errorMessage/ErrorMessage'
-import { groupByPeriod } from '../../../../utils/groupByPeriod'
+import { groupByPeriod, groupSubjectsByPeriod } from '../../../../utils/groupByPeriod'
 
 interface ErrorsPPCForm {
     title: string | null
@@ -40,34 +40,10 @@ interface Curriculum {
     subjects: Subject[]
 }
 
-function groupSubjectsByPeriod(curriculum: any[]) {
-  const grouped: Record<string, any> = {};
-
-  curriculum.forEach((item) => {
-    const period = item.period; // string
-    const subjectName = item.subject.name;
-    const preReqs = item.pre_requisits?.map((pr: any) => pr.id) || [];
-
-    if (!grouped[period]) {
-      grouped[period] = [];
-    }
-
-    grouped[period].push({
-      name: subjectName,
-      preRequisits: preReqs
-    });
-  });
-
-  // transforma o objeto em array no formato desejado
-  return Object.keys(grouped).map((period) => ({
-    period: period, // mantém como string
-    subjects: grouped[period]
-  }));
-}
-
 const PPCForm = () => {
     const location = useLocation()
     const { state } = location
+    const redirect = useNavigate()
     const [searched, setSearched] = useState<boolean>(false)
     const [periods, setPeriods] = useState<number[]>([])
     // Nome do curso
@@ -134,12 +110,7 @@ const PPCForm = () => {
             setCourse(res.data.course.name)
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message,
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.error(error)
             }
@@ -155,12 +126,7 @@ const PPCForm = () => {
             setCourseOptions(res.data.results)
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message,
-                    {
-                        autoClose: 2000,
-                        position: 'bottom-center'
-                    }
-                )
+                toast.error(error.response?.data.message)
             } else {
                 console.error(error)
             }
@@ -225,10 +191,6 @@ const PPCForm = () => {
         return Object.values(newErrors).every((error) => error === null || error.every((value: []) => value === null))
     }
 
-    useEffect(() => {
-        console.log(PPC)
-    }, [PPC])
-
     const removeEmtpyItems = () => {
         setPPC((prev) => {
             if (!(prev.curriculum instanceof File)) {
@@ -287,23 +249,15 @@ const PPCForm = () => {
     const deletePeriod = async (periodNumber: number) => {
         if (!(PPC.curriculum instanceof File)) {
             try {
-                await PPCService.deletePeriod(state, periodNumber)
+                const res = await PPCService.deletePeriod(state, periodNumber)
     
                 setPPC({...PPC, curriculum: PPC.curriculum.filter((subject) => subject.period !== periodNumber)})
                 setCurriculum(curriculum.filter((curriculum) => !curriculum.period.includes(`${periodNumber}º Período`)))
     
-                toast.success('Período removido com sucesso', {
-                    autoClose: 2000,
-                    position: 'bottom-center'
-                })
+                toast.success(res.data.message)
             } catch (error) {
                 if (error instanceof AxiosError) {
-                    toast.error(error.response?.data.message,
-                        {
-                            autoClose: 2000,
-                            position: 'bottom-center'
-                        }
-                    )
+                    toast.error(error.response?.data.message)
                 } else {
                     console.error(error)
                 }
@@ -320,19 +274,31 @@ const PPCForm = () => {
                 PPCService.edit(state, PPC) :
                 PPCService.create(PPC),
                 {
-                    pending: state ? 'Salvando alterações' : 'Cadastrando PPC',
-                    success: state ? 'Alterações salvas com sucesso' : 'PPC criado com sucesso',
-                    error: {
-                        render({ data }: { data: any }) {
-                            return data.message || 'Erro ao alterar dados'
+                    pending: state ? 'Salvando alterações...' : 'Cadastrando PPC...',
+                    success: {
+                        render({data}) {
+                            return data.data.message
                         }
-                    }
-                },
-                {
-                    autoClose: 2000,
-                    position: 'bottom-center'
+                    },
+                    error: "Erro de validação"
                 }
-            )
+            ).then((res) => {
+                    if (res.status === 201 || res.status === 200) {
+                        setTimeout(() => {
+                            redirect(`/session/admin/ppcs/`);
+                        }, 2000);
+                    }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
+                    }
+                }
+            })
         }
     }
 

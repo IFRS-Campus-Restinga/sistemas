@@ -93,7 +93,10 @@
     padding: 3px;
 }
 
-.thDualAction, .tdDualAction {
+.thDualAction, 
+.tdDualAction, 
+.tdDynamicAction, 
+.thDynamicAction {
     width: 0;
     padding: 3px;
 }
