@@ -7,10 +7,9 @@ interface ActionProps {
     itemId: string
     onView?: (itemId: string) => void
     onEdit?: (itemId: string) => void
-    onDelete?: (itemId: string) => void
 }
 
-const Actions = ({seeActionsIcon, collapseActionsIcon, itemId, onDelete, onEdit, onView}: ActionProps) => {
+const Actions = ({seeActionsIcon, collapseActionsIcon, itemId, onEdit, onView}: ActionProps) => {
     const [isOpen, setIsOpen] = useState<boolean>(false)
 
     const handleBlur = () => {
@@ -37,6 +36,7 @@ const Actions = ({seeActionsIcon, collapseActionsIcon, itemId, onDelete, onEdit,
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         onView(itemId)
+                                        setIsOpen(false)
                                     }} 
                                     className={styles.actionItem}
                                 >
@@ -48,21 +48,11 @@ const Actions = ({seeActionsIcon, collapseActionsIcon, itemId, onDelete, onEdit,
                                     onClick={(e) => {
                                         e.stopPropagation()
                                         onEdit(itemId)
+                                        setIsOpen(false)
                                     }} 
                                     className={styles.actionItem}
                                 >
                                     Editar
-                                </li>
-                            )}
-                            {onDelete && (
-                                <li 
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onDelete(itemId)
-                                    }} 
-                                    className={styles.actionItem}
-                                >
-                                    Remover
                                 </li>
                             )}
                     </ul>    

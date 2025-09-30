@@ -26,8 +26,8 @@ def login_with_google(request):
                 key='refresh_token',
                 value=refresh,
                 httponly=True,
-                secure=False,
-                samesite='Lax',
+                secure=True,
+                samesite='None',
                 max_age=3600*24*7,
                 path='/session/'
             )
@@ -36,8 +36,8 @@ def login_with_google(request):
                 key='access_token',
                 value=access,
                 httponly=True,
-                secure=False,
-                samesite='Lax',
+                secure=True,
+                samesite='None',
                 path='/'
             )
 
@@ -70,8 +70,8 @@ def login(request):
                 key="refresh_token",
                 value=refresh,
                 httponly=True,
-                secure=False,
-                samesite="Lax",
+                secure=True,
+                samesite='None',
                 max_age=3600*24*7,
                 path="/session/",
             )
@@ -80,8 +80,8 @@ def login(request):
                 key="access_token",
                 value=access,
                 httponly=True,
-                secure=False,
-                samesite="Lax",
+                secure=True,
+                samesite='None',
                 path="/",
             )
 
@@ -100,7 +100,7 @@ def logout(request):
     try:
         response = Response({'message': 'Logout concluído com sucesso'}, status=status.HTTP_200_OK)
 
-        response.delete_cookie('refresh_token')
+        response.delete_cookie("refresh_token", path="/session/")
         response.delete_cookie('access_token')
 
         return response

@@ -5,7 +5,7 @@ import type { CurriculumInterface } from '../../services/ppcService'
 import CustomLabel from '../../components/customLabel/CustomLabel'
 import SubjectService from '../../services/subjectService'
 import { AxiosError } from 'axios'
-import { toast, ToastContainer } from 'react-toastify'
+import { toast } from 'react-toastify'
 import PPCService from '../../services/ppcService'
 import CustomSearch from '../../components/customSearch/CustomSearch'
 import CustomOptions from '../../components/customOptions/CustomOptions'
@@ -17,7 +17,7 @@ import CustomLoading from '../../components/customLoading/CustomLoading'
 
 interface Subject {
     name: string
-    preRequisits: string[]
+    preRequisits: {id: string, code: string}[]
 }
 
 interface CurriculumTableProps {
@@ -193,7 +193,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                     <th className={tableStyles.th} style={{minWidth: '80px'}}>Pré requisitos</th>
                                                 ) : null
                                             }
-                                            <th className={tableStyles.thAction}/>
+                                            <th className={tableStyles.thDualAction}/>
                                         </tr>
                                     </thead>
                                     <tbody className={tableStyles.tbody}>
@@ -279,7 +279,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 onSelect={(option) => {
                                                                                     // Atualiza subjects (usado para exibir os nomes na UI)
                                                                                     const updatedPreReq = [...subjects];
-                                                                                    updatedPreReq[index].preRequisits.push(option.extraField!);
+                                                                                    updatedPreReq[index].preRequisits.push(option!);
                                                                                     setSubjects(updatedPreReq);
 
                                                                                     const updatedCurriculum = [...curriculum];
@@ -318,7 +318,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                     {
                                                                                         curriculumData.pre_requisits.map((preReq, pIndex) => (
                                                                                             <div key={pIndex} className={styles.preReq}>
-                                                                                                {subjects[index].preRequisits[pIndex]}
+                                                                                                {subjects[index].preRequisits[pIndex].code}
                                                                                                 <img 
                                                                                                 src={typeof preReq !== 'string' ? deleteIcon : clear} 
                                                                                                 className={tableStyles.action} 
@@ -391,7 +391,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                             }
                                                         })
                                                     }
-                                                <td className={tableStyles.tdAction}>
+                                                <td className={tableStyles.tdDualAction}>
                                                     <img 
                                                         src={curriculumData.id ? deleteIcon : clear} 
                                                         className={tableStyles.action} 

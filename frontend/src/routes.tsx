@@ -31,9 +31,11 @@ import PPCListUser from './pages/base/User/ppcList/PPCList'
 import SubjectListUser from './pages/base/User/subjectList/SubjectList'
 import CourseDetails from './pages/base/User/courseDetails/CourseDetails'
 import EventDetails from './pages/base/User/eventDetails/EventDetails'
-import ProfileForm from './pages/base/User/profileForm/Profile'
+import ProfileForm from './pages/base/User/profileForm/ProfileForm'
 import SubjectDetails from './pages/base/User/subjectDetails/SubjectDetails'
 import PPCDetails from './features/ppcDetails/PPCDetails'
+import Profile from './pages/base/User/profile/Profile'
+import ErrorBoundary from './pages/errorBoundary/ErrorBoundary'
 
 const routes = createBrowserRouter([
     {
@@ -167,7 +169,7 @@ const routes = createBrowserRouter([
                 element: <HomeUser />
             },
             {
-                path: 'profile',
+                path: 'first-login',
                 element: <ProfileForm/>
             },
             {
@@ -205,9 +207,17 @@ const routes = createBrowserRouter([
             {
                 path: 'disciplinas/:subjectId/',
                 element: <SubjectDetails/>
+            },
+            {
+                path: 'profile',
+                element: <Profile/>
             }
         ]
     },
+    {
+        path: '*',
+        element: <ErrorBoundary/>
+    }
 ])
 
 export default routes

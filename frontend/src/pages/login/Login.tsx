@@ -9,7 +9,7 @@ import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import CustomLoading from "../../components/customLoading/CustomLoading"
 import { comparePasswords, validateEmail, validateName, validatePassword } from "../../utils/validations/authValidations"
-import { useSetUser } from "../../store/userHooks"
+import { useSetUser, useUser } from "../../store/userHooks"
 import UserService, {type visitorAccountProps} from "../../services/userService"
 import { SystemService } from "../../services/systemService"
 import { AxiosError } from "axios"
@@ -29,6 +29,7 @@ export interface visitorLoginErrorProps {
 
 const Login = () => {
     const setUser = useSetUser()
+    const user = useUser()
     const redirect = useNavigate()
     const queryParams = new URLSearchParams(location.search);
     const systemId = queryParams.get('system')
@@ -155,14 +156,21 @@ const Login = () => {
                     success: 'Conta criada com sucesso',
                     error: {
                         render({ data }: any) {
-                            return data.message || 'Erro ao criar conta'
+                            if (data instanceof AxiosError) return data.response?.data.message[0]
                         }
                     }
                 }
             )
 
             setTimeout(() => {
-               setAccessRequested(false) 
+               setAccessRequested(false)
+               setCreateAccount(false)
+               setVisitorAccountData({
+                email: '',
+                first_name: '',
+                last_name: '',
+                password: ''
+               })
             }, 2000);
         }
     }
@@ -301,6 +309,32 @@ const Login = () => {
     useEffect(() => {
         if (systemId) fetchSystem()
     }, [systemId])
+
+    const fetchUserData = async () => {
+        try {
+            const res = await UserService.getData()
+
+            setUser(res.data)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error?.response?.status === 401) {
+                    console.error("Token inválido ou refresh falhou, redirecionando.")
+                    redirect('/session')
+                } else {
+                    console.error("Erro inesperado ao buscar usuário:", error)
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        fetchUserData()
+    }, [])
+
+    useEffect(() => {
+        if (user.groups?.includes("admin")) redirect("/session/admin/home")
+        if (user.groups?.includes("user")) redirect("/session/user/home")
+    }, [user])
 
     return (
         <Base navBar={<></>}>

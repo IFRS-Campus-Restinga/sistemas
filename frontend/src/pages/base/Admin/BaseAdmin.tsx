@@ -4,7 +4,7 @@ import CustomNavBar from "../../../components/customNavBar/CustomNavBar"
 import userIcon from '../../../assets/user-svgrepo-com-white.svg'
 import books from '../../../assets/books-fill-svgrepo-com-white.svg'
 import { useEffect, useState } from "react"
-import { useSetUser, useUser } from "../../../store/userHooks"
+import { useSetUser } from "../../../store/userHooks"
 import { hasGroup } from "../../../utils/hasGroup"
 import CustomLoading from "../../../components/customLoading/CustomLoading"
 import UserService from "../../../services/userService"
@@ -13,7 +13,6 @@ import { AxiosError } from "axios"
 
 const BaseAdmin = () => {
     const redirect = useNavigate()
-    const user = useUser()
     const setUser = useSetUser()
     const [authorized, setAuthorized] = useState<boolean | undefined>()
 
@@ -50,12 +49,7 @@ const BaseAdmin = () => {
     }
 
     if (authorized === false) {
-        if (Object.values(user).every((value) => value !== null)) {
-            for (let group in user.groups) {
-                if (group === 'aluno') redirect('/aluno/home/')
-                if (group === 'visit') redirect('/visit/home/')
-            }
-        }
+         redirect('/session/user/home/')
     }
 
     return (

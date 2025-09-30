@@ -23,8 +23,8 @@ def refresh_token(request):
             key='access_token',
             value=str(access),
             httponly=True,
-            secure=False,
-            samesite='Lax',
+            secure=True,
+            samesite='None',
             path='/'
         )
         return response

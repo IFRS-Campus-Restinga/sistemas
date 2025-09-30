@@ -30,33 +30,17 @@ BASE_SYSTEM_URL = os.getenv('BASE_SYSTEM_URL')
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
 CORS_ALLOW_CREDENTIALS = True
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-]
-
-CSRF_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
-    "http://127.0.0.1:5173",
-]
 
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
 ]
-
-CSRF_COOKIE_SECURE = False
-SESSION_COOKIE_SECURE = False
-SESSION_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 
@@ -97,8 +81,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            f'{BASE_DIR}/backend/google_auth/templates',  # Para o Google Auth
-            os.path.join(BASE_DIR, 'notifications_app', 'templates_email')  # Para templates de e-mail
+            f'{BASE_DIR}/backend/google_auth/templates',
+            os.path.join(BASE_DIR, 'notifications_app', 'templates_email')
         ],
         'APP_DIRS': True,
         'OPTIONS': {

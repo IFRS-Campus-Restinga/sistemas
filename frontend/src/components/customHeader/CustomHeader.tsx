@@ -7,7 +7,6 @@ import AuthService from '../../services/authService'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
 import { useClearUser, useUser } from '../../store/userHooks'
-import { hasGroup } from '../../utils/hasGroup'
 import { checkGroup } from '../../utils/checkGroup'
 
 interface CustomHeaderProps {
@@ -64,8 +63,14 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                             {
                                 profilePicture ? (
                                     <Dropdown
-                                        dropdownChildren={<img src={profilePicture} alt="foto_de_perfil" className={styles.accountOptions} />}
+                                        dropdownChildren={
+                                            <img src={profilePicture} alt="foto_de_perfil" className={styles.accountOptions} />
+                                        }
                                         items={[
+                                            ...(user.is_abstract === false ? [{
+                                                title: "Minha conta",
+                                                onClick: () => redirect('/session/user/profile/')
+                                            }] : []),
                                             {
                                                 title: 'Logout',
                                                 onClick: logout
@@ -73,7 +78,21 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                                         ]}
                                     />
                                 ) : user.username ? (
-                                    <div className={styles.accountOptions}>{user.username[0]}</div>
+                                    <Dropdown
+                                        dropdownChildren={
+                                            <div className={styles.accountOptions}>{user.username[0].toUpperCase()}</div>
+                                        }
+                                        items={[
+                                            ...(user.is_abstract === false ? [{
+                                                title: "Minha conta",
+                                                onClick: () => redirect('/session/user/profile/')
+                                            }] : []),
+                                            {
+                                                title: 'Logout',
+                                                onClick: logout
+                                            }
+                                        ]}
+                                    />
                                 ) : (
                                     <img src={gear} className={styles.accountOptions} />
                                 )

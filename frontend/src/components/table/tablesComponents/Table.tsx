@@ -2,7 +2,6 @@ import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react';
 import CustomLoading from '../../customLoading/CustomLoading';
 import styles from '../Table.module.css'
 import search from '../../../assets/search-alt-svgrepo-com.svg';
-import deleteIcon from '../../../assets/delete-svgrepo-com.svg';
 import editIcon from '../../../assets/edit-3-svgrepo-com.svg'
 import check from '../../../assets/check-svgrepo-com.svg'
 import x from '../../../assets/close-svgrepo-com.svg'
@@ -33,19 +32,13 @@ interface TableProps {
     searchParam?: string
 }
 
-const Table = ({ itemList, next, previous, translations, setCurrent, current, loadingContent, crudActions, dualActions, fetchData, searchParam }: TableProps) => {
+const Table = ({ itemList, next, translations, setCurrent, current, loadingContent, crudActions, dualActions, fetchData, searchParam }: TableProps) => {
     const redirect = useNavigate()
-    const firstRef = useRef(null)
     const lastRef = useRef(null)
-    const loadingRef = useRef(false);
 
 
     const redirectAction = (itemId: string, action: string = '') => {
         redirect(`${itemId}/${action}`, {state: itemId})
-    }
-
-    const openModal = (id: string) => {
-
     }
 
     useEffect(() => {
@@ -145,14 +138,14 @@ const Table = ({ itemList, next, previous, translations, setCurrent, current, lo
                                                             />
                                                         )}
 
-                                                        {typeof crudActions.onDelete === 'function' && (
+                                                        {/* {typeof crudActions.onDelete === 'function' && (
                                                             <img
                                                                 src={deleteIcon}
                                                                 alt="excluir"
                                                                 className={styles.action}
                                                                 onClick={() => openModal(item.id)}
                                                             />
-                                                        )}
+                                                        )} */}
                                                     </>
                                                 ) : dualActions ? (
                                                     <>

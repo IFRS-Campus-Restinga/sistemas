@@ -20,7 +20,7 @@ export function groupSubjectsByPeriod(curriculum: any[]) {
   curriculum.forEach((item) => {
     const period = item.period; // string
     const subjectName = item.subject.name;
-    const preReqs = item.pre_requisits?.map((pr: any) => pr.id) || [];
+    const preReqs = item.pre_requisits?.map((pr: any) => pr) || [];
 
     if (!grouped[period]) {
       grouped[period] = [];

@@ -32,7 +32,7 @@ interface ErrorsPPCForm {
 
 interface Subject {
     name: string
-    preRequisits: string[]
+    preRequisits: {id:string, code:string}[]
 }
 
 interface Curriculum {
@@ -82,6 +82,7 @@ const PPCForm = () => {
                     curriculum.subject_teach_workload,
                     curriculum.subject_remote_workload,
                     curriculum.subject_ext_workload,
+                    curriculum.weekly_periods,
                     curriculum.period,
                     curriculum.pre_requisits.id,
                     curriculum.pre_requisits.code,
@@ -99,6 +100,7 @@ const PPCForm = () => {
                         subject_teach_workload: curr.subject_teach_workload,
                         subject_remote_workload: curr.subject_remote_workload,
                         subject_ext_workload: curr.subject_remote_workload,
+                        weekly_periods: curr.weekly_periods,
                         period: curr.period,
                         pre_requisits: curr.pre_requisits.map((preReq: any) => {
                             return preReq.id
@@ -317,6 +319,8 @@ const PPCForm = () => {
 
     useEffect(() => {
         if (!(PPC.curriculum instanceof File)) setPeriods(groupByPeriod(PPC.curriculum))
+
+        console.log(curriculum)
     }, [PPC.curriculum])
 
     useEffect(() => {

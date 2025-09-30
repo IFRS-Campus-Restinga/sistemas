@@ -26,7 +26,7 @@ class URLFieldsParser:
         user_id = payload.get("user_id")
 
         if not 'admin' in groups:
-            if not user_id in system.dev_team.all() or system.current_state != "Em desenvolvimento":
+            if not user_id in [str(user.id) for user in system.dev_team.all()] or system.current_state != "Em desenvolvimento":
                 return None
                 
         return system.api_key

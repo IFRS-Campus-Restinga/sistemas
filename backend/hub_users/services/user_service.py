@@ -1,7 +1,5 @@
 import uuid
-from django.http import Http404
 from django.shortcuts import get_object_or_404
-from django.db.models import Q
 from rest_framework import serializers
 from hub_users.serializers.custom_user_serializer import CustomUserSerializer
 from .password_service import PasswordService
@@ -9,6 +7,7 @@ from hub_users.models import *
 from django.contrib.auth.models import Group
 from django.db import transaction
 from rest_framework.pagination import PageNumberPagination
+from ..models import Password
 
 class UserPagination(PageNumberPagination):
     page_size = 10
@@ -22,7 +21,7 @@ class UserService:
         email = data.get('email', None)
         first_name = data.get('first_name', None)
         last_name = data.get('last_name', None)
-        access_profile = data.get('access_profile', None)
+        access_profile = data.get('accessProfile', None)
         password = data.get('password', None)
 
         if password:
@@ -88,7 +87,7 @@ class UserService:
             data['first_login'] = user.first_login
 
         if not user.is_abstract:
-            data['is_abstract'] = user.is_abstract,
+            data['is_abstract'] = user.is_abstract
 
         if picture:
             data['profile_picture'] = picture
@@ -195,5 +194,9 @@ class UserService:
     @staticmethod
     def decline_request(request_id):
         user = get_object_or_404(CustomUser, pk=uuid.UUID(request_id))
+        if user.custom_password: 
+            user_password = Password.objects.get(user=user)
 
+            user_password.delete()
+            
         user.delete()

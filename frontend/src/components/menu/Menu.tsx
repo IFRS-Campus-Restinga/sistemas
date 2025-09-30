@@ -78,7 +78,6 @@ const Menu = () => {
 
     useEffect(() => {
         fetchSystems()
-        console.log(systems)
     }, [currentPage])
 
     if (isLoading) return (
@@ -117,7 +116,6 @@ const Menu = () => {
                                             itemId={system.id}
                                             onView={() => fetchAPIKey(system.id)}
                                             onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
-                                            onDelete={user.groups?.includes('admin') ? () => setIsOpen(true) : undefined}
                                         />
                                     ) : null
                                 }

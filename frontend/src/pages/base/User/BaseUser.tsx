@@ -20,7 +20,7 @@ const BaseUser = () => {
 
             setUser(res.data)
             
-            if (res.data.first_login) redirect('/session/user/profile/')
+            if (res.data.first_login) redirect('/session/user/first-login/')
 
             setAuthorized(hasGroup('user', res.data))
         } catch (error) {

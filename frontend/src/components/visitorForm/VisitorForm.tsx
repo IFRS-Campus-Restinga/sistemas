@@ -1,11 +1,13 @@
 import styles from './VisitorForm.module.css'
 import { useEffect, useState } from 'react'
-import type { visitorAccountErrorProps, visitorAccountProps, visitorLoginErrorProps, visitorLoginProps } from '../../pages/login/Login'
+import type { visitorAccountErrorProps, visitorLoginErrorProps } from '../../pages/login/Login'
 import { comparePasswords, validateEmail, validateName, validatePassword } from '../../utils/validations/authValidations'
 import CustomButton from '../customButton/CustomButton'
 import CustomInput from '../customInput/CustomInput'
 import visible from '../../assets/eye-show-svgrepo-com.svg'
 import hidden from '../../assets/eye-off-svgrepo-com.svg'
+import type { visitorAccountProps } from '../../services/userService'
+import type { visitorLoginProps } from '../../services/authService'
 
 interface VisitorFormProps {
     createAccount: boolean
