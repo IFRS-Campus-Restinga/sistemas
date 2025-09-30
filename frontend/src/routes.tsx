@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createHashRouter } from 'react-router-dom'
 // Base
 import Login from './pages/login/Login'
 
@@ -36,8 +36,13 @@ import SubjectDetails from './pages/base/User/subjectDetails/SubjectDetails'
 import PPCDetails from './features/ppcDetails/PPCDetails'
 import Profile from './pages/base/User/profile/Profile'
 import ErrorBoundary from './pages/errorBoundary/ErrorBoundary'
+import Home from './pages/home/Home'
 
-const routes = createBrowserRouter([
+const routes = createHashRouter([
+    {
+        path: '/',
+        element: <Home/>
+    },
     {
         path: 'session/',
         element: <Login />
