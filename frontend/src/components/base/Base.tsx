@@ -1,6 +1,5 @@
 import styles from './Base.module.css'
 import CustomHeader from '../customHeader/CustomHeader'
-import CustomFooter from '../customFooter/CustomFooter'
 import type React from 'react'
 
 interface BaseProps {
@@ -16,7 +15,6 @@ const Base = ({ children, navBar }: BaseProps) => {
             <main className={styles.main}>
                 {children}
             </main>
-            <CustomFooter />
         </>
     )
 }
