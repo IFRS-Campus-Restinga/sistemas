@@ -30,7 +30,7 @@ interface CurriculumTableProps {
   setSubjects: (subjects: Subject[]) => void
 }
 
-const textFields: Array<keyof CurriculumInterface> = [
+const textFields: (keyof CurriculumInterface)[] = [
     'subject_teach_workload',
     'subject_ext_workload',
     'subject_remote_workload',
@@ -363,7 +363,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                 )
                                                             }
                                                             
-                                                            if (textFields.includes(key)) {
+                                                            if (textFields.includes(key as keyof CurriculumInterface)) {
                                                                 return (
                                                                     <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
                                                                         <CustomInput
@@ -375,16 +375,24 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
                                                                                 if (isNumeric) {
                                                                                     const updatedCurriculum = [...curriculum];
-                                                                                    const updatedSubject = { ...updatedCurriculum[index] };
+                                                                                    const updatedSubject = { ...updatedCurriculum[index] }; // mantém todos os campos obrigatórios
 
-                                                                                    if (textFields.includes(key as keyof CurriculumInterface)) {
-                                                                                        updatedSubject[key as keyof CurriculumInterface] = inputValue;
-                                                                                        updatedCurriculum[index] = updatedSubject;
-                                                                                        setCurriculum(updatedCurriculum);
+                                                                                    switch (key) {
+                                                                                        case "period":
+                                                                                            updatedSubject[key] = Number(inputValue);
+                                                                                            break;
+                                                                                        case "subject_teach_workload":
+                                                                                        case "subject_ext_workload":
+                                                                                        case "subject_remote_workload":
+                                                                                        case "weekly_periods":
+                                                                                            updatedSubject[key] = inputValue;
+                                                                                            break;
                                                                                     }
+
+                                                                                    updatedCurriculum[index] = updatedSubject; // agora é do tipo correto
+                                                                                    setCurriculum(updatedCurriculum);
                                                                                 }
                                                                             }}
-
                                                                         />
                                                                     </td>
                                                                 )

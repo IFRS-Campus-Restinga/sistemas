@@ -16,23 +16,36 @@ const UserList = () => {
 
     
     const fetchUsers = async (page: number = 1, searchParam: string) => {
-        const profileMap = {
+        const profileMap: Record<string, string> = {
             'servidores': 'servidor',
             'convidados': 'convidado',
-            'alunos':'aluno'
+            'alunos': 'aluno'
+        };
+
+        const profileKey = profileMap[accessProfile];
+
+        if (!profileKey) {
+            // Retorna um objeto "vazio" compatível com ListPage
+            return {
+                next: null,
+                previous: null,
+                data: []
+            };
         }
 
-        if (profileMap[accessProfile]) {
-            const res = await UserService.listByAccessProfile(profileMap[accessProfile], searchParam, page, 'id, username, email, status, date_joined')
-    
-            return {
-                next: res.data.next,
-                previous: res.data.previous,
-                data: res.data.results
-            }
-        }
-        
-    }
+        const res = await UserService.listByAccessProfile(
+            profileKey,
+            searchParam,
+            page,
+            'id, username, email, status, date_joined'
+        );
+
+        return {
+            next: res.data.next ?? null,
+            previous: res.data.previous ?? null,
+            data: res.data.results ?? []
+        };
+    };
 
     return (
         <ListPage
