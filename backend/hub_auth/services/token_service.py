@@ -41,11 +41,10 @@ class TokenValidationService:
         try:
             user_id = uuid.UUID(token["user_id"])
 
-            user = CustomUser.objects.get(id=user_id)
+            user = get_object_or_404(CustomUser, pk=user_id)
+
         except (KeyError, ValueError, TypeError):
             raise TokenValidationError("Usuário inválido no token")
-        except CustomUser.DoesNotExist:
-            raise TokenValidationError("Usuário não encontrado")
         
         token_groups = set(token['groups'])
         TokenValidationService.validate_groups(user, token_groups)
@@ -117,4 +116,4 @@ class TokenService:
 
             return payload
         except InvalidTokenError as e:
-            raise ValueError("Token inválido ou chave inválida.") from e
+            raise TokenValidationError("Token inválido ou chave inválida.") from e

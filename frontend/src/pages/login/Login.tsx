@@ -156,7 +156,7 @@ const Login = () => {
                     success: 'Conta criada com sucesso',
                     error: {
                         render({ data }: any) {
-                            if (data instanceof AxiosError) return data.response?.data.message[0]
+                            if (data instanceof AxiosError && data.response?.status !== 404) return data.response?.data.message[0]
                         }
                     }
                 }
@@ -316,14 +316,7 @@ const Login = () => {
 
             setUser(res.data)
         } catch (error) {
-            if (error instanceof AxiosError) {
-                if (error?.response?.status === 401) {
-                    console.error("Token inválido ou refresh falhou, redirecionando.")
-                    redirect('/session')
-                } else {
-                    console.error("Erro inesperado ao buscar usuário:", error)
-                }
-            }
+            console.log(error)
         }
     }
 
