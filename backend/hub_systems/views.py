@@ -44,6 +44,21 @@ def get_system(request, system_id):
         return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 @api_view(['GET'])
+def get_system_url(request, system_id):
+    try:
+        system_url = SystemService.get_url(request, system_id)
+
+        return Response({'system_url': system_url}, status=status.HTTP_200_OK)
+    except serializers.ValidationError as e:
+        return Response({'message': format_validation_errors(e.detail, SystemSerializer)}, status=status.HTTP_400_BAD_REQUEST)
+    except Http404 as e:
+        return Response({'message': "Sistema não encontrado"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        logger.error(f"[{timestamp}] Erro inesperado ao obter sistema {system_id}", exc_info=True)
+        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['GET'])
 def validate_system(request, api_key):
     try:
         get_object_or_404(System, api_key=api_key)

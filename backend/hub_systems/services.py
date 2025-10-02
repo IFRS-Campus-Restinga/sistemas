@@ -35,6 +35,10 @@ class SystemService:
         serializer = SystemSerializer(instance=system, context={'request': request})
 
         return serializer.data
+
+    @staticmethod
+    def get_url(request, system_id):
+        return get_object_or_404(System, pk=uuid.UUID(system_id)).system_url
     
     @staticmethod
     def list(request):
