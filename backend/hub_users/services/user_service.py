@@ -21,7 +21,7 @@ class UserService:
         email = data.get('email', None)
         first_name = data.get('first_name', None)
         last_name = data.get('last_name', None)
-        access_profile = data.get('accessProfile', None)
+        access_profile = data.get('accessProfile') or data.get('access_profile')
         password = data.get('password', None)
 
         if password:

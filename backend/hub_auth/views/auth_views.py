@@ -26,8 +26,8 @@ def login_with_google(request):
                 key='refresh_token',
                 value=refresh,
                 httponly=True,
-                secure=True,
-                samesite='None',
+                secure=False,
+                samesite='Lax',
                 max_age=3600*24*7,
                 path='/session/'
             )
@@ -36,8 +36,8 @@ def login_with_google(request):
                 key='access_token',
                 value=access,
                 httponly=True,
-                secure=True,
-                samesite='None',
+                secure=False,
+                samesite='Lax',
                 path='/'
             )
 
@@ -70,8 +70,8 @@ def login(request):
                 key="refresh_token",
                 value=refresh,
                 httponly=True,
-                secure=True,
-                samesite='None',
+                secure=False,
+                samesite='Lax',
                 max_age=3600*24*7,
                 path="/session/",
             )
@@ -80,8 +80,8 @@ def login(request):
                 key="access_token",
                 value=access,
                 httponly=True,
-                secure=True,
-                samesite='None',
+                secure=False,
+                samesite='Lax',
                 path="/",
             )
 
