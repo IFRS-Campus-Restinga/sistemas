@@ -156,7 +156,7 @@ const Login = () => {
                     success: 'Conta criada com sucesso',
                     error: {
                         render({ data }: any) {
-                            if (data instanceof AxiosError && data.response?.status !== 404) return data.response?.data.message[0]
+                            if (data instanceof AxiosError && data.response?.status !== 404 && data.response?.status !== 401) return data.response?.data.message[0]
                         }
                     }
                 }
