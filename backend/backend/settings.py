@@ -30,7 +30,7 @@ BASE_SYSTEM_URL = os.getenv('BASE_SYSTEM_URL')
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
