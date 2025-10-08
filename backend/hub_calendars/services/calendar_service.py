@@ -10,7 +10,7 @@ from hub_calendars.services.event_service import EventService
 class CalendarPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
-    max_page_size = 30
+    max_page_size = 100
 
 class CalendarService:
     @staticmethod

@@ -104,7 +104,7 @@ const Menu = () => {
                 }
                 <div className={styles.menuContainer}>
                     {
-                        systems.map((system) => (
+                        systems?.map((system) => (
                             <>
                             <button className={styles.systemButton} style={{backgroundColor: system.is_active ? "006b3f" : "#ccc"}} onClick={() => redirectToSystem(system)}>
                                 <p className={styles.systemTitle}>{system.name}</p>
