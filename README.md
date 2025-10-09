@@ -9,7 +9,7 @@ Para executar o projeto localmente:
 - git clone https://github.com/IFRS-Campus-Restinga/sistemas
 - cd backend
 - python -m venv .venv (cria um ambiente virtual para instalação das dependências de maneira isolada)
-- .\.venv\Scripts\activate (ativa o ambiente virtual)
+- ".\.venv\Scripts\activate" (ativa o ambiente virtual)
 - pip install -r requirements.txt
 - py manage.py makemigrations
 - py manage.py migrate
