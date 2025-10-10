@@ -137,7 +137,8 @@ env.bak/
 venv.bak/
 credentials/
 data_to_import/
-migrations/
+**/migrations/*.py
+!**/migrations/__init__.py
 
 # Spyder project settings
 .spyderproject
