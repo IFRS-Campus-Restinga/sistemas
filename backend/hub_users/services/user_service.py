@@ -33,7 +33,7 @@ class UserService:
             'access_profile': access_profile
         })
 
-        if access_profile == 'aluno':
+        if user.access_profile == 'aluno':
             UserService.add_group(user, 'user')
 
         if password and created:
@@ -194,7 +194,7 @@ class UserService:
     @staticmethod
     def decline_request(request_id):
         user = get_object_or_404(CustomUser, pk=uuid.UUID(request_id))
-        if user.custom_password: 
+        if hasattr(user, 'custom_password'): 
             user_password = Password.objects.get(user=user)
 
             user_password.delete()

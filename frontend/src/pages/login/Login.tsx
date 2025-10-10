@@ -122,7 +122,7 @@ const Login = () => {
             }
         } catch (error) {
             if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message)
+                toast.error(error.response?.data.message[0])
                 setIsDisabled(false)
             } else {
                 console.error(error)
@@ -228,7 +228,7 @@ const Login = () => {
             }
         } catch (error) {
              if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message)
+                toast.error(error.response?.data.message[0])
                 setIsDisabled(false)
             } else {
                 console.error(error)

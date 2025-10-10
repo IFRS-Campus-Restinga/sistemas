@@ -139,7 +139,7 @@ def decline_user_request(_, user_id):
     try:
         UserService.decline_request(user_id)
 
-        return Response({'message': 'Conta ativada com sucesso'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Solicitação excluída com sucesso'}, status=status.HTTP_200_OK)
     except Http404 as e:
         return Response({'message': "Usuário não encontrado"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:

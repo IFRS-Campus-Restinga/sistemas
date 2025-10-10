@@ -20,11 +20,11 @@ const AuthService = {
     },
 
     googleLogin: async (params: AuthParams, system: string | null) => {
-            return await api.post('session/login/google/', params, {
-                params: {
-                    system
-                }
-            })
+        return await api.post('session/login/google/', params, {
+            params: {
+                system
+            }
+        })
     },
 
     logout: async () => {

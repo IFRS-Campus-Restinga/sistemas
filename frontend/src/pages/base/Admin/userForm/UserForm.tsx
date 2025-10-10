@@ -124,14 +124,13 @@ const UserForm = () => {
     }
 
     const setUserGroups = (newGroups: React.SetStateAction<Group[]>) => {
-        setGroups(userGroups => {
-            const updatedGroups = typeof newGroups === 'function'
-                ? (newGroups as (prev: Group[]) => Group[])(userGroups)
-                : newGroups;
-
-            return updatedGroups;
-        });
-    }
+        setUserForm((prev) => ({
+            ...prev,
+            groups: typeof newGroups === 'function'
+            ? (newGroups as (prev: Group[]) => Group[])(prev.groups)
+            : newGroups
+        }));
+    };
 
     const validateGroups = (group: Group, userGroups: Group[]) => {
         const groupName = group.name
