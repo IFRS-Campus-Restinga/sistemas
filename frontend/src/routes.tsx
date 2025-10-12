@@ -1,4 +1,4 @@
-import { createHashRouter } from 'react-router-dom'
+import { createBrowserRouter } from 'react-router-dom'
 // Base
 import Login from './pages/login/Login'
 
@@ -38,7 +38,7 @@ import Profile from './pages/base/User/profile/Profile'
 import ErrorBoundary from './pages/errorBoundary/ErrorBoundary'
 import Home from './pages/home/Home'
 
-const routes = createHashRouter([
+const routes = createBrowserRouter([
     {
         path: '/',
         element: <Home/>

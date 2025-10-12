@@ -18,7 +18,10 @@ def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
     django.setup()
 
-    from django.contrib.auth.models import Group, Permission, User
+    from django.contrib.auth.models import Group, Permission
+    from hub_users.models import CustomUser
+    from hub_groups.models import GroupUUIDMap
+    from hub_permissions.models import PermissionUUIDMap
     from django.db import transaction
 
     with transaction.atomic():
@@ -33,7 +36,11 @@ def main():
 
         # --- Permissões ---
         todas_permissoes = Permission.objects.all()
-        permissoes_view = todas_permissoes.filter(codename__icontains="view")
+        permissoes_view = todas_permissoes.filter(
+            codename__startswith="view_"
+        ) | todas_permissoes.filter(
+            codename="add_additionalinfos"
+        )
 
         # Admin recebe todas as permissões
         admin_group = Group.objects.get(name="admin")
@@ -44,14 +51,18 @@ def main():
         # Coord e User recebem apenas as permissões de visualização
         for nome in ["coord", "user"]:
             grupo = Group.objects.get(name=nome)
-            grupo.permissions.set(permissoes_view)
+            grupo.permissions.clear()  # limpa antes
+            for perm in permissoes_view:
+                grupo.permissions.add(perm)
             grupo.save()
             print(f"👁️ Grupo '{nome}' recebeu {permissoes_view.count()} permissões (apenas view_).")
 
         # --- Vincular usuário existente ao grupo admin ---
         try:
-            user = User.objects.first()  # pega o primeiro usuário existente
+            user = CustomUser.objects.first()  # pega o primeiro usuário existente
             if user:
+                user.access_profile = 'servidor'
+                user.is_active = True    
                 user.groups.add(admin_group)
                 user.save()
                 print(f"👤 Usuário '{user.username}' vinculado ao grupo 'admin'.")
@@ -60,9 +71,22 @@ def main():
         except Exception as e:
             print(f"❌ Erro ao vincular usuário: {e}")
 
-    print("📊 Rodando script de mapeamento UUID...")
-    run_command([sys.executable, "manage.py", "map_groups_and_permissions"])
+        # --- Mapeamento de UUIDs de grupos e permissões ---
+        print("📊 Mapeando UUIDs de grupos e permissões...")
 
+        for grupo in Group.objects.all():
+            uuid_map, criado = GroupUUIDMap.objects.get_or_create(group=grupo)
+            status = "🆕" if criado else "🔁"
+            print(f"{status} Grupo '{grupo.name}' UUID: {uuid_map.uuid}")
+
+        for perm in todas_permissoes:
+            uuid_map, criado = PermissionUUIDMap.objects.get_or_create(permission=perm)
+            status = "🆕" if criado else "🔁"
+            print(f"{status} Permissão '{perm.codename}' UUID: {uuid_map.uuid}")
+
+        print("✅ Mapeamento de UUIDs concluído.")
+
+    # --- Subir servidor Django ---
     print("🌍 Subindo servidor Django em 127.0.0.1:8000 ...")
     run_command([sys.executable, "manage.py", "runserver", "127.0.0.1:8000"])
 

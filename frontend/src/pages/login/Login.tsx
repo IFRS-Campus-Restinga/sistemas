@@ -34,6 +34,7 @@ const Login = () => {
     const queryParams = new URLSearchParams(location.search);
     const systemId = queryParams.get('system')
     const [systemURL, setSystemURL] = useState<string>('')
+    const [invalidSystem, setInvalidSystem] = useState<boolean>(false)
     const [passwordConfirmation, setPasswordConfirmation] = useState<string>('')
     const [accessProfile, setAccessProfile] = useState<'aluno' | 'servidor' | 'convidado'>('aluno')
     const [loginWithExternalAccount, setLoginWithExternalAccount] = useState<boolean>(false)
@@ -115,7 +116,7 @@ const Login = () => {
                     }
                 } 
                  else {
-                    const url = `${systemURL}/session/token?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+                    const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
     
                     window.location.href = url
                 }
@@ -218,7 +219,7 @@ const Login = () => {
                         }
                     } 
                      else {
-                        const url = `${systemURL}/session/token?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
+                        const url = `${systemURL}/session/auth?user=${res.data.user.id}&profilePicture=${res.data.user.profile_picture}`;
     
                         window.location.href = url
                     }
@@ -299,42 +300,37 @@ const Login = () => {
 
     const fetchSystem = async () => {
         try {
-            const res = await SystemService.get(systemId!, 'system_url')
+            const res = await SystemService.getUrl(systemId!, 'system_url')
 
             setSystemURL(res.data.system_url)
         } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message)
-            } else {
-                console.error(error)
-            }
+            setInvalidSystem(true)
+            console.error(error)
         }
     }
 
-    useEffect(() => {
-        if (systemId) fetchSystem()
-    }, [systemId])
-
+    
     const fetchUserData = async () => {
         try {
             const res = await UserService.getData()
 
             setUser(res.data)
         } catch (error) {
-            if (error instanceof AxiosError) {
-                if (error?.response?.status === 401) {
-                    console.error("Token inválido ou refresh falhou, redirecionando.")
-                    redirect('/session')
-                } else {
-                    console.error("Erro inesperado ao buscar usuário:", error)
-                }
-            }
+            console.error(error)
         }
     }
 
     useEffect(() => {
+        if (systemId) fetchSystem()
+    }, [systemId])
+    
+    useEffect(() => {
         fetchUserData()
     }, [])
+
+    useEffect(() => {
+        console.log(systemURL)
+    }, [systemURL])
 
     useEffect(() => {
         if (user.groups?.includes("admin")) redirect("/session/admin/home")
@@ -344,60 +340,69 @@ const Login = () => {
     return (
         <Base navBar={<></>}>
             {
-                accessRequested ? (
+                invalidSystem ? (
                     <section className={styles.sectionMessage}>
-                        <h2 className={styles.h2} style={{ textAlign: 'center' }}>Acesso Solicitado com Sucesso!</h2>
+                        <h2 className={styles.h2} style={{ textAlign: 'center' }}>Requisição de login não autorizada</h2>
                         <p className={styles.p} style={{ textAlign: 'center' }}>
-                            Por questões de segurança, seu acesso como {accessProfile} necessitará de aprovação prévia de um administrador
-                            <br />
-                            <br />
-                            Você será notificado através do email informado assim que o pedido de acesso for aprovado.
+                            Solicite o cadastro de seu sistema para ter acesso ao login e outra funcionalidades do HUB de sistemas
                         </p>
                     </section>
                 ) : (
-                    <>
-                        <h2 className={styles.title}>HUB de Sistemas do IFRS</h2>
-                        <section className={styles.section}>
-                            <LoginGroupList changeLoginGroup={changeAccessProfile} loginGroup={accessProfile} />
-                            <hr className={styles.hr} />
-                            <div className={styles.loginOptions}>
-                                <h2 className={styles.h2}>Faça seu Login</h2>
-                                {
-                                    accessProfile === 'convidado' && !isDisabled ? (
-                                        <div className={styles.visitorOptions}>
-                                            <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-
-                                            <span className={styles.span}>
-                                                <hr className={styles.horizontalHr} />
-                                                <p className={styles.optionP} onClick={() => setLoginWithExternalAccount((prev) => !prev)}>Já tem uma conta?</p>
-                                                <hr className={styles.horizontalHr} />
-                                            </span>
-                                            {
-                                                loginWithExternalAccount ? (
-                                                    <VisitorForm
-                                                        createAccount={createAccount}
-                                                        setCreateAccount={setCreateAccount}
-                                                        formData={visitorAccountData}
-                                                        setFormData={setVisitorAccountData}
-                                                        errors={errors}
-                                                        setErrors={setErrors}
-                                                        disableButton={isDisabled}
-                                                        onSubmit={createAccount ? handleCreateAccount : handleLogin}
-                                                        passwordConfirmation={passwordConfirmation}
-                                                        setPasswordConfirmation={setPasswordConfirmation}
-                                                    />
-                                                ) : null
-                                            }
-                                        </div>
-                                    ) : isDisabled ? (
-                                        <CustomLoading />
-                                    ) : (
-                                        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
-                                    )
-                                }
-                            </div>
+                    accessRequested ? (
+                        <section className={styles.sectionMessage}>
+                            <h2 className={styles.h2} style={{ textAlign: 'center' }}>Acesso Solicitado com Sucesso!</h2>
+                            <p className={styles.p} style={{ textAlign: 'center' }}>
+                                Por questões de segurança, seu acesso como {accessProfile} necessitará de aprovação prévia de um administrador
+                                <br />
+                                <br />
+                                Você será notificado através do email informado assim que o pedido de acesso for aprovado.
+                            </p>
                         </section>
-                    </>
+                    ) : (
+                        <>
+                            <h2 className={styles.title}>HUB de Sistemas do IFRS</h2>
+                            <section className={styles.section}>
+                                <LoginGroupList changeLoginGroup={changeAccessProfile} loginGroup={accessProfile} />
+                                <hr className={styles.hr} />
+                                <div className={styles.loginOptions}>
+                                    <h2 className={styles.h2}>Faça seu Login</h2>
+                                    {
+                                        accessProfile === 'convidado' && !isDisabled ? (
+                                            <div className={styles.visitorOptions}>
+                                                <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+    
+                                                <span className={styles.span}>
+                                                    <hr className={styles.horizontalHr} />
+                                                    <p className={styles.optionP} onClick={() => setLoginWithExternalAccount((prev) => !prev)}>Já tem uma conta?</p>
+                                                    <hr className={styles.horizontalHr} />
+                                                </span>
+                                                {
+                                                    loginWithExternalAccount ? (
+                                                        <VisitorForm
+                                                            createAccount={createAccount}
+                                                            setCreateAccount={setCreateAccount}
+                                                            formData={visitorAccountData}
+                                                            setFormData={setVisitorAccountData}
+                                                            errors={errors}
+                                                            setErrors={setErrors}
+                                                            disableButton={isDisabled}
+                                                            onSubmit={createAccount ? handleCreateAccount : handleLogin}
+                                                            passwordConfirmation={passwordConfirmation}
+                                                            setPasswordConfirmation={setPasswordConfirmation}
+                                                        />
+                                                    ) : null
+                                                }
+                                            </div>
+                                        ) : isDisabled ? (
+                                            <CustomLoading />
+                                        ) : (
+                                            <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
+                                        )
+                                    }
+                                </div>
+                            </section>
+                        </>
+                    )
                 )
             }
         </Base >

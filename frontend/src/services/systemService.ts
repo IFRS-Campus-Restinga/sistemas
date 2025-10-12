@@ -38,6 +38,14 @@ export const SystemService = {
         })
     },
 
+    getUrl: async (systemId: string, fields: string) => {
+        return api.get(`api/systems/get_url/${systemId}/`, {
+            params: {
+                fields
+            }
+        })
+    },
+
     edit: async (systemId: string, params: System) => {
         return api.put(`api/systems/edit/${systemId}/`, params)
     }
