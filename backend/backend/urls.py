@@ -14,8 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """ 
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from hub_auth.views.login_django_admin import *
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -36,5 +37,7 @@ urlpatterns = [
     path('api/calendars/', include('hub_calendars.urls')),
 
     # academic data (courses, subjects, ppcs, classes)
-    path('api/academic/', include('hub_academic.urls'))
+    path('api/academic/', include('hub_academic.urls')),
+
+    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
 ]
