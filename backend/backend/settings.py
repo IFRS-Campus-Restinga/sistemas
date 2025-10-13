@@ -36,10 +36,15 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ALLOW_CREDENTIALS = True
 
+X_FRAME_OPTIONS = "ALLOWALL"
+
+CSP_FRAME_ANCESTORS = ("https://accounts.google.com",)
+
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
+    "http://127.0.0.1:8000",
 ]
 
 # Application definition
@@ -77,21 +82,15 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'backend.urls'
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-FRONTEND_DIR = BASE_DIR.parent / "frontend"
-FRONTEND_BUILD_DIR = FRONTEND_DIR / "dist"
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            FRONTEND_BUILD_DIR,
-            f'{BASE_DIR}/backend/google_auth/templates',
-            os.path.join(BASE_DIR, 'notifications_app', 'templates_email')
+            BASE_DIR / 'static',  # pasta do build do React
         ],
         'APP_DIRS': True,
         'OPTIONS': {
-            'context_processors': [ 
+            'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
@@ -153,7 +152,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    FRONTEND_BUILD_DIR,
+    BASE_DIR / 'static',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
