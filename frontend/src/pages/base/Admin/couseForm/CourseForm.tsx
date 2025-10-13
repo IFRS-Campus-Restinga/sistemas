@@ -288,6 +288,7 @@ const CourseForm = () => {
                                         value={coordSearch}
                                         setSearch={(param) => {
                                             setCoordSearch(param)
+                                            console.log(param)
                                             if (param.length === 0) {
                                                 setCoordOptions([])
                                                 setSearched(false)
@@ -310,6 +311,7 @@ const CourseForm = () => {
                                         renderKey='username'
                                     />
                                 </div>
+                                {errors.coord ? <ErrorMessage message={errors.coord}/> : null}
                             </CustomLabel>
                         </div>
                         {

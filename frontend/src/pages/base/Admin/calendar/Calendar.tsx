@@ -87,14 +87,19 @@ const Calendar = () => {
       const year = start.getFullYear()
 
       const res = await EventService.list(month, year, 'id, title, start, end, type')
-      const mappedEvents = res.data.map((ev: EventInterface) => ({
-        id: ev.id,
-        title: ev.title,
-        start: new Date(ev.start),
-        end: new Date(new Date(ev.end).setDate(new Date(ev.end).getDate() + 1)),
-        type: ev.type,
-        category: ev.category,
-      }))
+      const mappedEvents = res.data.map((ev: EventInterface) => {
+      const [startYear, startMonth, startDay] = ev.start.split('-').map(Number)
+      const [endYear, endMonth, endDay] = ev.end.split('-').map(Number)
+
+        return {
+          id: ev.id,
+          title: ev.title,
+          start: new Date(startYear, startMonth - 1, startDay),
+          end: new Date(endYear, endMonth - 1, endDay + 1), // +1 para incluir o último dia
+          type: ev.type,
+          category: ev.category,
+        }
+      })
 
       setEvents(mappedEvents)
     } catch (error) {

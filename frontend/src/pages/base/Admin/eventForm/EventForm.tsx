@@ -12,6 +12,7 @@ import CustomSelect from '../../../../components/customSelect/CustomSelect'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
 import CustomTextArea from '../../../../components/customTextArea/CustomTextArea'
+import flattenValues from '../../../../utils/flattenObj'
 
 interface EventFormErrors {
     title: string | null
@@ -46,9 +47,9 @@ const EventForm = () => {
         setIsLoading(true)
 
         try {
-            const res = await EventService.get(eventId!, 'id, title, start, end, type, category, description')
+            const res = await EventService.get(eventId!, 'id, title, start, end, type, category, description, calendar.id')
 
-            setEvent(res.data)
+            setEvent(flattenValues(res.data))
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
@@ -110,7 +111,7 @@ const EventForm = () => {
             ).then((res) => {
                     if (res.status === 201 || res.status === 200) {
                         setTimeout(() => {
-                            redirect(`/session/admin/calendarios/${calendarId}/`);
+                            redirect(`/session/admin/calendarios/${calendarId}/`, {state: calendarId});
                         }, 2000);
                     }
             }).catch((err) => {

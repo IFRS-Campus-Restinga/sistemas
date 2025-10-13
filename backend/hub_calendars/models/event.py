@@ -11,5 +11,5 @@ class Event(models.Model):
     end = models.DateField(verbose_name="Fim")
     type = models.CharField(choices=EventTypes.choices, max_length=60, verbose_name="Tipo")
     category = models.CharField(choices=Categories.choices, max_length=10, verbose_name="Categoria")
-    description = models.TextField(max_length=300, verbose_name="Descrição")
+    description = models.TextField(max_length=300, verbose_name="Descrição", null=True, blank=True)
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, verbose_name="Calendário")
