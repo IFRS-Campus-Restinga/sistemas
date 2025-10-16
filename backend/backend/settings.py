@@ -38,6 +38,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 X_FRAME_OPTIONS = "ALLOWALL"
 
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
 CSP_FRAME_ANCESTORS = ("https://accounts.google.com",)
 
 CORS_ALLOWED_ORIGINS = [
@@ -152,7 +154,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+    BASE_DIR / 'static/',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
