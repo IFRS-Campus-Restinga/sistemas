@@ -7,6 +7,7 @@ Para executar o projeto localmente:
 Clonar a Branch Main
 
 - ```git clone https://github.com/IFRS-Campus-Restinga/sistemas```
+- ```cd sistemas```
 - ```cd backend```
 - ```python -m venv .venv``` (cria um ambiente virtual para instalação das dependências de maneira isolada)
 - ```.\.venv\Scripts\activate``` (ativa o ambiente virtual)
