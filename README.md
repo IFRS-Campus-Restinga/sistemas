@@ -14,5 +14,5 @@ Clonar a Branch Main
 - ```py manage.py makemigrations```
 - ```py manage.py migrate```
 - ```py manage.py createsuperuser``` (cadastre qualquer email do google)
-- ```py manage.py entrypoint.py```
+- ```py entrypoint.py```
 
