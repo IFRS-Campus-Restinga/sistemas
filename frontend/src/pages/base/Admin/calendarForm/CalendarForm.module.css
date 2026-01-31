@@ -22,3 +22,51 @@
     width: 100%;
     justify-content: center;
 }
+
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 280px;
+    max-width: 520px;
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.modalText {
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+
+.modalActions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.modalActions button:first-child {
+    background-color: #2e7d32;
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+.modalActions button:last-child {
+    background-color: #7b1f1f;
+    color: #fff;
+    border: 1px solid transparent;
+}
+
+.modalActions button:first-child:hover {
+    background-color: #fff;
+    color: #2e7d32;
+    border-color: #2e7d32;
+}
+
+.modalActions button:last-child:hover {
+    background-color: #fff;
+    color: #7b1f1f;
+    border-color: #7b1f1f;
+}

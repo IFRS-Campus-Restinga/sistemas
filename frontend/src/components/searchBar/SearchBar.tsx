@@ -11,24 +11,43 @@ interface SearchBarProps {
 const SearchBar = ({ onSearch, setSearch, searchParam }: SearchBarProps) => {
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && searchParam.length > 0) {
             onSearch(1, searchParam)
         }
+    }
+
+    const handleSearch = () => {
+        if (searchParam.length > 0) onSearch(1, searchParam)
+    }
+
+    const handleClear = () => {
+        setSearch('')
     }
 
     return (
         <div className={styles.searchBarContainer}>
             <input
                 type="text"
-                name={'searchInput'}
+                name="searchInput"
                 value={searchParam}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={handleKeyDown}
                 className={styles.searchInput}
             />
+
             <div className={styles.actionsContainer}>
-                <img src={search} className={styles.action} alt="Buscar" onClick={() => onSearch(1, searchParam)} />
-                <img src={clear} className={styles.action} alt="Limpar campo" onClick={() => setSearch('')}/>
+                <img
+                    src={search}
+                    className={styles.action}
+                    alt="Buscar"
+                    onClick={handleSearch}
+                />
+                <img
+                    src={clear}
+                    className={styles.action}
+                    alt="Limpar campo"
+                    onClick={handleClear}
+                />
             </div>
         </div>
     )

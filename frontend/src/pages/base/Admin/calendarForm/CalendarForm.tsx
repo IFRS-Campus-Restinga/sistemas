@@ -11,6 +11,7 @@ import CustomButton from '../../../../components/customButton/CustomButton'
 import { toast } from 'react-toastify'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
 import { AxiosError } from 'axios'
+import Modal from '../../../../components/modal/Modal'
 
 interface CalendarFormErrors {
     title: string | null
@@ -30,6 +31,7 @@ const CalendarForm = () => {
         end: null,
         status: null,
     })
+    const [showConfirmModal, setShowConfirmModal] = useState(false)
     const [calendar, setCalendar] = useState<CalendarInterface>({
         title: '',
         start: '',
@@ -64,19 +66,19 @@ const CalendarForm = () => {
         for (let field in calendar) {
             switch (field) {
                 case 'title':
-                    setErrors({...errors, title: validateMandatoryStringField(calendar.title)})
+                    newErrors.title = validateMandatoryStringField(calendar.title)
                     break;
                 case 'start':
-                    setErrors({...errors, start: validateMandatoryStringField(calendar.start)})
+                    newErrors.start = validateMandatoryStringField(calendar.start)
                     break;
                 case 'end':
-                    setErrors({...errors, end: validateMandatoryStringField(calendar.end)})
-                    
-                    let error = compareDates(calendar.start, calendar.end)
-                    setErrors({...errors, start: error, end: error})
+                    newErrors.end = validateMandatoryStringField(calendar.end)
+                    const error = compareDates(calendar.start, calendar.end)
+                    newErrors.start = error
+                    newErrors.end = error
                     break;
                 case 'status':
-                    setErrors({...errors, status: validateMandatoryStringField(calendar.status)})
+                    newErrors.status = validateMandatoryStringField(calendar.status)
                     break;
                 default:
                     break;
@@ -87,43 +89,52 @@ const CalendarForm = () => {
         return Object.values(newErrors).every((value) => value === null)
     }
 
+    const submitCalendar = async () => {
+        const request = state
+            ? CalendarService.edit(calendar, state)
+            : CalendarService.create(calendar);
+
+        toast.promise(
+            request, 
+            {
+                pending: state ? "Salvando alterações..." : "Criando calendário...",
+                success: {
+                    render({ data }) {
+                        return data.data.message;
+                    },
+                },
+                error: "Erro ao cadastrar",
+            }).then((res) => {
+                if (res.status === 201 || res.status === 200) {
+                    setTimeout(() => {
+                        redirect("/session/admin/calendarios/");
+                    }, 2000);
+                }
+            }).catch((err) => {
+                if (err instanceof AxiosError) {
+                    const errors = err.response?.data?.message;
+    
+                    if (Array.isArray(errors)) {
+                        errors.forEach((msg: string) => toast.error(msg));
+                    } else {
+                        toast.error(errors);
+                    }
+                }
+            }
+        );
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (validateForm()) {
-            const request = state
-                ? CalendarService.edit(calendar, state)
-                : CalendarService.create(calendar);
-    
-            toast.promise(
-                request, 
-                {
-                    pending: state ? "Salvando alterações..." : "Criando calendário...",
-                    success: {
-                        render({ data }) {
-                            return data.data.message;
-                        },
-                    },
-                    error: "Erro ao cadastrar",
-                }).then((res) => {
-                    if (res.status === 201 || res.status === 200) {
-                        setTimeout(() => {
-                            redirect("/session/admin/calendarios/");
-                        }, 2000);
-                    }
-                }).catch((err) => {
-                    if (err instanceof AxiosError) {
-                        const errors = err.response?.data?.message;
-        
-                        if (Array.isArray(errors)) {
-                            errors.forEach((msg: string) => toast.error(msg));
-                        } else {
-                            toast.error(errors);
-                        }
-                    }
-                }
-            );
+        if (!validateForm()) return
+
+        if (!state) {
+            setShowConfirmModal(true)
+            return
         }
+
+        submitCalendar()
     };
 
     useEffect(() => {
@@ -140,7 +151,8 @@ const CalendarForm = () => {
                 isLoading ? (
                     <CustomLoading/>
                 ) : (
-                    <form onSubmit={handleSubmit} className={styles.form}>
+                    <>
+                        <form onSubmit={handleSubmit} className={styles.form}>
                         <CustomLabel title='Título *'>
                             <CustomInput
                                 type='text'
@@ -148,7 +160,7 @@ const CalendarForm = () => {
                                 onChange={(e) => setCalendar({...calendar, title: e.target.value})}
                                 onBlur={() => setErrors({...errors, title: validateMandatoryStringField(calendar.title)})}
                                 error={errors.title}
-                                max={20}
+                                maxLength={20}
                             />
                         </CustomLabel>
                         <div className={styles.formGroup}>
@@ -210,7 +222,32 @@ const CalendarForm = () => {
                         <span className={styles.buttonContainer}>
                             <CustomButton text={state ? 'Salvar alteracoes' : 'Cadastrar'} type='submit'/>
                         </span>
-                    </form>
+                        </form>
+                        {showConfirmModal ? (
+                            <Modal setIsOpen={setShowConfirmModal}>
+                                <div className={styles.modalContent}>
+                                    <p className={styles.modalText}>
+                                        Registrar um novo calendário irá inativar os existentes, deseja prosseguir?
+                                    </p>
+                                    <div className={styles.modalActions}>
+                                        <CustomButton
+                                            type="button"
+                                            text="Cadastrar"
+                                            onClick={() => {
+                                                setShowConfirmModal(false)
+                                                submitCalendar()
+                                            }}
+                                        />
+                                        <CustomButton
+                                            type="button"
+                                            text="Cancelar"
+                                            onClick={() => setShowConfirmModal(false)}
+                                        />
+                                    </div>
+                                </div>
+                            </Modal>
+                        ) : null}
+                    </>
                 )
             }
         </FormContainer>

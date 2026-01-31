@@ -28,154 +28,202 @@ interface TableProps {
     translations: Record<string, string>;
     crudActions?: CRUDActions
     dualActions?: DualActions
-    fetchData: (page:  number, param: string) => void
+    fetchData: (page: number, param: string) => void
     searchParam?: string
 }
 
-const Table = ({ itemList, next, translations, setCurrent, current, loadingContent, crudActions, dualActions, fetchData, searchParam }: TableProps) => {
-    const redirect = useNavigate()
-    const lastRef = useRef(null)
+const Table = ({
+    itemList,
+    next,
+    previous,
+    setCurrent,
+    current,
+    loadingContent,
+    translations,
+    crudActions,
+    dualActions,
+    fetchData,
+    searchParam
+}: TableProps) => {
 
+    const redirect = useNavigate()
+    const firstRef = useRef<HTMLTableRowElement | null>(null)
+    const lastRef = useRef<HTMLTableRowElement | null>(null)
 
     const redirectAction = (itemId: string, action: string = '') => {
-        redirect(`${itemId}/${action}`, {state: itemId})
+        redirect(`${itemId}/${action}`, { state: itemId })
+    }
+
+    const formatarData = (valor: any) => {
+        if (!valor) return '-'
+        if (typeof valor !== 'string') return valor
+
+        const isoDatetimeRegex =
+            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
+        const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+        if (isoDatetimeRegex.test(valor)) {
+            const date = new Date(valor)
+            if (!isNaN(date.getTime())) {
+                return date.toLocaleDateString('pt-BR')
+            }
+        }
+
+        if (isoDateRegex.test(valor)) {
+            const date = new Date(`${valor}T00:00:00`)
+            if (!isNaN(date.getTime())) {
+                return date.toLocaleDateString('pt-BR')
+            }
+        }
+
+        return valor
     }
 
     useEffect(() => {
-        if (!lastRef.current) return;
+        if (!firstRef.current || !lastRef.current) return
 
-        const observer = new IntersectionObserver((entries) => {
+        const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
-                if (entry.isIntersecting && next && !loadingContent) {
-                    setCurrent(prev => prev + 1);
+                if (!entry.isIntersecting || loadingContent) return
+
+                if (entry.target === lastRef.current && next) {
+                    setCurrent(next)
                 }
-            });
-        }, { threshold: 1.0 });
 
-        observer.observe(lastRef.current);
+                if (entry.target === firstRef.current && previous) {
+                    setCurrent(previous)
+                }
+            })
+        }, { threshold: 0.5 })
 
-        return () => {
-            observer.disconnect();
-        };
-    }, [itemList, next, loadingContent]);
+        observer.observe(firstRef.current)
+        observer.observe(lastRef.current)
+
+        return () => observer.disconnect()
+    }, [itemList, next, previous, loadingContent])
 
     useEffect(() => {
-        if (current > 1) fetchData(current, searchParam ?? '');
-    }, [current]);
+        if (current > 1) {
+            fetchData(current, searchParam ?? '')
+        }
+    }, [current])
 
     return (
         <div className={styles.tableContainer}>
-            {
-                loadingContent ? (
-                    <div className={styles.loadingTable}>
-                        <div className={styles.loadingContainer}>
-                            <CustomLoading color='white' />
-                        </div>
+            {loadingContent && (
+                <div
+                    className={styles.loadingTable}
+                    style={{
+                        backgroundColor:
+                            itemList.length === 0
+                                ? 'transparent'
+                                : 'rgba(0,0,0,0.3)'
+                    }}
+                >
+                    <div className={styles.loadingContainer}>
+                        <CustomLoading color="white" />
                     </div>
-                ) : null
-            }
-            {
-                itemList.length > 0 ? (
-                    <table className={styles.table}>
-                        <thead className={styles.thead}>
-                            <tr className={styles.tr}>
-                            {
-                                Object.keys(itemList[0]).map((key) => (
+                </div>
+            )}
+
+            {itemList.length === 0 && !loadingContent ? (
+                <div className={styles.messageContainer}>
+                    <p className={styles.message}>
+                        Não há resultados para serem mostrados
+                    </p>
+                </div>
+            ) : (
+                <table className={styles.table}>
+                    <thead className={styles.thead}>
+                        <tr className={styles.tr}>
+                            {Object.keys(itemList[0] ?? {}).map(key =>
+                                key !== 'id' ? (
+                                    <th key={key} className={styles.th}>
+                                        {translations[key] ?? key}
+                                    </th>
+                                ) : null
+                            )}
+
+                            {(crudActions || dualActions) && (
+                                <th className={styles.thAction}>Ações</th>
+                            )}
+                        </tr>
+                    </thead>
+
+                    <tbody className={styles.tbody}>
+                        {itemList.map((item, index) => (
+                            <tr
+                                key={item.id}
+                                className={styles.tr}
+                                ref={
+                                    index === 0
+                                        ? firstRef
+                                        : index === itemList.length - 1
+                                            ? lastRef
+                                            : null
+                                }
+                            >
+                                {Object.entries(item).map(([key, value]) =>
                                     key !== 'id' ? (
-                                        <th key={key} className={styles.th}>{translations[key] ?? key}</th>
-                                    ): null
-                                ))
-                            }
-                            {(crudActions || dualActions) && <th className={styles.thAction}>Ações</th>}
-                            </tr>
-                        </thead>
-                        <tbody className={styles.tbody}>
-                            {
-                                itemList.map((item, index) => (
-                                    <tr 
-                                        key={item.id}
-                                        className={styles.tr}
-                                        ref={index === itemList.length - 1 ? lastRef : null}
-                                    >
-                                        {
-                                            Object.entries(item).map(([key, value]) => {
-                                                if (key === "id") return null;
-
-                                                // Detecta automaticamente se é uma data válida
-                                                if (value) {
-                                                const date = new Date(value);
-                                                if (!isNaN(date.getTime()) && typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
-                                                    value = date.toLocaleDateString("pt-BR"); // converte para DD/MM/YYYY
-                                                }
-                                                }
-
-                                                return (
-                                                <td key={key} className={styles.td}>
-                                                    {value}
-                                                </td>
-                                                );
-                                            })
-                                        }
-                                        <td className={styles.tdAction}>
-                                            <div className={styles.actions}>
-                                                {crudActions ? (
-                                                    <>
-                                                        {crudActions.canView && (
-                                                            <img
-                                                                src={search}
-                                                                alt="detalhes"
-                                                                className={styles.action}
-                                                                onClick={() => redirectAction(item.id)}
-                                                            />
-                                                        )}
-
-                                                        {crudActions.canEdit && (
-                                                            <img
-                                                                src={editIcon}
-                                                                alt="editar"
-                                                                className={styles.action}
-                                                                onClick={() => redirectAction(item.id, 'edit')}
-                                                            />
-                                                        )}
-
-                                                        {/* {typeof crudActions.onDelete === 'function' && (
-                                                            <img
-                                                                src={deleteIcon}
-                                                                alt="excluir"
-                                                                className={styles.action}
-                                                                onClick={() => openModal(item.id)}
-                                                            />
-                                                        )} */}
-                                                    </>
-                                                ) : dualActions ? (
-                                                    <>
-                                                        <img
-                                                            src={check}
-                                                            alt="aprovar"
-                                                            className={styles.action}
-                                                            onClick={() => dualActions.onApprove(item)}
-                                                        />
-                                                        <img
-                                                            src={x}
-                                                            alt="rejeitar"
-                                                            className={styles.action}
-                                                            onClick={() => dualActions.onDecline(item.id)}
-                                                        />
-                                                    </>
-                                                ) : null}
-                                            </div>
+                                        <td key={key} className={styles.td}>
+                                            {formatarData(value)}
                                         </td>
-                                    </tr>
-                                ))
-                            }
-                        </tbody>
-                    </table>
-                ) : (
-                    <div className={styles.messageContainer}>
-                        <p className={styles.message}>Não há resultados para serem mostrados</p>
-                    </div>
-                )
-            }
+                                    ) : null
+                                )}
+
+                                <td className={styles.tdAction}>
+                                    <div className={styles.actions}>
+                                        {crudActions ? (
+                                            <>
+                                                {crudActions.canView && (
+                                                    <img
+                                                        src={search}
+                                                        alt="detalhes"
+                                                        className={styles.action}
+                                                        onClick={() =>
+                                                            redirectAction(item.id)
+                                                        }
+                                                    />
+                                                )}
+
+                                                {crudActions.canEdit && (
+                                                    <img
+                                                        src={editIcon}
+                                                        alt="editar"
+                                                        className={styles.action}
+                                                        onClick={() =>
+                                                            redirectAction(item.id, 'edit')
+                                                        }
+                                                    />
+                                                )}
+                                            </>
+                                        ) : dualActions ? (
+                                            <>
+                                                <img
+                                                    src={check}
+                                                    alt="aprovar"
+                                                    className={styles.action}
+                                                    onClick={() =>
+                                                        dualActions.onApprove(item)
+                                                    }
+                                                />
+                                                <img
+                                                    src={x}
+                                                    alt="rejeitar"
+                                                    className={styles.action}
+                                                    onClick={() =>
+                                                        dualActions.onDecline(item.id)
+                                                    }
+                                                />
+                                            </>
+                                        ) : null}
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
         </div>
     )
 }

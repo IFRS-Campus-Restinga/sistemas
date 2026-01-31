@@ -58,6 +58,8 @@ class PPCService:
     def edit(ppc_data, ppc_id):
         curriculum_data = ppc_data.pop('curriculum', [])
 
+        print(curriculum_data)
+
         ppc = get_object_or_404(PPC, pk=uuid.UUID(ppc_id))
 
         serializer = PPCSerializer(instance=ppc, data={**ppc_data, 'curriculum': curriculum_data})

@@ -14,6 +14,7 @@ class CustomUser(AbstractUser):
     first_login = models.BooleanField(default=True, verbose_name="Primeiro login")
     access_profile = models.CharField(choices=AcessProfile.choices, max_length=12, verbose_name="Perfil de acesso")
     is_active = models.BooleanField(default=False, verbose_name="Status")
+    pending_request = models.BooleanField(default=True)
 
     last_login = None
     password = None
@@ -42,6 +43,6 @@ class AdditionalInfos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     birth_date = models.DateField(verbose_name="Data de nascimento")
     telephone_number = models.CharField(max_length=13, null=False, blank=False, verbose_name="Telefone")
-    registration = models.CharField(max_length=11, null=True, blank=True, verbose_name="Matrícula")
+    registration = models.CharField(max_length=11, null=True, blank=True, unique=True, verbose_name="Matrícula")
     cpf = models.CharField(max_length=11, verbose_name="CPF", unique=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='additional_infos')

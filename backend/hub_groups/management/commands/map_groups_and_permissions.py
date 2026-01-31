@@ -3,6 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from hub_groups.models import GroupUUIDMap
 from hub_permissions.models import PermissionUUIDMap
 
+
 class Command(BaseCommand):
     help = "Mapeia todos os grupos e permissões com UUIDs"
 
@@ -15,7 +16,7 @@ class Command(BaseCommand):
         for grupo in Group.objects.all():
             if grupo.name.lower() == "admin":
                 grupo.permissions.set(permissoes)
-                self.stdout.write(f"✅ Permissões atribuídas ao grupo 'admin'")
+                self.stdout.write("✅ Permissões atribuídas ao grupo 'admin'")
             else:
                 grupo.permissions.clear()
 
@@ -29,4 +30,3 @@ class Command(BaseCommand):
             self.stdout.write(f"{status} Permissão '{perm.codename}' UUID: {uuid_map.uuid}")
 
         self.stdout.write("✅ Mapeamento concluído com sucesso.")
-

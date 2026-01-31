@@ -63,7 +63,7 @@ const DualTableTransfer = <T,>({
         if (validate) {
             const error = validate(item, list2);
             if (error) {
-                console.log(error)
+                console.error(error)
                 return;
             }
         }
@@ -142,11 +142,6 @@ const DualTableTransfer = <T,>({
         if (currentList2 && currentList2 > 1 && fetchData2) fetchData2(currentList2);
     }, [currentList2]);
 
-
-    useEffect(() => {
-        console.log('lista 1', list1)
-        console.log('lista 2', list2)
-    }, [list1, list2])
     return (
         <section className={styles.tablesContainer}>
             <div className={styles.dualTableContainer}>

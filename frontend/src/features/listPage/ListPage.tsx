@@ -30,7 +30,7 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
         try {
             const { next, previous, data } = await fetchData(page, param)
 
-            setListData([...listData, ...data])
+            setListData(next > 1 ? [...listData, ...data] : [...data])
 
             setNextPage(next ? currentPage + 1 : null)
             setPreviousPage(previous ? currentPage - 1 : null)

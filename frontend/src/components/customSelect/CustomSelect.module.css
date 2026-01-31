@@ -5,6 +5,18 @@
     position: relative;
 }
 
+.disabled {
+    opacity: 0.6;
+}
+
+.disabled .span {
+    cursor: not-allowed;
+}
+
+.disabled .icon {
+    cursor: not-allowed;
+}
+
 .span {
     width: 100%;
     display: flex;
@@ -56,4 +68,3 @@
     width: 15px;
     cursor: pointer;
 }
-

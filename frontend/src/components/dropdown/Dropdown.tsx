@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import styles from './Dropdown.module.css'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface DropdownItemProps {
     title: string
@@ -21,20 +21,37 @@ export interface DropdownProps {
 
 const Dropdown = ({ items, dropdownIcon, dropdownTitle, backgroundColor, backgroundColor2, color, dropdownChildren }: DropdownProps) => {
     const [dropdownOpen, setDropdownOpen] = useState<boolean>(false)
+    const closeTimerRef = useRef<number | null>(null)
 
-    const changeDropdownState = () => {
-        if (dropdownOpen) {
-            setTimeout(() => {
-                setDropdownOpen((prev) => !prev)
-            }, 300);
-        } else {
-            setDropdownOpen((prev) => !prev)
+    const clearCloseTimer = () => {
+        if (closeTimerRef.current !== null) {
+            window.clearTimeout(closeTimerRef.current)
+            closeTimerRef.current = null
         }
     }
 
+    const handleOpen = () => {
+        clearCloseTimer()
+        setDropdownOpen(true)
+    }
+
+    const handleClose = () => {
+        clearCloseTimer()
+        closeTimerRef.current = window.setTimeout(() => {
+            setDropdownOpen(false)
+            closeTimerRef.current = null
+        }, 500)
+    }
+
+    useEffect(() => {
+        return () => {
+            clearCloseTimer()
+        }
+    }, [])
+
     return (
-        <div className={styles.dropdownContainer}>
-            <h1 className={styles.dropdownTitle} onMouseEnter={changeDropdownState}>
+        <div className={styles.dropdownContainer} onMouseEnter={handleOpen} onMouseLeave={handleClose}>
+            <h1 className={styles.dropdownTitle}>
                 {
                     dropdownTitle ? (
                         dropdownIcon ? (
@@ -54,7 +71,7 @@ const Dropdown = ({ items, dropdownIcon, dropdownTitle, backgroundColor, backgro
             </h1>
             {
                 dropdownOpen ? (
-                    <ul className={styles.dropdownList} style={{backgroundColor: backgroundColor}} onMouseLeave={changeDropdownState}>
+                    <ul className={styles.dropdownList} style={{backgroundColor: backgroundColor}}>
                         {
                             items.map((item) =>
                                 item.link ? (

@@ -13,6 +13,7 @@ import { useSetUser, useUser } from "../../store/userHooks"
 import UserService, {type visitorAccountProps} from "../../services/userService"
 import { SystemService } from "../../services/systemService"
 import { AxiosError } from "axios"
+import CustomButton from "../../components/customButton/CustomButton"
 
 export interface visitorAccountErrorProps {
     first_name: string | null
@@ -164,17 +165,6 @@ const Login = () => {
                     }
                 }
             )
-
-            setTimeout(() => {
-               setAccessRequested(false)
-               setCreateAccount(false)
-               setVisitorAccountData({
-                email: '',
-                first_name: '',
-                last_name: '',
-                password: ''
-               })
-            }, 2000);
         }
     }
 
@@ -308,8 +298,7 @@ const Login = () => {
             console.error(error)
         }
     }
-
-    
+ 
     const fetchUserData = async () => {
         try {
             const res = await UserService.getData()
@@ -320,6 +309,17 @@ const Login = () => {
         }
     }
 
+    const resetLogin = () => {
+        setAccessRequested(false)
+        setCreateAccount(false)
+        setVisitorAccountData({
+        email: '',
+        first_name: '',
+        last_name: '',
+        password: ''
+        })
+    }
+
     useEffect(() => {
         if (systemId) fetchSystem()
     }, [systemId])
@@ -327,10 +327,6 @@ const Login = () => {
     useEffect(() => {
         fetchUserData()
     }, [])
-
-    useEffect(() => {
-        console.log(systemURL)
-    }, [systemURL])
 
     useEffect(() => {
         if (user.groups?.includes("admin")) redirect("/session/admin/home")
@@ -357,6 +353,7 @@ const Login = () => {
                                 <br />
                                 Você será notificado através do email informado assim que o pedido de acesso for aprovado.
                             </p>
+                            <CustomButton text="Voltar" type="button" onClick={resetLogin}/>
                         </section>
                     ) : (
                         <>

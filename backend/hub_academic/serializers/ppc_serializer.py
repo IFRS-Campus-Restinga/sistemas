@@ -11,8 +11,8 @@ class CurriculumSerializer(serializers.ModelSerializer):
     subject = serializers.PrimaryKeyRelatedField(queryset=Subject.objects.all(), required=False)
     pre_requisits = serializers.ListField(required=False)
     subject_teach_workload = serializers.IntegerField()
-    subject_ext_workload = serializers.IntegerField()
-    subject_remote_workload = serializers.IntegerField()
+    subject_ext_workload = serializers.IntegerField(required=False, default=0)
+    subject_remote_workload = serializers.IntegerField(required=False, default=0)
     weekly_periods = serializers.IntegerField() 
 
     class Meta:
@@ -37,6 +37,12 @@ class CurriculumSerializer(serializers.ModelSerializer):
                 pass
 
         data['pre_requisits'] = normalized
+
+        # Normaliza cargas horárias opcionais vazias para 0
+        for field in ['subject_ext_workload', 'subject_remote_workload']:
+            if data.get(field) in ['', None]:
+                data[field] = 0
+
         return super().to_internal_value(data)
 
 
@@ -76,10 +82,10 @@ class PPCSerializer(serializers.ModelSerializer):
     
     def update(self, instance, validated_data):
         curriculum_data = validated_data.pop('curriculum', [])
-        course_id = validated_data.pop('course', None)
+        course = validated_data.pop('course', None)
 
-        if course_id:
-            instance.course = Course.objects.get(id=course_id)
+        if course:
+            instance.course = course
         instance.title = validated_data.get('title', instance.title)
         instance.save()
 
@@ -97,13 +103,13 @@ class PPCSerializer(serializers.ModelSerializer):
             return normalized
 
         for item in curriculum_data:
-            subject_id = item.get('subject')
+            subject_obj = item.get('subject')
             pre_req_ids = normalize_pre_requisits(item.get('pre_requisits', []))
             other_fields = item.copy()
             other_fields.pop('subject', None)
             other_fields.pop('pre_requisits', None)
 
-            subject = Subject.objects.get(id=subject_id)
+            subject = subject_obj if isinstance(subject_obj, Subject) else Subject.objects.get(id=subject_obj)
 
             curriculum = Curriculum.objects.create(
                 ppc=instance,

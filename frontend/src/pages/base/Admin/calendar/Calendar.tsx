@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Calendar as BigCalendar, dateFnsLocalizer, type Event as BigEvent, type View } from 'react-big-calendar'
 import { useEffect, useState, type CSSProperties } from 'react'
-import { format, parse, getDay } from 'date-fns'
+import { format, parse, getDay, startOfMonth, endOfMonth, isBefore, isAfter, startOfDay, endOfDay } from 'date-fns'
 import { ptBR } from 'date-fns/locale/pt-BR'
 import EventService, { type EventInterface } from '../../../../services/eventService'
 import CalendarService, { type CalendarInterface } from '../../../../services/calendarService'
@@ -110,10 +110,24 @@ const Calendar = () => {
   }
 
   const handleNavigate = (date: Date) => {
-    const start = new Date(calendar!.start) 
-    const end = new Date(calendar!.end)
+    const start = startOfMonth(new Date(calendar!.start))
+    const end = endOfMonth(new Date(calendar!.end))
+    const target = startOfMonth(date)
 
-    if (date < end && date > start) setCurrentDate(date)
+    if (!isBefore(target, start) && !isAfter(target, end)) {
+      setCurrentDate(date)
+    }
+  }
+
+  const getMinSelectableDate = () => {
+    const calendarStart = startOfDay(new Date(`${calendar!.start}T00:00:00`))
+    return today > calendarStart ? today : calendarStart
+  }
+
+  const isDateSelectable = (date: Date) => {
+    const minSelectable = getMinSelectableDate()
+    const end = endOfDay(new Date(`${calendar!.end}T00:00:00`))
+    return date >= minSelectable && date <= end
   }
 
   const handleViewChange = (view: View) => {
@@ -122,7 +136,7 @@ const Calendar = () => {
   
   // Bloqueia seleção em datas anteriores a hoje
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-    if (slotInfo.start >= today) {
+    if (isDateSelectable(slotInfo.start)) {
       navigate('eventos/create/', {
         state: {
           calendarId: state,
@@ -172,7 +186,7 @@ const Calendar = () => {
   
   // Estiliza dias anteriores bloqueando cursor e mudando visual
   const dayPropGetter = (date: Date) => {
-    if (date < today) {
+    if (!isDateSelectable(date)) {
       return {
         className: styles.disabledDay,
       }

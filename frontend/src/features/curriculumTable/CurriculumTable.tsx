@@ -17,7 +17,7 @@ import CustomLoading from '../../components/customLoading/CustomLoading'
 
 interface Subject {
     name: string
-    preRequisits: {id: string, code: string}[]
+    preRequisits: {id: string, code: string, name: string}[]
 }
 
 interface CurriculumTableProps {
@@ -50,12 +50,18 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     const fetchPreRequisits = async (index: number) => {
         try {
-            const res = await SubjectService.list(1, preReqSearch[index], 'id, code')
+            const res = await SubjectService.list(1, preReqSearch[index], 'id, name, code')
 
             setPreReqOptions((prev) => {
                 const updated = [...prev]
 
-                updated[index] = res.data.results
+                updated[index] = res.data.results.map((subj: any) => {
+                    return {
+                        id: subj.id,
+                        code: subj.code,
+                        name: `${subj.name} (${subj.code})`
+                    }
+                })
 
                 return updated
             })
@@ -214,6 +220,12 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                             value={subjects[index].name}
                                                                             onSearch={() => fetchSubjects(index)}
                                                                             setSearch={(param) => {
+                                                                                if (param.trim() === '') {
+                                                                                    const updatedSubjectOptions = [...subjectOptions]
+                                                                                    updatedSubjectOptions[index] = []
+                                                                                    setSubjectOptions(updatedSubjectOptions)
+                                                                                }
+
                                                                                 const updated = [...subjects]
 
                                                                                 updated[index].name = param
@@ -263,6 +275,12 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 value={preReqSearch[index] ?? ''}
                                                                                 onSearch={() => fetchPreRequisits(index)}
                                                                                 setSearch={(param) => {
+                                                                                    if (param.trim() === '') {
+                                                                                        const updatedPreReqOptions = [...preReqOptions]
+                                                                                        updatedPreReqOptions[index] = []
+                                                                                        setPreReqOptions(updatedPreReqOptions)
+                                                                                    }
+
                                                                                     setPreReqSearch((prev) => {
                                                                                         const updated = [...prev]
 
@@ -273,7 +291,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 }}
                                                                             />
                                                                             <CustomOptions
-                                                                                renderKey='code'
+                                                                                renderKey='name'
                                                                                 options={preReqOptions[index]}
                                                                                 searched={preReqSearched[index]}
                                                                                 onSelect={(option) => {
@@ -317,7 +335,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 <div className={styles.preReqContainer}>
                                                                                     {
                                                                                         curriculumData.pre_requisits.map((preReq, pIndex) => (
-                                                                                            <div key={pIndex} className={styles.preReq}>
+                                                                                        <div key={pIndex} className={styles.preReq}>
                                                                                                 {subjects[index].preRequisits[pIndex].code}
                                                                                                 <img 
                                                                                                 src={typeof preReq !== 'string' ? deleteIcon : clear} 

@@ -44,7 +44,7 @@ const CourseDetails = () => {
                     }
                 )
             } else {
-                console.log(error)
+                console.error(error)
             }
         } finally {
             setIsLoading(false)

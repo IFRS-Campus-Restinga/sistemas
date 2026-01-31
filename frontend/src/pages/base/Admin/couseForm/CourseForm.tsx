@@ -62,18 +62,24 @@ const CourseForm = () => {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
             } else {
-                console.log(error)
+                console.error(error)
             }
         }
     }
 
     const fetchCourse = async () => {
         try {
-            const res  = await CourseService.get(state, 'id, name, workload, category, coord.id, coord.username, course_class.id, course_class.number')
+            const res  = await CourseService.get(state, 'id, name, workload, category, coord.id, coord.username, course_class.id, course_class.number, course_class.course.id')
 
             setCourse({
                 category: res.data.category,
-                classes: res.data.course_class,
+                classes: res.data.course_class.map((course_class) => {
+                    return {
+                        id: course_class.id,
+                        number: course_class.number,
+                        course: course_class.course.id
+                    }
+                }),
                 coord: res.data.coord.id,
                 name: res.data.name,
                 workload: res.data.workload,
@@ -84,7 +90,7 @@ const CourseForm = () => {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
             } else {
-                console.log(error)
+                console.error(error)
             }
         } finally {
             setIsLoading(false)
@@ -288,7 +294,6 @@ const CourseForm = () => {
                                         value={coordSearch}
                                         setSearch={(param) => {
                                             setCoordSearch(param)
-                                            console.log(param)
                                             if (param.length === 0) {
                                                 setCoordOptions([])
                                                 setSearched(false)

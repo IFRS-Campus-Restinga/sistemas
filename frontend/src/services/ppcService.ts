@@ -25,15 +25,24 @@ export interface PPCInterface {
 
 const PPCService = {
     create: async (params: PPCInterface) => {
-        return api.post(
-            'api/academic/ppcs/create/',
-            params,
-            {
-                headers : {
+        if (params.curriculum instanceof File) {
+            const formData = new FormData()
+            formData.append('title', params.title)
+            formData.append('course', params.course)
+            formData.append('curriculum', params.curriculum)
+
+            return api.post('api/academic/ppcs/create/', formData, {
+                headers: {
                     "Content-Type": "multipart/form-data"
                 }
+            })
+        }
+
+        return api.post('api/academic/ppcs/create/', params, {
+            headers: {
+                "Content-Type": "application/json"
             }
-        )
+        })
     },
 
     list: async (page: number, search: string, fields: string) => {
@@ -66,7 +75,24 @@ const PPCService = {
     },
 
     edit: async (PPCId: string, params: PPCInterface) => {
-        return await api.put(`api/academic/ppcs/edit/${PPCId}/`, params)
+        if (params.curriculum instanceof File) {
+            const formData = new FormData()
+            formData.append('title', params.title)
+            formData.append('course', params.course)
+            formData.append('curriculum', params.curriculum)
+
+            return api.put(`api/academic/ppcs/edit/${PPCId}/`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            })
+        }
+
+        return api.put(`api/academic/ppcs/edit/${PPCId}/`, params, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
     },
 
     deletePeriod: async (PPCId: string, period: number) => {

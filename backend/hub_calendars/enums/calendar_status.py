@@ -4,3 +4,4 @@ class CalendarStatus(TextChoices):
     ATIVO = 'Ativo'
     SUSPENSO = 'Suspenso'
     CANCELADO = 'Cancelado'
+    FINALIZADO = 'Finalizado'

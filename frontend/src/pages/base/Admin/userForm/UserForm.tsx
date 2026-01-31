@@ -212,6 +212,19 @@ const UserForm = () => {
         return Object.values(errors).every((error) => error === null)
     }
 
+    const getProfilePath = (accessProfile?: string) => {
+        switch (accessProfile) {
+            case 'aluno':
+                return 'alunos'
+            case 'servidor':
+                return 'servidores'
+            case 'convidado':
+                return 'convidados'
+            default:
+                return profile
+        }
+    }
+
     const submitUser = (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -234,7 +247,13 @@ const UserForm = () => {
                         }
                     }
                 }
-            )
+            ).then((res) => {
+                if (res.status === 200) {
+                    setTimeout(() => {
+                        redirect(`/session/admin/${getProfilePath(userForm.access_profile)}/`)
+                    }, 2000)
+                }
+            })
         }
     }
 
@@ -258,7 +277,7 @@ const UserForm = () => {
             ).then((res) => {
                     if (res.status === 201 || res.status === 200) {
                         setTimeout(() => {
-                            redirect(`/session/admin/${profile}/`);
+                            redirect(`/session/admin/${getProfilePath(userForm.access_profile)}/`)
                         }, 2000);
                     }
             }).catch((err) => {
@@ -347,7 +366,14 @@ const UserForm = () => {
 
                                             ]}
                                             onSelect={(option) => {
-                                                if ('value' in option) setUserForm({...userForm, access_profile: option.value})
+                                                if ('value' in option) {
+                                                    const nextProfile = option.value
+                                                    setUserForm((prev) => ({
+                                                        ...prev,
+                                                        access_profile: nextProfile,
+                                                        is_abstract: nextProfile === 'aluno' ? false : prev.is_abstract
+                                                    }))
+                                                }
                                             }}
                                             selected={{
                                                 title: userForm.access_profile,
@@ -393,14 +419,27 @@ const UserForm = () => {
                                                 },
                                             ]}
                                             onSelect={(option) => {
-                                                if ('value' in option) setUserForm({...userForm, is_abstract: option.value === 'Pessoal' ? false : true})
+                                                if ('value' in option) {
+                                                    const nextIsAbstract = option.value !== 'Pessoal'
+                                                    if (addInfoForm.id) {
+                                                        return
+                                                    }
+                                                    if (userForm.access_profile === 'aluno' && nextIsAbstract) {
+                                                        return
+                                                    }
+                                                    setUserForm({...userForm, is_abstract: nextIsAbstract})
+                                                }
                                             }}
+                                            disabled={Boolean(addInfoForm.id)}
                                             selected={{
                                                 title: userForm.is_abstract ? 'Departamento' : 'Pessoal',
                                                 value: userForm.is_abstract ? 'Departamento' : 'Pessoal',
                                             }}
                                             renderKey='title'
                                         />
+                                        {userForm.access_profile === 'aluno' ? (
+                                            <ErrorMessage message="Aluno não pode ter conta do tipo Departamento." />
+                                        ) : null}
                                     </CustomLabel>
                                 </div>
                                 <div className={styles.formGroupTable}>

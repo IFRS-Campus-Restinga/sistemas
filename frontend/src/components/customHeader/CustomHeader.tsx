@@ -33,7 +33,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                 }
             })(),
             {
-                pending: 'Deconectando...',
+                pending: 'Desconectando...',
                 error: {
                     render({ data }: any) {
                         return data.message || 'Erro sair da conta'
@@ -67,7 +67,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                                             <img src={profilePicture} alt="foto_de_perfil" className={styles.accountOptions} />
                                         }
                                         items={[
-                                            ...(user.is_abstract === false ? [{
+                                            ...(!user.is_abstract && !user.first_login ? [{
                                                 title: "Minha conta",
                                                 onClick: () => redirect('/session/user/profile/')
                                             }] : []),
@@ -83,7 +83,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                                             <div className={styles.accountOptions}>{user.username[0].toUpperCase()}</div>
                                         }
                                         items={[
-                                            ...(user.is_abstract === false ? [{
+                                            ...(!user.is_abstract && !user.first_login ? [{
                                                 title: "Minha conta",
                                                 onClick: () => redirect('/session/user/profile/')
                                             }] : []),

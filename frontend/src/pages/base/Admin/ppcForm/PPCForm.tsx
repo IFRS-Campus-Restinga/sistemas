@@ -96,10 +96,10 @@ const PPCForm = () => {
                 curriculum: res.data.curriculum.map((curr: any) => {
                     return {
                         id: curr.id,
-                        subject: curr.subject,
+                        subject: curr.subject.id,
                         subject_teach_workload: curr.subject_teach_workload,
                         subject_remote_workload: curr.subject_remote_workload,
-                        subject_ext_workload: curr.subject_remote_workload,
+                        subject_ext_workload: curr.subject_ext_workload,
                         weekly_periods: curr.weekly_periods,
                         period: curr.period,
                         pre_requisits: curr.pre_requisits.map((preReq: any) => {
@@ -142,6 +142,8 @@ const PPCForm = () => {
             period: null,
             curriculum: []
         }
+        const missingTeachMessages: string[] = []
+        const periodCounters = new Map<number, number>()
 
         for (let field in PPC) {
             switch (field) {
@@ -151,37 +153,58 @@ const PPCForm = () => {
                 case 'course':
                     newErrors.course = validateMandatoryUUIDField(PPC.course)
                     break;
-                case 'periods':
-                    if (state) {
-                        if (PPC.curriculum instanceof File) {
-                             // Validação do PDF
-                            const file = PPC.curriculum as File;
+                case 'curriculum':
+                    if (PPC.curriculum instanceof File) {
+                        // Validação do PDF
+                        const file = PPC.curriculum as File;
 
-                            if (file.type !== "application/pdf") {
-                                newErrors.period = "O arquivo deve ser um PDF";
-                            } else if (file.size > 5 * 1024 * 1024) {
-                                newErrors.period = "O arquivo PDF é muito grande (máx 5MB)";
-                            } else {
-                                newErrors.period = null;
-                            }
+                        if (file.type !== "application/pdf") {
+                            newErrors.period = "O arquivo deve ser um PDF";
+                        } else if (file.size > 5 * 1024 * 1024) {
+                            newErrors.period = "O arquivo PDF é muito grande (máx 5MB)";
                         } else {
-                            newErrors.period = validateMandatoryArrayField(PPC.curriculum, "O PPC deve possui ao menos um período")
-        
-                            PPC.curriculum.map((curriculumData, index) => {
-                                for (let sField in curriculumData) {
-                                    // valida a disciplina
-                                    if (sField === 'subject') {
-                                        newErrors.curriculum[index] = validateMandatoryUUIDField(curriculumData.subject, 'O currículo possui campos não preenchidos');
-                                    } else {
-                                        const value = curriculumData[sField as keyof CurriculumInterface];
-                                        
-                                        if (typeof value === 'string') {
-                                            newErrors.curriculum[index] = validateMandatoryStringField(value, 'O currículo possui campos não preenchidos');
-                                        }
+                            newErrors.period = null;
+                        }
+                    } else {
+                        newErrors.period = validateMandatoryArrayField(PPC.curriculum, "O PPC deve possui ao menos um período")
+
+                        PPC.curriculum.map((curriculumData, index) => {
+                            const periodNumber = curriculumData.period
+                            const periodIndex = periodCounters.get(periodNumber) ?? 0
+                            periodCounters.set(periodNumber, periodIndex + 1)
+                            const periodLabel = `${periodNumber}º Período`
+                            const periodVisual = curriculum.find((c) => c.period.includes(`${periodNumber}`))
+                            const subjectLabel = periodVisual?.subjects?.[periodIndex]?.name ?? 'Disciplina'
+
+                            for (let sField in curriculumData) {
+                                // valida a disciplina
+                                if (sField === 'subject') {
+                                    newErrors.curriculum[index] = validateMandatoryUUIDField(curriculumData.subject, 'O currículo possui campos não preenchidos');
+                                } else if (sField === 'subject_teach_workload') {
+                                    const value = curriculumData[sField as keyof CurriculumInterface];
+                                    if (value === '' || value === null || value === undefined) {
+                                        newErrors.curriculum[index] = 'O currículo possui campos numéricos não preenchidos';
+                                        missingTeachMessages.push(`${periodLabel} - ${subjectLabel} sem carga horária de ensino`);
+                                    } else if (typeof value === 'string' && isNaN(Number(value))) {
+                                        newErrors.curriculum[index] = 'Os campos numéricos devem conter apenas números';
+                                        missingTeachMessages.push(`${periodLabel} - ${subjectLabel} sem carga horária de ensino`);
+                                    }
+                                } else if (sField === 'weekly_periods') {
+                                    const value = curriculumData[sField as keyof CurriculumInterface];
+                                    if (value === '' || value === null || value === undefined) {
+                                        newErrors.curriculum[index] = 'O currículo possui campos numéricos não preenchidos';
+                                    } else if (typeof value === 'string' && isNaN(Number(value))) {
+                                        newErrors.curriculum[index] = 'Os campos numéricos devem conter apenas números';
+                                    }
+                                } else {
+                                    const value = curriculumData[sField as keyof CurriculumInterface];
+
+                                    if (typeof value === 'string') {
+                                        newErrors.curriculum[index] = validateMandatoryStringField(value, 'O currículo possui campos não preenchidos');
                                     }
                                 }
-                            })                    
-                        }
+                            }
+                        })
                     }
                     break;
                 default:
@@ -189,8 +212,18 @@ const PPCForm = () => {
             }
         }
 
+        if (missingTeachMessages.length > 0) {
+            const message = missingTeachMessages.join(' | ')
+            newErrors.period = newErrors.period ? `${newErrors.period} | ${message}` : message
+        }
+
         setErrors(newErrors)
-        return Object.values(newErrors).every((error) => error === null || error.every((value: []) => value === null))
+        return (
+            newErrors.title === null &&
+            newErrors.course === null &&
+            newErrors.period === null &&
+            newErrors.curriculum.every((error) => error === null)
+        )
     }
 
     const removeEmtpyItems = () => {
@@ -319,8 +352,6 @@ const PPCForm = () => {
 
     useEffect(() => {
         if (!(PPC.curriculum instanceof File)) setPeriods(groupByPeriod(PPC.curriculum))
-
-        console.log(curriculum)
     }, [PPC.curriculum])
 
     useEffect(() => {
@@ -435,9 +466,8 @@ const PPCForm = () => {
                                     </button>
                                 </label>
                                 <div className={styles.periodsContainer}>
-                                {errors.period ? <ErrorMessage message={errors.period}/> : null}
-                                {
-                                    periods.map((periodNumber, index) => {
+                                    {
+                                        periods.map((periodNumber, index) => {
                                         const periodTitle = `${periodNumber}`;
 
                                         return (
@@ -583,6 +613,7 @@ const PPCForm = () => {
                                         );
                                     })}
                                 </div>
+                                {errors.period ? <ErrorMessage message={errors.period} align="center"/> : null}
                             </div>
                         ) : (
                             <label htmlFor="fileInput" className={styles.fileLabel}>

@@ -72,8 +72,6 @@ const ProfileForm = () => {
 
     const submitAddInfo = (e: React.FormEvent) => {
         e.preventDefault()
-
-        console.log(validateAddInfoForm())
         
         if (validateAddInfoForm()) {
             toast.promise(

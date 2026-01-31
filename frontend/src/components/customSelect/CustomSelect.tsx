@@ -13,6 +13,7 @@ interface CustomSelectProps<Key extends 'title' | 'username' | 'name'> {
   onBlur?: () => void
   renderKey: Key | 'title'
   selected: OptionProps<Key> | ValueOption | null
+  disabled?: boolean
 }
 
 const CustomSelect = <Key extends 'title' | 'username' | 'name'>({
@@ -20,11 +21,17 @@ const CustomSelect = <Key extends 'title' | 'username' | 'name'>({
   onSelect,
   selected,
   renderKey,
+  disabled = false,
 }: CustomSelectProps<Key>) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className={styles.selectContainer} onClick={() => setIsOpen((prev) => !prev)}>
+    <div
+      className={`${styles.selectContainer} ${disabled ? styles.disabled : ''}`}
+      onClick={() => {
+        if (!disabled) setIsOpen((prev) => !prev)
+      }}
+    >
       <span className={styles.span}>
         <p className={styles.p}>
             {
@@ -44,12 +51,12 @@ const CustomSelect = <Key extends 'title' | 'username' | 'name'>({
           alt=""
           onClick={(e) => {
             e.stopPropagation()
-            setIsOpen((prev) => !prev)
+            if (!disabled) setIsOpen((prev) => !prev)
           }}
         />
       </span>
 
-      {isOpen && (
+      {isOpen && !disabled && (
         <ul className={styles.options}>
           {options.length > 0
             ? options.map((option) => (

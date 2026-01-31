@@ -35,6 +35,9 @@ class UserService:
 
         if user.access_profile == 'aluno':
             UserService.add_group(user, 'user')
+            if user.pending_request:
+                user.pending_request = False
+                user.save(update_fields=['pending_request'])
 
         if password and created:
             PasswordService.create(user, password)
@@ -148,7 +151,7 @@ class UserService:
     
     @staticmethod
     def get_requests(request):
-        requests = CustomUser.objects.filter(first_login=True, is_active=False)
+        requests = CustomUser.objects.filter(pending_request=True)
 
         if not requests.exists():
             paginator = UserPagination()
@@ -168,8 +171,6 @@ class UserService:
         group_list = request_data.get('groups')
         is_abstract = request_data.get('is_abstract')
 
-        print(group_list)
-
         if not user_id or not group_list:
             raise ValueError("ID do usuário e lista de grupos são obrigatórios.")
 
@@ -188,6 +189,7 @@ class UserService:
         # Atualizar o usuário
         user.is_active = True
         user.is_abstract = is_abstract
+        user.pending_request = False
         user.groups.set(group_ids)
         user.save()
 
