@@ -22,6 +22,7 @@ import CustomButton from '../../../../components/customButton/CustomButton'
 import PPCService from '../../../../services/ppcService'
 import ErrorMessage from '../../../../components/errorMessage/ErrorMessage'
 import { groupByPeriod, groupSubjectsByPeriod } from '../../../../utils/groupByPeriod'
+import type { OptionProps } from '../../../../components/customOptions/CustomOptions'
 
 interface ErrorsPPCForm {
     title: string | null
@@ -32,7 +33,7 @@ interface ErrorsPPCForm {
 
 interface Subject {
     name: string
-    preRequisits: {id:string, code:string}[]
+    preRequisits: {id:string, code:string, name?: string}[]
 }
 
 interface Curriculum {
@@ -49,7 +50,7 @@ const PPCForm = () => {
     // Nome do curso
     const [course, setCourse] = useState<string>('')
     // Campo de opções de curso
-    const [courseOptions, setCourseOptions] = useState([])
+    const [courseOptions, setCourseOptions] = useState<OptionProps<'name'>[]>([])
     // Controla os dados que aparecem: nome do período, nome das disciplinas e nome dos pré-requisitos
     const [curriculum, setCurriculum] = useState<Curriculum[]>([])
     // Controla se o modal do período respectivo está aberto

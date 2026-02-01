@@ -6,7 +6,6 @@ import { hasGroup } from "../../../utils/hasGroup"
 import CustomLoading from "../../../components/customLoading/CustomLoading"
 import UserService from "../../../services/userService"
 import { AxiosError } from "axios"
-import { toast } from "react-toastify"
 
 const BaseUser = () => {
     const redirect = useNavigate()

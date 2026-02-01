@@ -19,6 +19,7 @@ import ErrorMessage from '../../../../components/errorMessage/ErrorMessage'
 import CourseClassService from '../../../../services/courseClassService'
 import CustomLoading from '../../../../components/customLoading/CustomLoading'
 import CustomSearch from '../../../../components/customSearch/CustomSearch'
+import type { OptionProps } from '../../../../components/customOptions/CustomOptions'
 
 interface ErrorsCourseForm {
     name: string | null
@@ -35,7 +36,7 @@ const CourseForm = () => {
     const [searched, setSearched] = useState<boolean>(false)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [coordSearch, setCoordSearch] = useState<string>('')
-    const [coordOptions, setCoordOptions] = useState([])
+    const [coordOptions, setCoordOptions] = useState<OptionProps<'username'>[]>([])
     const [errors, setErrors] = useState<ErrorsCourseForm>({
         classes: [],
         coord: null,
@@ -73,7 +74,7 @@ const CourseForm = () => {
 
             setCourse({
                 category: res.data.category,
-                classes: res.data.course_class.map((course_class) => {
+                classes: res.data.course_class.map((course_class: { id: string; number: string; course: { id: string } }) => {
                     return {
                         id: course_class.id,
                         number: course_class.number,

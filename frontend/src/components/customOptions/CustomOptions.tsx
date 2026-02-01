@@ -1,25 +1,25 @@
 import styles from './CustomOptions.module.css'
 
-export type OptionProps<Key extends string = 'title'> = {
+export type OptionProps<Key extends string = 'title', Extra extends object = {}> = {
   id: string
   extraField?: string
 } & {
   [K in Key]: string
-}
+} & Extra
 
-interface CustomOptionsProps<Key extends string> {
-  options: OptionProps<Key>[]
+interface CustomOptionsProps<Key extends string, Extra extends object = {}> {
+  options: OptionProps<Key, Extra>[]
   renderKey: Key
-  onSelect: (option: OptionProps<Key>) => void
+  onSelect: (option: OptionProps<Key, Extra>) => void
   searched?: boolean
 }
 
-const CustomOptions = <Key extends string>({
+const CustomOptions = <Key extends string, Extra extends object = {}>({
   options,
   renderKey,
   onSelect,
   searched,
-}: CustomOptionsProps<Key>) => {
+}: CustomOptionsProps<Key, Extra>) => {
   return (
     <ul className={styles.optionsContainer}>
       {options.length > 0 ? (

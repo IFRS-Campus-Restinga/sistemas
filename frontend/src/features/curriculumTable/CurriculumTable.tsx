@@ -17,7 +17,18 @@ import CustomLoading from '../../components/customLoading/CustomLoading'
 
 interface Subject {
     name: string
-    preRequisits: {id: string, code: string, name: string}[]
+    preRequisits: {id: string, code: string, name?: string}[]
+}
+
+interface SubjectOption {
+    id: string
+    name: string
+}
+
+interface PreReqOption {
+    id: string
+    code: string
+    name: string
 }
 
 interface CurriculumTableProps {
@@ -44,9 +55,9 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
     // Campo de pesquisa de pré-requisitos por linha
     const [preReqSearch, setPreReqSearch] = useState<string[]>([])
     // Opções de disciplina
-    const [subjectOptions, setSubjectOptions] = useState([[]])
+    const [subjectOptions, setSubjectOptions] = useState<SubjectOption[][]>([[]])
     // Opções de pré-requisitos
-    const [preReqOptions, setPreReqOptions] = useState([[]])
+    const [preReqOptions, setPreReqOptions] = useState<PreReqOption[][]>([[]])
 
     const fetchPreRequisits = async (index: number) => {
         try {
@@ -297,7 +308,11 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                                                                 onSelect={(option) => {
                                                                                     // Atualiza subjects (usado para exibir os nomes na UI)
                                                                                     const updatedPreReq = [...subjects];
-                                                                                    updatedPreReq[index].preRequisits.push(option!);
+                                                                                    updatedPreReq[index].preRequisits.push({
+                                                                                        id: option.id,
+                                                                                        code: option.code,
+                                                                                        name: option.name
+                                                                                    });
                                                                                     setSubjects(updatedPreReq);
 
                                                                                     const updatedCurriculum = [...curriculum];
