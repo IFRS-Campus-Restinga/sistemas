@@ -58,7 +58,7 @@ const Profile = () => {
                     <CustomLoading/>
                 ) : (
                     <>
-                        <img src={sessionStorage.getItem("profilePicture")!} alt="" className={styles.profilePicture} />
+                        <img src={localStorage.getItem("profilePicture")!} alt="" className={styles.profilePicture} />
                         <label className={styles.label}>
                             Nome De usuário
                             <h2 className={styles.h2}>

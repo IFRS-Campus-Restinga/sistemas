@@ -27,7 +27,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
                 try {
                     await req;
                 } finally {
-                    sessionStorage.clear()
+                    localStorage.removeItem('profilePicture')
                     clearUser()
                     redirect('/session')
                 }
@@ -44,7 +44,7 @@ const CustomHeader = ({navBar}: CustomHeaderProps) => {
     }
 
     useEffect(() => {
-        setProfilePicture(sessionStorage.getItem('profilePicture'))
+        setProfilePicture(localStorage.getItem('profilePicture'))
     }, [user])
 
     return (

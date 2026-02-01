@@ -11,6 +11,5 @@ urlpatterns = [
     path('google-callback/', google_callback, name='google_callback'),
 
     path('token/refresh/', refresh_token),
-    path('token/pair-token/', pair_token),
     path('logout/', logout),
 ]

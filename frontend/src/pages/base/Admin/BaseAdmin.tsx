@@ -24,12 +24,7 @@ const BaseAdmin = () => {
             setAuthorized(hasGroup('admin', res.data))
         } catch (error) {
             if (error instanceof AxiosError) {
-                if (error?.response?.status === 401) {
-                    console.error("Token inválido ou refresh falhou, redirecionando.")
-                    redirect('/session')
-                } else {
-                    console.error("Erro inesperado ao buscar usuário:", error)
-                }
+                console.error("Erro inesperado ao buscar usuário:", error)
             }
         }
     }

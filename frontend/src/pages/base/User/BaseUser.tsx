@@ -25,12 +25,7 @@ const BaseUser = () => {
             setAuthorized(hasGroup('user', res.data))
         } catch (error) {
             if (error instanceof AxiosError) {
-                if (error?.response?.status === 401) {
-                    toast.error("Token inválido ou refresh falhou, redirecionando...")
-                    redirect('/session')
-                } else {
-                    console.error(error)
-                }
+                console.error(error)
             }
         }
     }

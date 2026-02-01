@@ -97,7 +97,7 @@ const Login = () => {
                 if (!systemURL) {
                     setUser(res.data.user)
     
-                    if (res.data.user.profile_picture) sessionStorage.setItem('profilePicture', res.data.user.profile_picture)
+                    if (res.data.user.profile_picture) localStorage.setItem('profilePicture', res.data.user.profile_picture)
     
                     setErrors({
                         email: null,

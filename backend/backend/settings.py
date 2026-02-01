@@ -136,6 +136,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 AUTH_USER_MODEL = 'hub_users.CustomUser' 
+FS_AUTH_SYSTEM_MODEL = "hub_systems.System"
 
 LANGUAGE_CODE = 'pt-BR'
 

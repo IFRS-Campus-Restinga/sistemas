@@ -14,7 +14,7 @@ Este documento descreve todas as APIs expostas pelo backend (Django + DRF).
 
 O backend usa JWT em cookies HTTP only:
 - `access_token`: expira em ~5 minutos.
-- `refresh_token`: expira em 7 dias (ou 1 dia quando gerado via `pair-token`).
+- `refresh_token`: expira em 7 dias.
 
 Fluxos principais:
 - `POST /session/login/` (email + senha) ou `POST /session/login/google/` (Google).
@@ -109,17 +109,6 @@ Renova o `access_token` usando o cookie `refresh_token`.
 Resposta `200`:
 ```json
 { "message": "Token renovado" }
-```
-
-## GET `/session/token/pair-token/`
-Gera um par de tokens para um usuario especifico.
-
-Query params:
-- `user`: UUID do usuario
-
-Resposta `200`:
-```json
-{ "access": "<jwt>", "refresh": "<jwt>" }
 ```
 
 ## POST `/session/logout/`
