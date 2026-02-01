@@ -12,6 +12,7 @@ RUN apt-get update \
         libffi-dev \
         libssl-dev \
         libpq-dev \
+        cron \
         gettext \
         git \
     && rm -rf /var/lib/apt/lists/*
