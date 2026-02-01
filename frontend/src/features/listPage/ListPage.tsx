@@ -23,48 +23,30 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
     const [nextPage, setNextPage] = useState<number | null>(null)
     const [previousPage, setPreviousPage] = useState<number | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
-
     const handleSearch = async (page: number, param: string) => {
         setIsLoading(true)
 
         try {
             const { next, previous, data } = await fetchData(page, param)
 
-            setListData(next > 1 ? [...listData, ...data] : [...data])
+            setListData(page > 1 ? [...listData, ...data] : [...data])
 
-            setNextPage(next ? currentPage + 1 : null)
-            setPreviousPage(previous ? currentPage - 1 : null)
+            if (next) setNextPage(page + 1)
+            if (previous) setPreviousPage(page - 1)
         } catch (error) {
             console.error(error)
         } finally {
             setIsLoading(false)
         }
     }
-
-    const resetAndFetch = async () => {
-        setIsLoading(true)
-        setListData([])
-        setCurrentPage(1)
-
-        try {
-            const { next, previous, data } = await fetchData(1, searchParam)
-            setListData(data)
-            setNextPage(next ? currentPage + 1 : null)
-            setPreviousPage(previous ? currentPage : null)
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    useEffect(() =>{
-        resetAndFetch()
-    }, [title, searchParam])
 
     useEffect(() => {
-        if (currentPage > 1) handleSearch(currentPage, searchParam)
+        handleSearch(currentPage, searchParam)
     }, [currentPage])
+
+    useEffect(() => {
+        if (searchParam === '') handleSearch(1, searchParam)
+    }, [searchParam])
 
     return (
         <FormContainer title={`Gerenciar ${title}`}>
@@ -72,8 +54,12 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
                 <SearchBar
                     setSearch={setSearchParam}
                     onSearch={(page, param) => {
+                        if (param === '') setListData([])
                         setCurrentPage(page)
-                        handleSearch(page, param)
+                        setNextPage(null)
+                        setPreviousPage(null)
+                        setSearchParam(param)
+                        handleSearch(1, param)
                     }}
                     searchParam={searchParam}
                 />
