@@ -43,6 +43,6 @@ class AdditionalInfos(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     birth_date = models.DateField(verbose_name="Data de nascimento")
     telephone_number = models.CharField(max_length=13, null=False, blank=False, verbose_name="Telefone")
-    registration = models.CharField(max_length=11, null=True, blank=True, verbose_name="Matrícula")
+    registration = models.CharField(max_length=11, null=True, blank=True, unique=True, verbose_name="Matrícula")
     cpf = models.CharField(max_length=11, verbose_name="CPF", unique=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='additional_infos')

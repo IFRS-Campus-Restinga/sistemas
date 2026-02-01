@@ -37,21 +37,3 @@ def refresh_token(request):
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         logger.error(f"[{timestamp}] Erro inesperado ao renovar token", exc_info=True)
         return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['GET'])
-def pair_token(request):
-    user = request.GET.get('user', None)
-
-    try:
-        if not user:
-            return Response({'message': 'Autenticação necessária'}, status=status.HTTP_401_UNAUTHORIZED)
-    
-        access_token, refresh_token = TokenService.pair_token(user)
-
-        return Response({'access': access_token, 'refresh': refresh_token}, status=status.HTTP_200_OK)
-    except Http404 as e:
-        return Response({'message': "Usuário não encontrado"}, status=status.HTTP_404_NOT_FOUND)
-    except Exception as e:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        logger.error(f"[{timestamp}] Erro inesperado ao gerar par de tokens", exc_info=True)
-        return Response({'message': "Ocorreu um erro"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

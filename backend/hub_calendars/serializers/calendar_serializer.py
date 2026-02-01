@@ -11,10 +11,18 @@ class CalendarSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         start = attrs.get('start', None)
         end =  attrs.get('end', None)
+        title = attrs.get('title', None)
 
         if not start or not end:
             raise serializers.ValidationError('datas de início e encerramento são obrigatórias')
         
+        if title:
+            existing = Calendar.objects.filter(title__iexact=title)
+            if self.instance:
+                existing = existing.exclude(pk=self.instance.pk)
+            if existing.exists():
+                raise serializers.ValidationError('Já existe um calendário com este título')
+
         if end < start:
             raise serializers.ValidationError('A data de encerramento não pode ser menor que a de início')
         

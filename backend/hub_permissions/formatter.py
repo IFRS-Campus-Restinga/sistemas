@@ -1,3 +1,4 @@
+from django.utils.translation import gettext as _
 from .models import PermissionUUIDMap, Permission
 
 class URLFieldsParser:
@@ -26,6 +27,10 @@ class URLFieldsParser:
                 except PermissionUUIDMap.DoesNotExist:
                     value = None
                 result[field] = value
+                continue
+            if isinstance(instance, Permission) and field == "name":
+                value = getattr(instance, field, None)
+                result[field] = _(value) if value else value
                 continue
 
             if not hasattr(instance, field):

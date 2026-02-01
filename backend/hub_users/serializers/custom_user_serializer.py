@@ -58,6 +58,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if access_profile and groups:
             validateUserGroups(access_profile, groups)
 
+        if self.instance and "is_abstract" in data:
+            if hasattr(self.instance, "additional_infos") and data["is_abstract"] != self.instance.is_abstract:
+                raise serializers.ValidationError(
+                    "Não é permitido alterar o tipo de conta quando há informações adicionais cadastradas."
+                )
+
         return data
 
     def create(self, validated_data):

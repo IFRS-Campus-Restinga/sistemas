@@ -6,6 +6,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination
 from hub_calendars.services.event_service import EventService
+from django.db import transaction
+from hub_calendars.enums.calendar_status import CalendarStatus
 
 class CalendarPagination(PageNumberPagination):
     page_size = 10
@@ -19,8 +21,12 @@ class CalendarService:
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
-        
-        serializer.save()
+
+        with transaction.atomic():
+            calendar = serializer.save()
+            Calendar.objects.exclude(pk=calendar.pk).filter(status=CalendarStatus.ATIVO).update(
+                status=CalendarStatus.SUSPENSO
+            )
 
     @staticmethod
     def edit(calendar_data, calendar_id):
@@ -37,7 +43,9 @@ class CalendarService:
     def list_calendars(request):
         status = request.GET.get('status', None)
 
-        calendars = Calendar.objects.filter(title__icontains=request.GET.get('search', ''))
+        calendars = Calendar.objects.filter(
+            title__icontains=request.GET.get('search', '')
+        ).order_by('-start', '-end', '-id')
 
         if status:
             calendars = calendars.filter(status=status)
@@ -61,5 +69,3 @@ class CalendarService:
         serializer = CalendarSerializer(instance=calendar, context={'request': request})
 
         return serializer.data
-
-

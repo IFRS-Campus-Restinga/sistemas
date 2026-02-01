@@ -1,0 +1,169 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: sistemas\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-31 00:00+0000\n"
+"PO-Revision-Date: 2026-01-31 00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgid "Can add group"
+msgstr "Pode adicionar grupo"
+
+msgid "Can change group"
+msgstr "Pode alterar grupo"
+
+msgid "Can delete group"
+msgstr "Pode excluir grupo"
+
+msgid "Can view group"
+msgstr "Pode visualizar grupo"
+
+msgid "Can add custom user"
+msgstr "Pode adicionar usuário"
+
+msgid "Can change custom user"
+msgstr "Pode alterar usuário"
+
+msgid "Can delete custom user"
+msgstr "Pode excluir usuário"
+
+msgid "Can view custom user"
+msgstr "Pode visualizar usuário"
+
+msgid "Can add password"
+msgstr "Pode adicionar senha"
+
+msgid "Can change password"
+msgstr "Pode alterar senha"
+
+msgid "Can delete password"
+msgstr "Pode excluir senha"
+
+msgid "Can view password"
+msgstr "Pode visualizar senha"
+
+msgid "Can add additional infos"
+msgstr "Pode adicionar informações adicionais"
+
+msgid "Can change additional infos"
+msgstr "Pode alterar informações adicionais"
+
+msgid "Can delete additional infos"
+msgstr "Pode excluir informações adicionais"
+
+msgid "Can view additional infos"
+msgstr "Pode visualizar informações adicionais"
+
+msgid "Can add system"
+msgstr "Pode adicionar sistema"
+
+msgid "Can change system"
+msgstr "Pode alterar sistema"
+
+msgid "Can delete system"
+msgstr "Pode excluir sistema"
+
+msgid "Can view system"
+msgstr "Pode visualizar sistema"
+
+msgid "Can add calendar"
+msgstr "Pode adicionar calendário"
+
+msgid "Can change calendar"
+msgstr "Pode alterar calendário"
+
+msgid "Can delete calendar"
+msgstr "Pode excluir calendário"
+
+msgid "Can view calendar"
+msgstr "Pode visualizar calendário"
+
+msgid "Can add event"
+msgstr "Pode adicionar evento"
+
+msgid "Can change event"
+msgstr "Pode alterar evento"
+
+msgid "Can delete event"
+msgstr "Pode excluir evento"
+
+msgid "Can view event"
+msgstr "Pode visualizar evento"
+
+msgid "Can add course class"
+msgstr "Pode adicionar turma"
+
+msgid "Can change course class"
+msgstr "Pode alterar turma"
+
+msgid "Can delete course class"
+msgstr "Pode excluir turma"
+
+msgid "Can view course class"
+msgstr "Pode visualizar turma"
+
+msgid "Can add course"
+msgstr "Pode adicionar curso"
+
+msgid "Can change course"
+msgstr "Pode alterar curso"
+
+msgid "Can delete course"
+msgstr "Pode excluir curso"
+
+msgid "Can view course"
+msgstr "Pode visualizar curso"
+
+msgid "Can add ppc"
+msgstr "Pode adicionar PPC"
+
+msgid "Can change ppc"
+msgstr "Pode alterar PPC"
+
+msgid "Can delete ppc"
+msgstr "Pode excluir PPC"
+
+msgid "Can view ppc"
+msgstr "Pode visualizar PPC"
+
+msgid "Can add subject"
+msgstr "Pode adicionar disciplina"
+
+msgid "Can change subject"
+msgstr "Pode alterar disciplina"
+
+msgid "Can delete subject"
+msgstr "Pode excluir disciplina"
+
+msgid "Can view subject"
+msgstr "Pode visualizar disciplina"
+
+msgid "Can add user"
+msgstr "Pode adicionar usuário"
+
+msgid "Can change user"
+msgstr "Pode alterar usuário"
+
+msgid "Can delete user"
+msgstr "Pode excluir usuário"
+
+msgid "Can view user"
+msgstr "Pode visualizar usuário"
+
+msgid "Can add permission"
+msgstr "Pode adicionar permissão"
+
+msgid "Can change permission"
+msgstr "Pode alterar permissão"
+
+msgid "Can delete permission"
+msgstr "Pode excluir permissão"
+
+msgid "Can view permission"
+msgstr "Pode visualizar permissão"

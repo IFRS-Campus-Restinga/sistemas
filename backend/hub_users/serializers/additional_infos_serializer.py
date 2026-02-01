@@ -93,6 +93,9 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
         if is_abstract:
             raise serializers.ValidationError("Contas de Departamento não podem estar vinculadas à informações adicionais")
 
+        if getattr(user, "access_profile", None) == "aluno" and is_abstract:
+            raise serializers.ValidationError("Usuários do perfil aluno não podem ser do tipo Departamento.")
+
         # -------- Valida CPF --------
         cpf = data.get("cpf")
         if cpf:

@@ -7,6 +7,5 @@ urlpatterns = [
     path('login/google/', login_with_google),
 
     path('token/refresh/', refresh_token),
-    path('token/pair-token/', pair_token),
     path('logout/', logout),
 ]
