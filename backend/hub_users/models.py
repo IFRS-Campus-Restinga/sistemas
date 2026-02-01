@@ -14,6 +14,7 @@ class CustomUser(AbstractUser):
     first_login = models.BooleanField(default=True, verbose_name="Primeiro login")
     access_profile = models.CharField(choices=AcessProfile.choices, max_length=12, verbose_name="Perfil de acesso")
     is_active = models.BooleanField(default=False, verbose_name="Status")
+    pending_request = models.BooleanField(default=True)
 
     last_login = None
     password = None

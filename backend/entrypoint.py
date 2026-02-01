@@ -110,6 +110,7 @@ def main():
                     "username": admin_name,
                     "access_profile": "servidor",
                     "is_active": True,
+                    "pending_request": False,
                     "first_login": False,
                     "is_abstract": False,
                     "is_staff": True,
@@ -121,6 +122,7 @@ def main():
                 user.username = admin_name
                 user.access_profile = "servidor"
                 user.is_active = True
+                user.pending_request = False
                 user.first_login = False
                 user.is_abstract = False
                 user.is_staff = True
