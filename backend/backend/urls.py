@@ -15,9 +15,10 @@ Including another URLconf
 """ 
 from django.urls import path, include, re_path
 from django.conf import settings
-from django.views.generic import TemplateView
 from django.conf.urls.static import static
 from django.views.static import serve
+from django.http import FileResponse, Http404
+from pathlib import Path
 
 urlpatterns = [
     path('session/', include('hub_auth.urls')),
@@ -28,13 +29,29 @@ urlpatterns = [
     path('api/systems/', include('hub_systems.urls')),
     path('api/calendars/', include('hub_calendars.urls')),
     path('api/academic/', include('hub_academic.urls')),
-    re_path(r'^assets/(?P<path>.*)$', serve, {'document_root': settings.STATICFILES_DIRS[0] / 'assets'}),
+    re_path(
+        r'^assets/(?P<path>.*)$',
+        serve,
+        {
+            'document_root': (
+                settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else Path(settings.BASE_DIR) / 'static'
+            ) / 'assets'
+        },
+    ),
 ]
 
 # serve arquivos estáticos do build do React
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+if settings.STATIC_URL:
+    static_root = settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else Path(settings.BASE_DIR) / 'static'
+    urlpatterns += static(settings.STATIC_URL, document_root=static_root)
 
 # catch-all para o React (SPA)
+def spa_index(_request):
+    index_path = (settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else Path(settings.BASE_DIR) / 'static') / 'index.html'
+    if not index_path.exists():
+        raise Http404("index.html not found in static directory")
+    return FileResponse(index_path.open('rb'), content_type='text/html')
+
 urlpatterns += [
-    re_path(r'^.*$', TemplateView.as_view(template_name='index.html')),
+    re_path(r'^.*$', spa_index),
 ]

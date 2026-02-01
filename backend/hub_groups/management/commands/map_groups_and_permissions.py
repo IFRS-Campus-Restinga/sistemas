@@ -14,12 +14,6 @@ class Command(BaseCommand):
         self.stdout.write(f"🔐 Total de permissões: {permissoes.count()}")
 
         for grupo in Group.objects.all():
-            if grupo.name.lower() == "admin":
-                grupo.permissions.set(permissoes)
-                self.stdout.write("✅ Permissões atribuídas ao grupo 'admin'")
-            else:
-                grupo.permissions.clear()
-
             uuid_map, criado = GroupUUIDMap.objects.get_or_create(group=grupo)
             status = "🆕" if criado else "🔁"
             self.stdout.write(f"{status} Grupo '{grupo.name}' UUID: {uuid_map.uuid}")
