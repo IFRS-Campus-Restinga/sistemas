@@ -24,7 +24,6 @@ SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx
 
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
 BASE_SYSTEM_URL = os.getenv('BASE_SYSTEM_URL')
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -52,7 +51,6 @@ CORS_ALLOWED_ORIGINS = [
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -108,10 +106,34 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+POSTGRES_DB = os.getenv('POSTGRES_DB')
+POSTGRES_USER = os.getenv('POSTGRES_USER')
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD')
+POSTGRES_HOST = os.getenv('POSTGRES_HOST')
+POSTGRES_PORT = os.getenv('POSTGRES_PORT', '5432')
+
+missing_db_envs = [
+    name for name, value in {
+        'POSTGRES_DB': POSTGRES_DB,
+        'POSTGRES_USER': POSTGRES_USER,
+        'POSTGRES_PASSWORD': POSTGRES_PASSWORD,
+        'POSTGRES_HOST': POSTGRES_HOST,
+    }.items() if not value
+]
+
+if missing_db_envs:
+    raise RuntimeError(
+        f"Missing required database env vars: {', '.join(missing_db_envs)}"
+    )
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': POSTGRES_DB,
+        'USER': POSTGRES_USER,
+        'PASSWORD': POSTGRES_PASSWORD,
+        'HOST': POSTGRES_HOST,
+        'PORT': POSTGRES_PORT,
     }
 }
 

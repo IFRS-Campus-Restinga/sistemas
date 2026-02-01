@@ -99,27 +99,41 @@ def main():
         user_group.save()
         print(f"👁️ Grupo 'user' recebeu {permissoes_view.count()} permissões (apenas view_).")
 
-        # --- Vincular usuário existente ao grupo admin ---
+        # --- Garantir superuser admin padrão ---
         try:
-            user = CustomUser.objects.first()  # pega o primeiro usuário existente
-            if user:
-                user.access_profile = 'servidor'
-                user.is_active = True    
-                user.groups.add(admin_group)
+            admin_email = "naoresponda_sistema@restinga.ifrs.edu.br"
+            admin_name = "Admin Sistemas"
+
+            user, created = CustomUser.objects.get_or_create(
+                email=admin_email,
+                defaults={
+                    "username": admin_name,
+                    "access_profile": "servidor",
+                    "is_active": True,
+                    "first_login": False,
+                    "is_abstract": False,
+                    "is_staff": True,
+                    "is_superuser": True,
+                },
+            )
+
+            if not created:
+                user.username = admin_name
+                user.access_profile = "servidor"
+                user.is_active = True
+                user.first_login = False
+                user.is_abstract = False
+                user.is_staff = True
+                user.is_superuser = True
                 user.save()
-                print(f"👤 Usuário '{user.username}' vinculado ao grupo 'admin'.")
-            else:
-                print("⚠️ Nenhum usuário encontrado no banco de dados.")
+
+            user.groups.add(admin_group)
+            print(f"👤 Superuser '{user.username}' garantido no grupo 'admin'.")
         except Exception as e:
-            print(f"❌ Erro ao vincular usuário: {e}")
+            print(f"❌ Erro ao criar/vincular superuser admin: {e}")
 
     # --- Mapeamento de UUIDs de grupos e permissões ---
     run_command([sys.executable, "manage.py", "map_groups_and_permissions"])
-
-    # --- Subir servidor Django ---
-    print("🌍 Subindo servidor Django em 127.0.0.1:8000 ...")
-    run_command([sys.executable, "manage.py", "runserver", "127.0.0.1:8000"])
-
 
 if __name__ == "__main__":
     try:

@@ -13,16 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """ 
-from django.contrib import admin
 from django.urls import path, include, re_path
-from hub_auth.views.login_django_admin import *
+from django.conf import settings
 from django.views.generic import TemplateView
 from django.conf.urls.static import static
+from django.views.static import serve
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('django-admin/', include('hub_auth.urls')),
-
     path('session/', include('hub_auth.urls')),
 
     path('api/users/', include('hub_users.urls')),
@@ -31,6 +28,7 @@ urlpatterns = [
     path('api/systems/', include('hub_systems.urls')),
     path('api/calendars/', include('hub_calendars.urls')),
     path('api/academic/', include('hub_academic.urls')),
+    re_path(r'^assets/(?P<path>.*)$', serve, {'document_root': settings.STATICFILES_DIRS[0] / 'assets'}),
 ]
 
 # serve arquivos estáticos do build do React
