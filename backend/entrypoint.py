@@ -19,12 +19,57 @@ def main():
     django.setup()
 
     from django.contrib.auth.models import Group, Permission
+    from django.contrib.contenttypes.models import ContentType
     from hub_users.models import CustomUser
-    from hub_groups.models import GroupUUIDMap
-    from hub_permissions.models import PermissionUUIDMap
     from django.db import transaction
 
     with transaction.atomic():
+        allowed_models = {
+            ("hub_users", "customuser"),
+            ("hub_users", "password"),
+            ("hub_users", "additionalinfos"),
+            ("hub_systems", "system"),
+            ("auth", "group"),
+            ("auth", "permission"),
+            ("hub_calendars", "calendar"),
+            ("hub_calendars", "event"),
+            ("hub_academic", "courseclass"),
+            ("hub_academic", "course"),
+            ("hub_academic", "ppc"),
+            ("hub_academic", "curriculum"),
+            ("hub_academic", "subject"),
+        }
+
+        allowed_apps = {app for app, _ in allowed_models}
+        allowed_model_names = {model for _, model in allowed_models}
+
+        allowed_ct_ids = set(
+            ContentType.objects.filter(
+                app_label__in=allowed_apps,
+                model__in=allowed_model_names,
+            ).values_list("id", flat=True)
+        )
+
+        removed_count, _ = Permission.objects.exclude(content_type_id__in=allowed_ct_ids).delete()
+        print(f"🧹 Removidas {removed_count} permissões de models não permitidos")
+
+        # Remove permissões de adicionar/alterar/excluir permissões
+        try:
+            permission_ct = ContentType.objects.get(app_label="auth", model="permission")
+            removed_perm_count, _ = Permission.objects.filter(
+                content_type=permission_ct,
+                codename__in={"add_permission", "change_permission", "delete_permission"},
+            ).delete()
+            print(f"🧹 Removidas {removed_perm_count} permissões de gerenciamento de permissões")
+        except ContentType.DoesNotExist:
+            print("⚠️ ContentType 'auth.permission' não encontrado para limpeza de permissões")
+
+        # Remove todas as permissões de exclusão
+        removed_delete_count, _ = Permission.objects.filter(
+            codename__startswith="delete_"
+        ).delete()
+        print(f"🧹 Removidas {removed_delete_count} permissões de exclusão")
+
         # --- Criação dos grupos ---
         grupos = ["admin", "coord", "user"]
         for nome_grupo in grupos:
@@ -48,14 +93,11 @@ def main():
         admin_group.save()
         print(f"🔐 Grupo 'admin' recebeu {todas_permissoes.count()} permissões.")
 
-        # Coord e User recebem apenas as permissões de visualização
-        for nome in ["coord", "user"]:
-            grupo = Group.objects.get(name=nome)
-            grupo.permissions.clear()  # limpa antes
-            for perm in permissoes_view:
-                grupo.permissions.add(perm)
-            grupo.save()
-            print(f"👁️ Grupo '{nome}' recebeu {permissoes_view.count()} permissões (apenas view_).")
+        # User recebe apenas as permissões de visualização
+        user_group = Group.objects.get(name="user")
+        user_group.permissions.set(permissoes_view)
+        user_group.save()
+        print(f"👁️ Grupo 'user' recebeu {permissoes_view.count()} permissões (apenas view_).")
 
         # --- Vincular usuário existente ao grupo admin ---
         try:
@@ -71,20 +113,8 @@ def main():
         except Exception as e:
             print(f"❌ Erro ao vincular usuário: {e}")
 
-        # --- Mapeamento de UUIDs de grupos e permissões ---
-        print("📊 Mapeando UUIDs de grupos e permissões...")
-
-        for grupo in Group.objects.all():
-            uuid_map, criado = GroupUUIDMap.objects.get_or_create(group=grupo)
-            status = "🆕" if criado else "🔁"
-            print(f"{status} Grupo '{grupo.name}' UUID: {uuid_map.uuid}")
-
-        for perm in todas_permissoes:
-            uuid_map, criado = PermissionUUIDMap.objects.get_or_create(permission=perm)
-            status = "🆕" if criado else "🔁"
-            print(f"{status} Permissão '{perm.codename}' UUID: {uuid_map.uuid}")
-
-        print("✅ Mapeamento de UUIDs concluído.")
+    # --- Mapeamento de UUIDs de grupos e permissões ---
+    run_command([sys.executable, "manage.py", "map_groups_and_permissions"])
 
     # --- Subir servidor Django ---
     print("🌍 Subindo servidor Django em 127.0.0.1:8000 ...")
