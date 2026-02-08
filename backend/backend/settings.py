@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from datetime import timedelta
 
 load_dotenv()
 
@@ -20,7 +19,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')

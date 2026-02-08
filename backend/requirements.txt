@@ -38,4 +38,4 @@ sqlparse==0.5.3
 typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==1.26.20
-psycopg2-binary==2.9.9
+psycopg2-binary>=2.9.10
