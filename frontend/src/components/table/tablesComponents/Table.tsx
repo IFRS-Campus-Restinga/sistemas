@@ -37,14 +37,18 @@ const Table = ({
     next,
     previous,
     setCurrent,
-    current,
     loadingContent,
     translations,
     crudActions,
     dualActions,
+    current,
     fetchData,
     searchParam
 }: TableProps) => {
+
+    void current
+    void fetchData
+    void searchParam
 
     const redirect = useNavigate()
     const firstRef = useRef<HTMLTableRowElement | null>(null)
@@ -84,14 +88,14 @@ const Table = ({
 
         const observer = new IntersectionObserver(entries => {
             entries.forEach(entry => {
-                if (!entry.isIntersecting || loadingContent) return
+                if (entry.isIntersecting) {
+                    if (entry.target === lastRef.current && next && !loadingContent) {
+                        setCurrent(next)
+                    }
 
-                if (entry.target === lastRef.current && next) {
-                    setCurrent(next)
-                }
-
-                if (entry.target === firstRef.current && previous) {
-                    setCurrent(previous)
+                    if (entry.target === firstRef.current && previous && !loadingContent) {
+                        setCurrent(previous)
+                    }
                 }
             })
         }, { threshold: 0.5 })
@@ -100,13 +104,7 @@ const Table = ({
         observer.observe(lastRef.current)
 
         return () => observer.disconnect()
-    }, [itemList, next, previous, loadingContent])
-
-    useEffect(() => {
-        if (current > 1) {
-            fetchData(current, searchParam ?? '')
-        }
-    }, [current])
+    }, [itemList, next, previous])
 
     return (
         <div className={styles.tableContainer}>
