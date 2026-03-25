@@ -23,9 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-j$zon4heht3ss&b+9%n%)189=n+efwtb%&_w#xryx^6wpu0fhx'
 
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
-GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
-REDIRECT_URI = os.getenv('REDIRECT_URI')
 BASE_SYSTEM_URL = os.getenv('BASE_SYSTEM_URL')
+REDIRECT_URI = f"{BASE_SYSTEM_URL.rstrip('/')}/callback" if BASE_SYSTEM_URL else None
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
