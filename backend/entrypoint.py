@@ -1,3 +1,4 @@
+import argparse
 import os
 import subprocess
 import sys
@@ -11,7 +12,46 @@ def run_command(command: list[str]):
         print(f"❌ Erro ao executar: {' '.join(command)}")
         sys.exit(result.returncode)
 
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-user",
+        dest="initial_user_email",
+        help="Email do usuário inicial que será criado/promovido como superusuário.",
+    )
+    return parser.parse_args()
+
+
+def ensure_initial_superuser(CustomUser, admin_group, email: str):
+    username = email.split("@", 1)[0]
+    user, created = CustomUser.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": username,
+            "access_profile": "servidor",
+            "is_active": True,
+            "pending_request": False,
+            "is_staff": True,
+            "is_superuser": True,
+        },
+    )
+
+    user.username = user.username or username
+    user.access_profile = "servidor"
+    user.is_active = True
+    user.pending_request = False
+    user.is_staff = True
+    user.is_superuser = True
+    user.groups.add(admin_group)
+    user.save()
+
+    action = "criado" if created else "atualizado"
+    print(f"👤 Superusuário inicial '{email}' {action} e vinculado ao grupo 'admin'.")
+
+
 def main():
+    args = parse_args()
     print("⚙️ Criando grupos e vinculando permissões...")
 
     # Configura o ambiente Django
@@ -99,17 +139,20 @@ def main():
         user_group.save()
         print(f"👁️ Grupo 'user' recebeu {permissoes_view.count()} permissões (apenas view_).")
 
-        # --- Vincular usuário existente ao grupo admin ---
+        # --- Garantir superusuário inicial ---
         try:
-            user = CustomUser.objects.first()  # pega o primeiro usuário existente
-            if user:
-                user.access_profile = 'servidor'
-                user.is_active = True    
-                user.groups.add(admin_group)
-                user.save()
-                print(f"👤 Usuário '{user.username}' vinculado ao grupo 'admin'.")
+            if args.initial_user_email:
+                ensure_initial_superuser(CustomUser, admin_group, args.initial_user_email)
             else:
-                print("⚠️ Nenhum usuário encontrado no banco de dados.")
+                user = CustomUser.objects.first()
+                if user:
+                    user.access_profile = 'servidor'
+                    user.is_active = True
+                    user.groups.add(admin_group)
+                    user.save()
+                    print(f"👤 Usuário '{user.username}' vinculado ao grupo 'admin'.")
+                else:
+                    print("⚠️ Nenhum usuário encontrado no banco de dados.")
         except Exception as e:
             print(f"❌ Erro ao vincular usuário: {e}")
 
