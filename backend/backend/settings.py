@@ -16,6 +16,13 @@ from datetime import timedelta
 
 load_dotenv()
 
+
+def env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -47,6 +54,13 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://127.0.0.1:8000",
 ]
+
+AUTH_COOKIE_HTTPONLY = env_bool('AUTH_COOKIE_HTTPONLY', True)
+AUTH_COOKIE_SECURE = env_bool('AUTH_COOKIE_SECURE', False)
+AUTH_COOKIE_SAMESITE = os.getenv('AUTH_COOKIE_SAMESITE', 'Lax')
+AUTH_COOKIE_REFRESH_PATH = os.getenv('AUTH_COOKIE_REFRESH_PATH', '/session/')
+AUTH_COOKIE_ACCESS_PATH = os.getenv('AUTH_COOKIE_ACCESS_PATH', '/')
+AUTH_COOKIE_REFRESH_MAX_AGE = int(os.getenv('AUTH_COOKIE_REFRESH_MAX_AGE', str(3600 * 24 * 7)))
 
 # Application definition
 

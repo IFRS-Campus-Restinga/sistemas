@@ -1,5 +1,6 @@
 import logging
 from django.http import Http404
+from django.conf import settings
 from datetime import datetime
 from rest_framework.decorators import api_view
 from hub_auth.services.auth_service import *
@@ -25,20 +26,20 @@ def login_with_google(request):
             response.set_cookie(
                 key='refresh_token',
                 value=refresh,
-                httponly=True,
-                secure=False,
-                samesite='Lax',
-                max_age=3600*24*7,
-                path='/session/'
+                httponly=settings.AUTH_COOKIE_HTTPONLY,
+                secure=settings.AUTH_COOKIE_SECURE,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                max_age=settings.AUTH_COOKIE_REFRESH_MAX_AGE,
+                path=settings.AUTH_COOKIE_REFRESH_PATH
             )
 
             response.set_cookie(
                 key='access_token',
                 value=access,
-                httponly=True,
-                secure=False,
-                samesite='Lax',
-                path='/'
+                httponly=settings.AUTH_COOKIE_HTTPONLY,
+                secure=settings.AUTH_COOKIE_SECURE,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_COOKIE_ACCESS_PATH
             )
 
         return response
@@ -69,20 +70,20 @@ def login(request):
             response.set_cookie(
                 key="refresh_token",
                 value=refresh,
-                httponly=True,
-                secure=True,
-                samesite='None',
-                max_age=3600*24*7,
-                path="/session/",
+                httponly=settings.AUTH_COOKIE_HTTPONLY,
+                secure=settings.AUTH_COOKIE_SECURE,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                max_age=settings.AUTH_COOKIE_REFRESH_MAX_AGE,
+                path=settings.AUTH_COOKIE_REFRESH_PATH,
             )
 
             response.set_cookie(
                 key="access_token",
                 value=access,
-                httponly=True,
-                secure=True,
-                samesite='None',
-                path="/",
+                httponly=settings.AUTH_COOKIE_HTTPONLY,
+                secure=settings.AUTH_COOKIE_SECURE,
+                samesite=settings.AUTH_COOKIE_SAMESITE,
+                path=settings.AUTH_COOKIE_ACCESS_PATH,
             )
 
         return response
@@ -100,8 +101,8 @@ def logout(request):
     try:
         response = Response({'message': 'Logout concluído com sucesso'}, status=status.HTTP_200_OK)
 
-        response.delete_cookie("refresh_token", path="/session/")
-        response.delete_cookie('access_token')
+        response.delete_cookie("refresh_token", path=settings.AUTH_COOKIE_REFRESH_PATH)
+        response.delete_cookie('access_token', path=settings.AUTH_COOKIE_ACCESS_PATH)
 
         return response
     except Exception as e:

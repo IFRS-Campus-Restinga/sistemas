@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from django.conf import settings
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -22,10 +23,10 @@ def refresh_token(request):
         response.set_cookie(
             key='access_token',
             value=str(access),
-            httponly=True,
-            secure=True,
-            samesite='None',
-            path='/'
+            httponly=settings.AUTH_COOKIE_HTTPONLY,
+            secure=settings.AUTH_COOKIE_SECURE,
+            samesite=settings.AUTH_COOKIE_SAMESITE,
+            path=settings.AUTH_COOKIE_ACCESS_PATH
         )
         return response
 
