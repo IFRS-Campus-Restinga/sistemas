@@ -117,8 +117,12 @@ def main():
     run_command([sys.executable, "manage.py", "map_groups_and_permissions"])
 
     # --- Subir servidor Django ---
-    print("🌍 Subindo servidor Django em 127.0.0.1:8000 ...")
-    run_command([sys.executable, "manage.py", "runserver", "127.0.0.1:8000"])
+    runserver_host = os.getenv("RUNSERVER_HOST", "127.0.0.1")
+    runserver_port = os.getenv("RUNSERVER_PORT", "8000")
+    runserver_address = f"{runserver_host}:{runserver_port}"
+
+    print(f"🌍 Subindo servidor Django em {runserver_address} ...")
+    run_command([sys.executable, "manage.py", "runserver", runserver_address])
 
 
 if __name__ == "__main__":
