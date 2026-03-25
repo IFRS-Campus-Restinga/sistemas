@@ -1,4 +1,3 @@
-import argparse
 import os
 import subprocess
 import sys
@@ -11,16 +10,6 @@ def run_command(command: list[str]):
     if result.returncode != 0:
         print(f"❌ Erro ao executar: {' '.join(command)}")
         sys.exit(result.returncode)
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-user",
-        dest="initial_user_email",
-        help="Email do usuário inicial que será criado/promovido como superusuário.",
-    )
-    return parser.parse_args()
 
 
 def ensure_initial_superuser(CustomUser, admin_group, email: str):
@@ -51,7 +40,7 @@ def ensure_initial_superuser(CustomUser, admin_group, email: str):
 
 
 def main():
-    args = parse_args()
+    initial_user_email = os.getenv("INITIAL_ADMIN_EMAIL")
     print("⚙️ Criando grupos e vinculando permissões...")
 
     # Configura o ambiente Django
@@ -141,8 +130,8 @@ def main():
 
         # --- Garantir superusuário inicial ---
         try:
-            if args.initial_user_email:
-                ensure_initial_superuser(CustomUser, admin_group, args.initial_user_email)
+            if initial_user_email:
+                ensure_initial_superuser(CustomUser, admin_group, initial_user_email)
             else:
                 user = CustomUser.objects.first()
                 if user:
