@@ -8,7 +8,6 @@ from django.contrib import messages
 from google.auth.transport import requests
 
 GOOGLE_OAUTH2_CLIENT_ID = settings.GOOGLE_OAUTH2_CLIENT_ID
-GOOGLE_OAUTH2_CLIENT_SECRET = settings.GOOGLE_OAUTH2_CLIENT_SECRET
 REDIRECT_URI = settings.REDIRECT_URI
 BASE_DIR = settings.BASE_DIR
 
@@ -65,4 +64,3 @@ def google_callback(request):
     auth_login(request, user)
     messages.success(request, 'Login realizado com sucesso!')
     return redirect('admin:index')
-
