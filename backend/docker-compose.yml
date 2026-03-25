@@ -9,6 +9,7 @@ services:
       - ./.env
     environment:
       DJANGO_SETTINGS_MODULE: backend.settings
+      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
       POSTGRES_HOST: db
       RUNSERVER_HOST: 0.0.0.0
     volumes:
