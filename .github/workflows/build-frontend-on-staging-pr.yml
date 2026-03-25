@@ -2,16 +2,26 @@ name: Build frontend on staging PR
 
 on:
   pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
     branches:
       - staging
 
 jobs:
   build-frontend:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -30,3 +40,15 @@ jobs:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_GOOGLE_OAUTH2_CLIENT_ID: ${{ secrets.VITE_GOOGLE_OAUTH2_CLIENT_ID }}
         run: npm run build
+
+      - name: Commit backend/static changes
+        run: |
+          if [[ -n "$(git status --porcelain backend/static)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add backend/static
+            git commit -m "chore: update backend static for staging PR"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          else
+            echo "No backend/static changes to commit."
+          fi
