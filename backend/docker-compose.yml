@@ -1,3 +1,5 @@
+name: hub_ifrs_container
+
 services:
   backend:
     build:
