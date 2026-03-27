@@ -25,7 +25,6 @@ pyasn1_modules==0.4.2
 pycparser==2.22
 PyJWT==2.10.1
 PyMuPDF==1.26.3
-psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 python-social-auth==0.3.6
 python3-openid==3.2.0

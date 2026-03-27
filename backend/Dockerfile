@@ -18,7 +18,8 @@ RUN apt-get update \
 
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && pip install psycopg2-binary==2.9.9
 
 COPY . /app
 
