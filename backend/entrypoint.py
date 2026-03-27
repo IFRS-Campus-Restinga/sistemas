@@ -13,11 +13,10 @@ def run_command(command: list[str]):
 
 
 def ensure_initial_superuser(CustomUser, admin_group, email: str):
-    username = email.split("@", 1)[0]
     user, created = CustomUser.objects.get_or_create(
         email=email,
         defaults={
-            "username": username,
+            "username": "",
             "access_profile": "servidor",
             "is_active": True,
             "pending_request": False,
@@ -26,7 +25,6 @@ def ensure_initial_superuser(CustomUser, admin_group, email: str):
         },
     )
 
-    user.username = user.username or username
     user.access_profile = "servidor"
     user.is_active = True
     user.pending_request = False
@@ -40,12 +38,12 @@ def ensure_initial_superuser(CustomUser, admin_group, email: str):
 
 
 def main():
-    initial_user_email = os.getenv("INITIAL_ADMIN_EMAIL")
     print("⚙️ Criando grupos e vinculando permissões...")
 
     # Configura o ambiente Django
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
     django.setup()
+    initial_user_email = os.getenv("INITIAL_ADMIN_EMAIL")
 
     from django.contrib.auth.models import Group, Permission
     from django.contrib.contenttypes.models import ContentType
