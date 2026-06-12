@@ -18,6 +18,15 @@ class CourseSerializer(serializers.ModelSerializer):
             except (TypeError, ValueError):
                 raise serializers.ValidationError({'carga horária': 'O valor da carga horária deve ser numérico.'})
 
+        coord = attrs.get('coord')
+
+        if coord is not None:
+            qs = Course.objects.filter(coord=coord)
+            if self.instance:
+                qs = qs.exclude(pk=self.instance.pk)
+            if qs.exists():
+                raise serializers.ValidationError({'coord': 'Este usuário já é coordenador de outro curso.'})
+
         return attrs
 
     def to_representation(self, instance):

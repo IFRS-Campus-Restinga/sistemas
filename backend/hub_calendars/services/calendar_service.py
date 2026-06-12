@@ -25,7 +25,7 @@ class CalendarService:
         with transaction.atomic():
             calendar = serializer.save()
             Calendar.objects.exclude(pk=calendar.pk).filter(status=CalendarStatus.ATIVO).update(
-                status=CalendarStatus.SUSPENSO
+                status=CalendarStatus.CONCLUIDO
             )
 
     @staticmethod
@@ -36,8 +36,13 @@ class CalendarService:
 
         if not serializer.is_valid():
             raise serializers.ValidationError(serializer.errors)
-        
-        serializer.save()
+
+        with transaction.atomic():
+            serializer.save()
+            if calendar_data.get('status') == CalendarStatus.ATIVO:
+                Calendar.objects.exclude(pk=calendar.pk).filter(status=CalendarStatus.ATIVO).update(
+                    status=CalendarStatus.CONCLUIDO
+                )
 
     @staticmethod
     def list_calendars(request):

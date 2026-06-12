@@ -43,7 +43,7 @@ def main():
     # Configura o ambiente Django
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "backend.settings")
     django.setup()
-    initial_user_email = os.getenv("INITIAL_ADMIN_EMAIL")
+    initial_user_email = os.getenv("ROOT_USER")
 
     from django.contrib.auth.models import Group, Permission
     from django.contrib.contenttypes.models import ContentType

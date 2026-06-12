@@ -140,10 +140,15 @@ AUTHENTICATION_BACKENDS = [
 
 AUTH_USER_MODEL = "hub_users.CustomUser"
 FS_AUTH_SYSTEM_MODEL = "hub_systems.System"
-SIMPLE_JWT = {
-    "AUTH_COOKIE": env("AUTH_COOKIE_NAME", default="access_token"),
-    "AUTH_COOKIE_REFRESH": env("REFRESH_COOKIE_NAME", default="refresh_token"),
-}
+AUTH_COOKIE_NAME = env("AUTH_COOKIE_NAME", default="access_token")
+REFRESH_COOKIE_NAME = env("REFRESH_COOKIE_NAME", default="refresh_token")
+
+AUTH_COOKIE_HTTPONLY = env.bool("AUTH_COOKIE_HTTPONLY", default=True)
+AUTH_COOKIE_SECURE = env.bool("AUTH_COOKIE_SECURE", default=False)
+AUTH_COOKIE_SAMESITE = env("AUTH_COOKIE_SAMESITE", default="Lax")
+AUTH_COOKIE_REFRESH_MAX_AGE = env.int("AUTH_COOKIE_REFRESH_MAX_AGE", default=60 * 60 * 24 * 7)  # 7 dias
+AUTH_COOKIE_REFRESH_PATH = env("AUTH_COOKIE_REFRESH_PATH", default="/")
+AUTH_COOKIE_ACCESS_PATH = env("AUTH_COOKIE_ACCESS_PATH", default="/")
 
 # ------------------------------------------------------------------------------
 # I18N

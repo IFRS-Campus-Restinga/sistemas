@@ -202,6 +202,10 @@ const CalendarForm = () => {
                                                 title: 'Cancelado',
                                                 value: 'Cancelado',
                                             },
+                                            {
+                                                title: 'Concluído',
+                                                value: 'Concluído',
+                                            },
                                         ]}
                                         selected={
                                             {

@@ -58,6 +58,11 @@ class CustomUserSerializer(serializers.ModelSerializer):
         if access_profile and groups:
             validateUserGroups(access_profile, groups)
 
+        if access_profile == 'convidado' and data.get('is_abstract'):
+            raise serializers.ValidationError(
+                "Contas com perfil 'convidado' devem ser do tipo Pessoal."
+            )
+
         if self.instance and "is_abstract" in data:
             if hasattr(self.instance, "additional_infos") and data["is_abstract"] != self.instance.is_abstract:
                 raise serializers.ValidationError(

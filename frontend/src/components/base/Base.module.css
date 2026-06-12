@@ -4,6 +4,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     background-color: #f2f2f2;
     padding-top: 100px;
     padding-bottom: 20px;

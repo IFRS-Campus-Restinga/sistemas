@@ -5,12 +5,13 @@ interface CustomButtonProps {
     type: "submit" | "reset" | "button" | undefined
     onClick?: () => void
     disabled?: boolean
+    variant?: 'default' | 'gray'
 }
 
-const CustomButton = ({ text, type, onClick, disabled }: CustomButtonProps) => {
+const CustomButton = ({ text, type, onClick, disabled, variant = 'default' }: CustomButtonProps) => {
 
     return (
-        <button className={styles.button} type={type} onClick={onClick} disabled={disabled}>{text}</button>
+        <button className={variant === 'gray' ? styles.buttonGray : styles.button} type={type} onClick={onClick} disabled={disabled}>{text}</button>
     )
 }
 

@@ -49,6 +49,7 @@ const UserList = () => {
 
     return (
         <ListPage
+            key={accessProfile}
             title={accessProfile}
             fetchData={fetchUsers}
             canEdit={true}

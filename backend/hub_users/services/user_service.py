@@ -177,18 +177,22 @@ class UserService:
         user = get_object_or_404(CustomUser, pk=uuid.UUID(user_id))
 
         group_ids = []
+        group_names = []
         for group in group_list:
             group_uuid = uuid.UUID(group.get('id'))
             group_obj = get_object_or_404(Group, uuid_map__uuid=group_uuid)
             group_ids.append(group_obj.id)
-           
+            group_names.append(group_obj.name)
 
         if not group_ids:
             raise ValueError("Nenhum grupo válido foi fornecido.")
 
+        if user.access_profile == 'convidado' and 'coord' in group_names:
+            raise serializers.ValidationError("Usuários com perfil 'convidado' não podem ter o grupo 'coord'.")
+
         # Atualizar o usuário
         user.is_active = True
-        user.is_abstract = is_abstract
+        user.is_abstract = False if user.access_profile == 'convidado' else is_abstract
         user.pending_request = False
         user.groups.set(group_ids)
         user.save()

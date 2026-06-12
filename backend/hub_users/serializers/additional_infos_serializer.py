@@ -2,6 +2,7 @@ from rest_framework import serializers
 from ..models import AdditionalInfos
 from hub_auth.services.token_service import TokenService
 from hub_systems.models import System
+from django.conf import settings
 from datetime import date
 import re
 from ..formatters.format_add_info_data import URLFieldsParser
@@ -25,7 +26,7 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
         Dono ou admin podem acessar.
         """
         request = self._get_request()
-        access_token = request.COOKIES.get("access_token")
+        access_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         system_token = request.COOKIES.get("system")
 
         if access_token:
@@ -45,7 +46,7 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
         Dono (criando para si mesmo) ou admin podem criar.
         """
         request = self._get_request()
-        access_token = request.COOKIES.get("access_token")
+        access_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         system_token = request.COOKIES.get("system")
 
         if access_token:
@@ -65,7 +66,7 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
         Apenas admin pode editar.
         """
         request = self._get_request()
-        access_token = request.COOKIES.get("access_token")
+        access_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
         system_token = request.COOKIES.get("system")
 
         if access_token:
@@ -173,7 +174,7 @@ class AdditionalInfosSerializer(serializers.ModelSerializer):
         user = validated_data.get("user")
         request = self.context.get("request")
         if request and user:
-            access_token = request.COOKIES.get("access_token")
+            access_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME)
             if access_token:
                 payload = TokenService.decode_token(access_token)
                 user_id = payload.get("user_id")

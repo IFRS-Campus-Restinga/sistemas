@@ -11,6 +11,7 @@ RUN apt-get update \
         build-essential \
         git \
         libffi-dev \
+        gettext \
     && rm -rf /var/lib/apt/lists/*
 
 COPY backend/requirements.txt /tmp/requirements.txt

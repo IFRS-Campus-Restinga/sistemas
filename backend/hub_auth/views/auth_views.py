@@ -21,10 +21,10 @@ def login_with_google(request):
         user_data, refresh, access = GoogleLogin.login(credential, access_profile)
 
         response = Response({'user': user_data}, status=status.HTTP_200_OK)
-        
+
         if not system:
             response.set_cookie(
-                key='refresh_token',
+                key=settings.REFRESH_COOKIE_NAME,
                 value=refresh,
                 httponly=settings.AUTH_COOKIE_HTTPONLY,
                 secure=settings.AUTH_COOKIE_SECURE,
@@ -34,7 +34,7 @@ def login_with_google(request):
             )
 
             response.set_cookie(
-                key='access_token',
+                key=settings.AUTH_COOKIE_NAME,
                 value=access,
                 httponly=settings.AUTH_COOKIE_HTTPONLY,
                 secure=settings.AUTH_COOKIE_SECURE,
@@ -68,7 +68,7 @@ def login(request):
 
         if not system:
             response.set_cookie(
-                key="refresh_token",
+                key=settings.REFRESH_COOKIE_NAME,
                 value=refresh,
                 httponly=settings.AUTH_COOKIE_HTTPONLY,
                 secure=settings.AUTH_COOKIE_SECURE,
@@ -78,7 +78,7 @@ def login(request):
             )
 
             response.set_cookie(
-                key="access_token",
+                key=settings.AUTH_COOKIE_NAME,
                 value=access,
                 httponly=settings.AUTH_COOKIE_HTTPONLY,
                 secure=settings.AUTH_COOKIE_SECURE,
@@ -101,8 +101,8 @@ def logout(request):
     try:
         response = Response({'message': 'Logout concluído com sucesso'}, status=status.HTTP_200_OK)
 
-        response.delete_cookie("refresh_token", path=settings.AUTH_COOKIE_REFRESH_PATH)
-        response.delete_cookie('access_token', path=settings.AUTH_COOKIE_ACCESS_PATH)
+        response.delete_cookie(settings.REFRESH_COOKIE_NAME, path=settings.AUTH_COOKIE_REFRESH_PATH)
+        response.delete_cookie(settings.AUTH_COOKIE_NAME, path=settings.AUTH_COOKIE_ACCESS_PATH)
 
         return response
     except Exception as e:

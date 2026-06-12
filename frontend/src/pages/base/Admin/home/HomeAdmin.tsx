@@ -91,7 +91,7 @@ const HomeAdmin = () => {
             access_profile: request.access_profile,
             email: request.email,
             username: request.username,
-            is_abstract: selectedRequest.is_abstract,
+            is_abstract: request.access_profile === 'convidado' ? false : selectedRequest.is_abstract,
             groups: []
         })
         
@@ -187,7 +187,12 @@ const HomeAdmin = () => {
                 setError('Apenas usuários com perfil de acesso de Servidor podem possuir o grupo admin')
                 return 'Apenas usuários com perfil de acesso de Servidor podem possuir o grupo admin'
             }
-    
+
+            if (groupName === 'coord' && selectedRequest.access_profile === 'convidado') {
+                setError('Usuários com perfil convidado não podem ter o grupo coord')
+                return 'Usuários com perfil convidado não podem ter o grupo coord'
+            }
+
             return null
         }
 
@@ -273,11 +278,12 @@ const HomeAdmin = () => {
                                                     ...prev,
                                                     is_abstract: value === 'Depart.'
                                                 }))
-                                            }                                                
+                                            }
                                             value={selectedRequest.is_abstract ? 'Depart.' : 'Pessoal'}
                                             value1='Depart.'
                                             value2='Pessoal'
                                             width='11.5 rem'
+                                            disabled={selectedRequest.access_profile === 'convidado'}
                                         />
                                     </div>
                                     <DualTableTransfer

@@ -80,7 +80,6 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
-                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -108,7 +107,6 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
-                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -127,14 +125,12 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             setSubjects(updatedSubjects)
 
             toast.success('Disciplina removida com sucesso', {
-                autoClose: 2000,
                 position: 'bottom-center'
             })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
-                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -154,14 +150,12 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             updatedSubjects[index].preRequisits = subjects[index].preRequisits.filter((_, i) => i !== pIndex)
 
             toast.success('Pré requisito removido com sucesso', {
-                autoClose: 2000,
                 position: 'bottom-center'
             })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
-                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )

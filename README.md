@@ -34,7 +34,7 @@ O arquivo [backend/.env.example](/mnt/c/Users/User/Desktop/sistemas/backend/.env
 Principais campos:
 
 - `DB_ENGINE`: use `sqlite` para desenvolvimento local simples ou `postgres` para execução com Docker.
-- `INITIAL_ADMIN_EMAIL`: email Google do usuário que será promovido para administração inicial do sistema.
+- `ROOT_USER`: email Google do usuário que será promovido para administração inicial do sistema.
 - `GOOGLE_OAUTH2_CLIENT_ID`: client ID usado na autenticação com Google.
 - `BASE_SYSTEM_URL`: URL base do frontend. Em desenvolvimento local, normalmente `http://127.0.0.1:5173`.
 - `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_HOST`, `POSTGRES_PORT`: obrigatórios quando `DB_ENGINE=postgres`.
@@ -75,7 +75,7 @@ No Windows, a ativação do ambiente virtual pode ser feita com:
 
 Observações:
 
-- Se quiser autenticar e administrar o sistema com uma conta Google específica, defina `INITIAL_ADMIN_EMAIL` no `backend/.env` antes de subir o backend.
+- Se quiser autenticar e administrar o sistema com uma conta Google específica, defina `ROOT_USER` no `backend/.env` antes de subir o backend.
 - O `entrypoint.py` aplica a configuração inicial e sobe o Django em `127.0.0.1:8000` por padrão.
 
 ### 2. Subir o frontend
@@ -113,7 +113,7 @@ Antes de iniciar, ajuste o [backend/.env.example](/mnt/c/Users/User/Desktop/sist
 
 ```env
 DB_ENGINE=postgres
-INITIAL_ADMIN_EMAIL=seu-email@dominio.com
+ROOT_USER=seu-email@dominio.com
 GOOGLE_OAUTH2_CLIENT_ID=seu-client-id
 BASE_SYSTEM_URL=http://127.0.0.1:5173
 POSTGRES_DB=sistemas

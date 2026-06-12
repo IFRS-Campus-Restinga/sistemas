@@ -87,11 +87,6 @@ const Login = () => {
             
             if (!res.data.user) {
                 setAccessRequested(true)
-
-                setTimeout(() => {
-                    setAccessRequested(false)
-                }, 3000);
-
                 setIsDisabled(false)
             } else {
                 if (!systemURL) {

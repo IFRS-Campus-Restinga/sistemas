@@ -1,6 +1,7 @@
 import uuid
 from .models import System
 from hub_auth.services.token_service import TokenService
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 
 class URLFieldsParser:
@@ -19,7 +20,7 @@ class URLFieldsParser:
     
     @staticmethod
     def get_api_key(request, system_id):
-        payload = TokenService.decode_token(request.COOKIES.get("access_token"))
+        payload = TokenService.decode_token(request.COOKIES.get(settings.AUTH_COOKIE_NAME))
         system = get_object_or_404(System, pk=system_id)
 
         groups = payload.get("groups")
@@ -33,7 +34,7 @@ class URLFieldsParser:
     
     @staticmethod
     def get_secret_key(request, system_id):
-        payload = TokenService.decode_token(request.COOKIES.get("access_token"))
+        payload = TokenService.decode_token(request.COOKIES.get(settings.AUTH_COOKIE_NAME))
         system = get_object_or_404(System, pk=system_id)
 
         groups = payload.get("groups")

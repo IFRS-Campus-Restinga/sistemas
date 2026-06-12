@@ -151,6 +151,11 @@ const UserForm = () => {
             return 'Apenas usuários com perfil de acesso de Servidor podem possuir o grupo admin'
         }
 
+        if (groupName === 'coord' && userForm.access_profile === 'convidado') {
+            setUserErrors({...userErrors, groups: 'Usuários com perfil convidado não podem ter o grupo coord'})
+            return 'Usuários com perfil convidado não podem ter o grupo coord'
+        }
+
         return null
     }
 

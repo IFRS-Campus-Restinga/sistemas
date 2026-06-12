@@ -56,6 +56,7 @@ const PPCForm = () => {
     // Controla se o modal do período respectivo está aberto
     const [periodIsOpen, setPeriodIsOpen] = useState<boolean[]>([])
     const [uploadPPC, setUploadPPC] = useState<boolean>(state ? false : true)
+    const [showImportConfirm, setShowImportConfirm] = useState<boolean>(false)
     const [PPC, setPPC] = useState<PPCInterface>({
         title: '',
         course: '',
@@ -627,7 +628,20 @@ const PPCForm = () => {
                 </div>
                 <div className={styles.container}>
                     <div className={styles.uploadContainer}>
-                        <button type='button' className={uploadPPC ? styles.uploadActive : styles.uploadInactive} onClick={() => setUploadPPC((prev) => !prev)}>
+                        <button type='button' className={uploadPPC ? styles.uploadActive : styles.uploadInactive} onClick={() => {
+                            if (uploadPPC) {
+                                if (PPC.curriculum instanceof File) {
+                                    setPPC(prev => ({ ...prev, curriculum: [] }))
+                                }
+                                setUploadPPC(false)
+                            } else {
+                                if (!(PPC.curriculum instanceof File) && PPC.curriculum.length > 0) {
+                                    setShowImportConfirm(true)
+                                } else {
+                                    setUploadPPC(true)
+                                }
+                            }
+                        }}>
                             {
                                 uploadPPC ? (
                                     <img src={checkIcon} className={styles.uploadBtnIcon}/>
@@ -643,6 +657,25 @@ const PPCForm = () => {
                     </div>
                 </div>
             </form>
+        {showImportConfirm && (
+            <Modal setIsOpen={(open) => { if (!open) setShowImportConfirm(false) }}>
+                <FormContainer title='Confirmar importação' width='35%'>
+                    <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#767676' }}>
+                        Você tem certeza de que quer importar o PPC através de um arquivo? Isso vai remover toda a grade curricular já cadastrada.
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                        <CustomButton type='button' text='Cancelar' variant='gray' onClick={() => setShowImportConfirm(false)}/>
+                        <CustomButton type='button' text='Confirmar' onClick={() => {
+                            setPPC(prev => ({ ...prev, curriculum: [] }))
+                            setCurriculum([])
+                            setPeriodIsOpen([])
+                            setUploadPPC(true)
+                            setShowImportConfirm(false)
+                        }}/>
+                    </div>
+                </FormContainer>
+            </Modal>
+        )}
         </FormContainer>
     )
 }

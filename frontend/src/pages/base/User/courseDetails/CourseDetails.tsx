@@ -39,7 +39,6 @@ const CourseDetails = () => {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
-                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )

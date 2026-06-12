@@ -14,3 +14,20 @@
         border: 1px solid #006b3f;
     }
 }
+
+.buttonGray {
+    background-color: #767676;
+    border-radius: 5px;
+    color: white;
+    border: 1px solid transparent;
+    padding: 8px;
+
+    &:hover {
+        cursor: pointer;
+        transition: .3s all ease;
+        transform: scale(1.02);
+        background-color: white;
+        color: #767676;
+        border: 1px solid #767676;
+    }
+}

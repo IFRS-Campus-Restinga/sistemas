@@ -34,8 +34,8 @@ class CommonLogin:
         user_data = UserService.build_user_data(user)
                 
         access, refresh = TokenService.pair_token(user)
-        
-        return user_data, access, refresh
+
+        return user_data, refresh, access
     
 
 class GoogleLogin:
@@ -66,6 +66,12 @@ class GoogleLogin:
             }
 
             user, created = UserService.create_user(token_data)
+
+            if not created and not user.username.strip():
+                full_name = f"{token_data['first_name'] or ''} {token_data['last_name'] or ''}".strip()
+                if full_name:
+                    user.username = full_name
+                    user.save(update_fields=['username'])
 
             GoogleLogin.check_login(user)
 

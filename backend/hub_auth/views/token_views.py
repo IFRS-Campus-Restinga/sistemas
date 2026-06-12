@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 def refresh_token(request):
-    refresh = request.COOKIES.get('refresh_token', None)
+    refresh = request.COOKIES.get(settings.REFRESH_COOKIE_NAME, None)
 
     if not refresh:
         return Response({'message': 'Autenticação necessária'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -21,7 +21,7 @@ def refresh_token(request):
 
         response = Response({'message': 'Token renovado'}, status=status.HTTP_200_OK)
         response.set_cookie(
-            key='access_token',
+            key=settings.AUTH_COOKIE_NAME,
             value=str(access),
             httponly=settings.AUTH_COOKIE_HTTPONLY,
             secure=settings.AUTH_COOKIE_SECURE,

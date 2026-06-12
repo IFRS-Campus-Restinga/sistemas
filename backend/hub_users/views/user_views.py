@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from jwt.exceptions import ExpiredSignatureError
 from fs_auth_middleware.decorators import has_permissions
+from django.conf import settings
 from django.http import Http404
 from rest_framework import status, serializers
 from rest_framework.decorators import api_view
@@ -46,19 +47,19 @@ def get_user(request, user_id):
 @has_permissions(['view_customuser'])
 def get_data(request):
     try:
-        access_token = request.COOKIES.get('access_token', None)
+        access_token = request.COOKIES.get(settings.AUTH_COOKIE_NAME, None)
 
         if not access_token:
             return Response({'message': 'Sem credencial de acesso'}, status=status.HTTP_401_UNAUTHORIZED)
 
-        payload = TokenService.decode_token(request.COOKIES.get('access_token', None))
+        payload = TokenService.decode_token(access_token)
 
         user = get_object_or_404(CustomUser, pk=uuid.UUID(payload.get('user_id', None)))
 
         return Response(UserService.build_user_data(user), status=status.HTTP_200_OK)
     except serializers.ValidationError as e:
         return Response({'message': format_validation_errors(e.detail, CustomUserSerializer)}, status=status.HTTP_400_BAD_REQUEST)
-    except ExpiredSignatureError as e:
+    except (ExpiredSignatureError, TokenValidationError) as e:
         return Response({'message': str(e)}, status=status.HTTP_401_UNAUTHORIZED)
     except Http404 as e:
         return Response({'message': "Usuário não encontrado"}, status=status.HTTP_404_NOT_FOUND)

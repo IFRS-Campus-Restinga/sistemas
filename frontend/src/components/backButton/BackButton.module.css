@@ -1,0 +1,19 @@
+.button {
+    position: fixed;
+    top: 7rem;
+    left: 1.5rem;
+    z-index: 100;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button svg {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+

@@ -1,0 +1,105 @@
+name: Pipeline de Staging
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - staging
+
+jobs:
+  sca-sast:
+    name: Análise de Segurança (SCA/SAST)
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: npm audit (frontend)
+        working-directory: frontend
+        run: npm audit --audit-level=critical
+
+      - name: pip audit (backend)
+        working-directory: backend
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt --format json -o /tmp/pip-audit.json || true
+          python3 << 'EOF'
+          import json, sys, urllib.request
+
+          with open('/tmp/pip-audit.json') as f:
+              packages = json.load(f)
+
+          vuln_ids = [(p['name'], v['id']) for p in packages for v in p.get('vulns', [])]
+
+          if not vuln_ids:
+              print("Nenhuma vulnerabilidade encontrada.")
+              sys.exit(0)
+
+          print(f"Verificando severidade de {len(vuln_ids)} vulnerabilidade(s)...")
+          critical = []
+
+          for pkg_name, vuln_id in vuln_ids:
+              try:
+                  with urllib.request.urlopen(f"https://api.osv.dev/v1/vulns/{vuln_id}", timeout=10) as r:
+                      osv = json.load(r)
+                  severity = osv.get('database_specific', {}).get('severity', '').upper()
+                  print(f"  {pkg_name} / {vuln_id}: {severity or 'N/A'}")
+                  if severity == 'CRITICAL':
+                      critical.append((pkg_name, vuln_id))
+              except Exception as e:
+                  print(f"  Aviso: erro ao verificar {vuln_id}: {e}")
+
+          if critical:
+              print("\nVulnerabilidades críticas encontradas:")
+              for name, vid in critical:
+                  print(f"  {name}: {vid}")
+              sys.exit(1)
+
+          print(f"\nNenhuma vulnerabilidade crítica. {len(vuln_ids)} vuln(s) de menor severidade ignorada(s).")
+          EOF
+
+      - name: Trivy (filesystem)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: CRITICAL
+          exit-code: "1"
+          format: table
+
+  testes-integrados:
+    name: Testes Integrados
+    needs: sca-sast
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # TODO: adicionar steps de testes integrados
+
+  deploy-homologacao:
+    name: Deploy em Homologação
+    needs: testes-integrados
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # TODO: adicionar steps de deploy no ambiente de homologação

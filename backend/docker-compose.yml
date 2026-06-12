@@ -11,7 +11,7 @@ services:
       - ./.env
     environment:
       DJANGO_SETTINGS_MODULE: backend.settings
-      INITIAL_ADMIN_EMAIL: ${INITIAL_ADMIN_EMAIL}
+      ROOT_USER: ${ROOT_USER}
       POSTGRES_HOST: db
       RUNSERVER_HOST: 0.0.0.0
     volumes:
@@ -20,7 +20,10 @@ services:
       db:
         condition: service_healthy
     command: >
-      bash -lc "python manage.py migrate
+      bash -lc "pip install -r requirements.txt
+      && python manage.py makemigrations
+      && python manage.py migrate
+      && python manage.py compilemessages
       && python entrypoint.py"
 
   db:
