@@ -34,7 +34,8 @@ const Menu = () => {
     const user = useUser()
 
     const redirectToSystem = (system: SystemInterface) => {
-        const url = `${system.system_url}/session/token/?user=${user.id}&profilePicture=${localStorage.getItem('profilePicture')}`;
+        const picture = encodeURIComponent(localStorage.getItem('profilePicture') ?? '')
+        const url = `${system.system_url}/session/token/?user=${user.id}&profilePicture=${picture}`;
 
         window.location.href = url
     }
