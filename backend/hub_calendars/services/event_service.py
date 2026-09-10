@@ -6,6 +6,7 @@ from django.db.models import Q
 from rest_framework import serializers
 from hub_calendars.models.event import Event
 from hub_calendars.serializers.event_serializer import EventSerializer 
+from hub_academic.utils.query_fields import optimize_queryset
 
 class EventService:
     @staticmethod
@@ -39,13 +40,15 @@ class EventService:
         events = Event.objects.filter(
             Q(start__lte=end_of_month) & Q(end__gte=start_of_month)
         )
+        events = optimize_queryset(events, request.GET.get('fields', 'id'))
 
         serializer = EventSerializer(instance=events, context={'request': request}, many=True)
         return serializer.data
         
     @staticmethod
     def get_event(request, event_id):
-        event = get_object_or_404(Event, pk=uuid.UUID(event_id))
+        events = optimize_queryset(Event.objects.filter(pk=uuid.UUID(event_id)), request.GET.get('fields', 'id'))
+        event = get_object_or_404(events)
 
         serializer = EventSerializer(instance=event, context={'request': request})
 

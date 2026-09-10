@@ -11,12 +11,19 @@ import CustomLabel from '../../../../components/customLabel/CustomLabel'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import CustomButton from '../../../../components/customButton/CustomButton'
 import CustomTextArea from '../../../../components/customTextArea/CustomTextArea'
+import CustomSearch from '../../../../components/customSearch/CustomSearch'
+import CustomOptions, { type OptionProps } from '../../../../components/customOptions/CustomOptions'
+import deleteIcon from '../../../../assets/delete-svgrepo-com.svg'
 
 interface ErrorSubjectForm {
     name: string | null
     objective: string | null
     menu: string | null
     code: string | null
+    subject_teach_workload: string | null
+    subject_ext_workload: string | null
+    subject_remote_workload: string | null
+    weekly_periods: string | null
 }
 
 const SubjectForm = () => {
@@ -28,18 +35,30 @@ const SubjectForm = () => {
         menu: '',
         name: '',
         objective: '',
-        code: ''
+        code: '',
+        subject_teach_workload: '',
+        subject_ext_workload: '',
+        subject_remote_workload: '',
+        weekly_periods: '',
+        pre_requisits: []
     })
     const [errors, setErrors] = useState<ErrorSubjectForm>({
         menu: null,
         name: null,
         objective: null,
-        code: null
+        code: null,
+        subject_teach_workload: null,
+        subject_ext_workload: null,
+        subject_remote_workload: null,
+        weekly_periods: null
     })
+    const [preReqSearch, setPreReqSearch] = useState('')
+    const [preReqOptions, setPreReqOptions] = useState<OptionProps<'name'>[]>([])
+    const [preReqSearched, setPreReqSearched] = useState(false)
 
     const fetchSubject = async () => {
         try {
-            const res = await SubjectService.get(state, 'id, name, code, menu, objective')
+            const res = await SubjectService.get(state, 'id, name, code, menu, objective, subject_teach_workload, subject_ext_workload, subject_remote_workload, weekly_periods, pre_requisits.id, pre_requisits.name, pre_requisits.code')
 
             setSubject(res.data)
         } catch (error) {
@@ -53,12 +72,57 @@ const SubjectForm = () => {
         }
     }
 
+    const searchPreRequisits = async () => {
+        try {
+            const res = await SubjectService.list(1, preReqSearch, 'id, name, code')
+            const selectedIds = subject.pre_requisits.map((preReq) => typeof preReq === 'string' ? preReq : preReq.id)
+            setPreReqOptions(res.data.results.filter((option: OptionProps<'name'>) => (
+                option.id !== subject.id && !selectedIds.includes(option.id)
+            )))
+            setPreReqSearched(true)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message)
+            }
+        }
+    }
+
+    const addPreRequisit = (option: OptionProps<'name'>) => {
+        setSubject((current) => ({
+            ...current,
+            pre_requisits: [...current.pre_requisits, option]
+        }))
+        setPreReqSearch('')
+        setPreReqOptions([])
+        setPreReqSearched(false)
+    }
+
+    const removePreRequisit = (id: string) => {
+        setSubject((current) => ({
+            ...current,
+            pre_requisits: current.pre_requisits.filter((preReq) => (
+                typeof preReq === 'string' ? preReq !== id : preReq.id !== id
+            ))
+        }))
+    }
+
     const validateForm = () => {
         let newErrors: ErrorSubjectForm = {
             name: null,
             menu: null,
             objective: null,
-            code: null
+            code: null,
+            subject_teach_workload: null,
+            subject_ext_workload: null,
+            subject_remote_workload: null,
+            weekly_periods: null
+        }
+
+        for (const field of ['subject_teach_workload', 'subject_ext_workload', 'subject_remote_workload', 'weekly_periods'] as const) {
+            const value = subject[field]
+            newErrors[field] = value === '' || value === null || value === undefined || Number.isNaN(Number(value)) || Number(value) < 0
+                ? 'Informe um valor numérico válido'
+                : null
         }
 
         for (let field in subject) {
@@ -89,7 +153,9 @@ const SubjectForm = () => {
 
         if (validateForm()) {
             toast.promise(
-                (state ? SubjectService.edit(state, subject) : SubjectService.create(subject)),
+                (state
+                    ? SubjectService.edit(state, {...subject, pre_requisits: subject.pre_requisits.map((preReq) => typeof preReq === 'string' ? preReq : preReq.id)})
+                    : SubjectService.create({...subject, pre_requisits: subject.pre_requisits.map((preReq) => typeof preReq === 'string' ? preReq : preReq.id)})),
                 {
                     pending: state ? 'Salvando alterações...' : 'Cadastrando disciplina...',
                     success: {
@@ -157,6 +223,22 @@ const SubjectForm = () => {
                             </CustomLabel>
                         </div>
                         <div className={styles.formGroup}>
+                            <CustomLabel title='Carga horária de ensino *'>
+                                <CustomInput type='number' min='0' value={String(subject.subject_teach_workload)} onChange={(e) => setSubject({...subject, subject_teach_workload: e.target.value})} error={errors.subject_teach_workload}/>
+                            </CustomLabel>
+                            <CustomLabel title='Carga horária de extensão *'>
+                                <CustomInput type='number' min='0' value={String(subject.subject_ext_workload)} onChange={(e) => setSubject({...subject, subject_ext_workload: e.target.value})} error={errors.subject_ext_workload}/>
+                            </CustomLabel>
+                        </div>
+                        <div className={styles.formGroup}>
+                            <CustomLabel title='Carga horária remota *'>
+                                <CustomInput type='number' min='0' value={String(subject.subject_remote_workload)} onChange={(e) => setSubject({...subject, subject_remote_workload: e.target.value})} error={errors.subject_remote_workload}/>
+                            </CustomLabel>
+                            <CustomLabel title='Períodos semanais *'>
+                                <CustomInput type='number' min='0' value={String(subject.weekly_periods)} onChange={(e) => setSubject({...subject, weekly_periods: e.target.value})} error={errors.weekly_periods}/>
+                            </CustomLabel>
+                        </div>
+                        <div className={styles.formGroup}>
                             <CustomLabel title='Objetivo Geral *'>
                                 <CustomTextArea
                                     value={subject.objective}
@@ -164,6 +246,44 @@ const SubjectForm = () => {
                                     onBlur={() => setErrors({...errors, objective: validateMandatoryStringField(subject.objective)})}
                                     error={errors.objective}
                                 />
+                            </CustomLabel>
+                        </div>
+                        <div className={styles.formGroup}>
+                            <CustomLabel title='Pré-requisitos'>
+                                <div className={styles.searchContainer}>
+                                    <CustomSearch
+                                        value={preReqSearch}
+                                        onSearch={searchPreRequisits}
+                                        onBlur={() => {
+                                            setPreReqOptions([])
+                                            setPreReqSearched(false)
+                                        }}
+                                        setSearch={(value) => {
+                                            setPreReqSearch(value)
+                                            if (!value.trim()) {
+                                                setPreReqOptions([])
+                                                setPreReqSearched(false)
+                                            }
+                                        }}
+                                        showClear
+                                    />
+                                    <CustomOptions
+                                        renderKey='name'
+                                        options={preReqOptions}
+                                        searched={preReqSearched}
+                                        onSelect={addPreRequisit}
+                                    />
+                                    <div className={styles.preReqContainer}>
+                                        {subject.pre_requisits.map((preReq) => {
+                                            const id = typeof preReq === 'string' ? preReq : preReq.id
+                                            const label = typeof preReq === 'string' ? preReq : `${preReq.name} (${preReq.code})`
+                                            return <span key={id} className={styles.preReq}>
+                                                {label}
+                                                <img src={deleteIcon} alt='Remover pré-requisito' onClick={() => removePreRequisit(id)} />
+                                            </span>
+                                        })}
+                                    </div>
+                                </div>
                             </CustomLabel>
                         </div>
                         <div className={styles.formGroup}>

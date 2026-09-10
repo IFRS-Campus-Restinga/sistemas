@@ -18,8 +18,12 @@ const BaseUser = () => {
             const res = await UserService.getData()
 
             setUser(res.data)
-            
-            if (res.data.first_login) redirect('/session/user/first-login/')
+
+            const hasAdditionalInfos = res.data.additional_infos !== null && res.data.additional_infos !== undefined
+            const isPersonalAccount = res.data.is_abstract === false
+            const shouldRedirectToAdditionalInfo = Boolean(res.data.first_login) && !hasAdditionalInfos && isPersonalAccount
+
+            if (shouldRedirectToAdditionalInfo) redirect('/session/user/first-login/')
 
             setAuthorized(hasGroup('user', res.data))
         } catch (error) {

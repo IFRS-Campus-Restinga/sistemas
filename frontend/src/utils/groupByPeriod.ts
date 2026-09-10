@@ -20,6 +20,7 @@ export function groupSubjectsByPeriod(curriculum: any[]) {
   curriculum.forEach((item) => {
     const period = item.period; // string
     const subjectName = item.subject.name;
+    const subjectCode = item.subject.code;
     const preReqs = item.pre_requisits?.map((pr: any) => pr) || [];
 
     if (!grouped[period]) {
@@ -27,7 +28,7 @@ export function groupSubjectsByPeriod(curriculum: any[]) {
     }
 
     grouped[period].push({
-      name: subjectName,
+      name: subjectCode ? `${subjectName} (${subjectCode})` : subjectName,
       preRequisits: preReqs
     });
   });

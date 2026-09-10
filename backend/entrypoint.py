@@ -91,11 +91,14 @@ def main():
         except ContentType.DoesNotExist:
             print("⚠️ ContentType 'auth.permission' não encontrado para limpeza de permissões")
 
-        # Remove todas as permissões de exclusão
+        # Remove somente permissões de exclusão indevidas do model de permissões do Django,
+        # preservando permissões de exclusão do domínio (ex.: delete_curriculum)
+        permission_ct = ContentType.objects.get(app_label="auth", model="permission")
         removed_delete_count, _ = Permission.objects.filter(
-            codename__startswith="delete_"
+            content_type=permission_ct,
+            codename__in={"delete_permission"},
         ).delete()
-        print(f"🧹 Removidas {removed_delete_count} permissões de exclusão")
+        print(f"🧹 Removidas {removed_delete_count} permissões de exclusão do sistema de permissões")
 
         # --- Criação dos grupos ---
         grupos = ["admin", "coord", "user"]
@@ -107,6 +110,12 @@ def main():
                 print(f"ℹ️ Grupo '{nome_grupo}' já existia.")
 
         # --- Permissões ---
+        for permission in Permission.objects.filter(name=""):
+            inferred_name = f"Can {permission.codename.replace('_', ' ')}"
+            permission.name = inferred_name
+            permission.save(update_fields=["name"])
+            print(f"🛠️ Permissão '{permission.codename}' teve nome restaurado para '{inferred_name}'.")
+
         todas_permissoes = Permission.objects.all()
         permissoes_view = todas_permissoes.filter(
             codename__startswith="view_"
@@ -124,7 +133,19 @@ def main():
         user_group = Group.objects.get(name="user")
         user_group.permissions.set(permissoes_view)
         user_group.save()
+        user_group.permissions.remove(
+            Permission.objects.filter(codename='delete_curriculum').first()
+        )
         print(f"👁️ Grupo 'user' recebeu {permissoes_view.count()} permissões (apenas view_).")
+
+        # Coord recebe apenas visualização e não a permissão de exclusão de currículo
+        coord_group = Group.objects.get(name="coord")
+        coord_group.permissions.set(permissoes_view)
+        coord_group.save()
+        coord_group.permissions.remove(
+            Permission.objects.filter(codename='delete_curriculum').first()
+        )
+        print(f"🧭 Grupo 'coord' recebeu {permissoes_view.count()} permissões sem delete_curriculum.")
 
         # --- Garantir superusuário inicial ---
         try:
@@ -146,13 +167,12 @@ def main():
     # --- Mapeamento de UUIDs de grupos e permissões ---
     run_command([sys.executable, "manage.py", "map_groups_and_permissions"])
 
-    # --- Subir servidor Django ---
+    # --- Subir servidor ASGI compatível com async/await ---
     runserver_host = os.getenv("RUNSERVER_HOST", "127.0.0.1")
     runserver_port = os.getenv("RUNSERVER_PORT", "8000")
-    runserver_address = f"{runserver_host}:{runserver_port}"
 
-    print(f"🌍 Subindo servidor Django em {runserver_address} ...")
-    run_command([sys.executable, "manage.py", "runserver", runserver_address])
+    print(f"🌍 Subindo servidor ASGI em {runserver_host}:{runserver_port} ...")
+    run_command([sys.executable, "-m", "uvicorn", "backend.asgi:application", "--host", runserver_host, "--port", runserver_port])
 
 
 if __name__ == "__main__":

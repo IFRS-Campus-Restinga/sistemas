@@ -19,7 +19,12 @@ const SubjectDetails = () => {
         menu: '',
         name: '',
         objective: '',
-        id: ''
+        id: '',
+        subject_teach_workload: '',
+        subject_ext_workload: '',
+        subject_remote_workload: '',
+        weekly_periods: '',
+        pre_requisits: []
     })
 
     const fetchSubject = async () => {

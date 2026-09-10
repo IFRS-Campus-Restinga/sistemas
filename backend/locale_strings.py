@@ -45,6 +45,11 @@ _('Can change course')
 _('Can delete course')
 _('Can view course')
 
+_('Can add curriculum')
+_('Can change curriculum')
+_('Can delete curriculum')
+_('Can view curriculum')
+
 _('Can add ppc')
 _('Can change ppc')
 _('Can delete ppc')

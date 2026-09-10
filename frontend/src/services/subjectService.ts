@@ -1,11 +1,22 @@
 import api from "../../config/apiConfig"
 
+export interface SubjectPreRequisitInterface {
+    id: string
+    name: string
+    code: string
+}
+
 export interface SubjectInterface {
     id?: string
     name: string
     objective: string
     menu: string
     code: string
+    subject_teach_workload: string | number
+    subject_ext_workload: string | number
+    subject_remote_workload: string | number
+    weekly_periods: string | number
+    pre_requisits: Array<SubjectPreRequisitInterface | string>
 }
 
 const SubjectService = {

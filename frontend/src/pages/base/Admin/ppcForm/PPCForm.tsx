@@ -1,7 +1,7 @@
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import FormContainer from '../../../../components/formContainer/FormContainer'
 import styles from './PPCForm.module.css'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { CurriculumInterface, PPCInterface } from '../../../../services/ppcService'
 import CustomInput from '../../../../components/customInput/CustomInput'
 import CustomLabel from '../../../../components/customLabel/CustomLabel'
@@ -41,9 +41,24 @@ interface Curriculum {
     subjects: Subject[]
 }
 
+interface PPCDraft {
+    ppcId?: string
+    title: string
+    course: string
+    curriculum: CurriculumInterface[]
+    courseName?: string
+    visualCurriculum?: Curriculum[]
+}
+
+const PPC_DRAFT_KEY = 'ppcDraft'
+const PPC_EDIT_DRAFT_KEY = 'ppcEditDraft'
+
 const PPCForm = () => {
     const location = useLocation()
     const { state } = location
+    const { ppcId } = useParams()
+    const currentPPCId = typeof state === 'string' ? state : ppcId
+    const isEditMode = Boolean(currentPPCId)
     const redirect = useNavigate()
     const [searched, setSearched] = useState<boolean>(false)
     const [periods, setPeriods] = useState<number[]>([])
@@ -55,7 +70,7 @@ const PPCForm = () => {
     const [curriculum, setCurriculum] = useState<Curriculum[]>([])
     // Controla se o modal do período respectivo está aberto
     const [periodIsOpen, setPeriodIsOpen] = useState<boolean[]>([])
-    const [uploadPPC, setUploadPPC] = useState<boolean>(state ? false : true)
+    const [uploadPPC, setUploadPPC] = useState<boolean>(isEditMode ? false : true)
     const [showImportConfirm, setShowImportConfirm] = useState<boolean>(false)
     const [PPC, setPPC] = useState<PPCInterface>({
         title: '',
@@ -68,11 +83,170 @@ const PPCForm = () => {
         period: null,
         curriculum: []
     })
+    const [showDraftModal, setShowDraftModal] = useState<boolean>(false)
+    const [initialEditPayload, setInitialEditPayload] = useState<string | null>(null)
+    const restoredEditDraftRef = useRef<boolean>(false)
+
+    const clearDraft = () => {
+        localStorage.removeItem(PPC_DRAFT_KEY)
+    }
+
+    const clearEditDraft = () => {
+        localStorage.removeItem(PPC_EDIT_DRAFT_KEY)
+    }
+
+    const saveDraft = () => {
+        if (currentPPCId || uploadPPC || PPC.curriculum instanceof File) return
+
+        const draft: PPCDraft = {
+            title: PPC.title,
+            course: PPC.course,
+            curriculum: PPC.curriculum,
+            courseName: course,
+            visualCurriculum: curriculum,
+        }
+
+        localStorage.setItem(PPC_DRAFT_KEY, JSON.stringify(draft))
+    }
+
+    const saveEditDraft = () => {
+        if (!currentPPCId || uploadPPC || PPC.curriculum instanceof File) {
+            return
+        }
+
+        if (initialEditPayload === null) {
+            return
+        }
+
+        const draft: PPCDraft = {
+            ppcId: currentPPCId,
+            title: PPC.title,
+            course: PPC.course,
+            curriculum: PPC.curriculum,
+            courseName: course,
+            visualCurriculum: curriculum,
+        }
+
+        const currentDraftPayload = JSON.stringify(draft)
+
+        if (restoredEditDraftRef.current) {
+            localStorage.setItem(PPC_EDIT_DRAFT_KEY, currentDraftPayload)
+            restoredEditDraftRef.current = false
+            return
+        }
+
+        if (currentDraftPayload === initialEditPayload) {
+            localStorage.removeItem(PPC_EDIT_DRAFT_KEY)
+            return
+        }
+
+        localStorage.setItem(PPC_EDIT_DRAFT_KEY, currentDraftPayload)
+    }
+
+    const hydrateCourseName = async (courseId: string) => {
+        if (!courseId) return
+
+        try {
+            const res = await CourseService.get(courseId, 'id, name')
+            setCourse(res.data.name ?? '')
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
+    const loadDraft = async () => {
+        if (currentPPCId) return
+
+        const draftString = localStorage.getItem(PPC_DRAFT_KEY)
+        if (!draftString) return
+
+        try {
+            const draft: PPCDraft = JSON.parse(draftString)
+            if (!draft || !Array.isArray(draft.curriculum)) return
+
+            setPPC({
+                title: draft.title ?? '',
+                course: draft.course ?? '',
+                curriculum: draft.curriculum ?? []
+            })
+            setUploadPPC(false)
+
+            if (draft.visualCurriculum && draft.visualCurriculum.length > 0) {
+                setCurriculum(draft.visualCurriculum)
+            } else {
+                setCurriculum(groupSubjectsByPeriod(draft.curriculum))
+            }
+
+            if (draft.courseName) {
+                setCourse(draft.courseName)
+            } else if (draft.course) {
+                await hydrateCourseName(draft.course)
+            }
+        } catch (error) {
+            console.error(error)
+            clearDraft()
+        }
+    }
+
+    const loadEditDraft = async () => {
+        if (!currentPPCId) return
+
+        const draftString = localStorage.getItem(PPC_EDIT_DRAFT_KEY)
+        if (!draftString) return
+
+        try {
+            const draft: PPCDraft = JSON.parse(draftString)
+            if (!draft || Object.keys(draft).length === 0 || draft.ppcId !== currentPPCId || !Array.isArray(draft.curriculum)) {
+                clearEditDraft()
+                fetchPPC()
+                return
+            }
+
+            restoredEditDraftRef.current = true
+            setPPC({
+                id: currentPPCId,
+                title: draft.title ?? '',
+                course: draft.course ?? '',
+                curriculum: draft.curriculum ?? []
+            })
+            setUploadPPC(false)
+
+            if (draft.visualCurriculum && draft.visualCurriculum.length > 0) {
+                setCurriculum(draft.visualCurriculum)
+            } else {
+                setCurriculum(groupSubjectsByPeriod(draft.curriculum))
+            }
+
+            if (draft.courseName) {
+                setCourse(draft.courseName)
+            } else if (draft.course) {
+                await hydrateCourseName(draft.course)
+            }
+
+            const hydratedDraftPayload = JSON.stringify({
+                ppcId: currentPPCId,
+                title: draft.title ?? '',
+                course: draft.course ?? '',
+                curriculum: draft.curriculum ?? [],
+                courseName: draft.courseName ?? '',
+                visualCurriculum: draft.visualCurriculum ?? [],
+            })
+
+            setInitialEditPayload(hydratedDraftPayload)
+
+        } catch (error) {
+            console.error(error)
+            clearEditDraft()
+            fetchPPC()
+        }
+    }
 
     const fetchPPC = async () => {
+        if (!currentPPCId) return
+
         try {
             const res = await PPCService.get(
-                state, 
+                currentPPCId, 
                 `
                     id,
                     title,
@@ -81,17 +255,18 @@ const PPCForm = () => {
                     curriculum.id,
                     curriculum.subject.id,
                     curriculum.subject.name,
-                    curriculum.subject_teach_workload,
-                    curriculum.subject_remote_workload,
-                    curriculum.subject_ext_workload,
-                    curriculum.weekly_periods,
+                    curriculum.subject.code,
+                    curriculum.subject.subject_teach_workload,
+                    curriculum.subject.subject_remote_workload,
+                    curriculum.subject.subject_ext_workload,
+                    curriculum.subject.weekly_periods,
                     curriculum.period,
-                    curriculum.pre_requisits.id,
-                    curriculum.pre_requisits.code,
+                    curriculum.subject.pre_requisits.id,
+                    curriculum.subject.pre_requisits.code,
                 `
             )
 
-            setPPC({
+            const nextPPCState = {
                 id: res.data.id,
                 course: res.data.course.id,
                 title: res.data.title,
@@ -99,19 +274,29 @@ const PPCForm = () => {
                     return {
                         id: curr.id,
                         subject: curr.subject.id,
-                        subject_teach_workload: curr.subject_teach_workload,
-                        subject_remote_workload: curr.subject_remote_workload,
-                        subject_ext_workload: curr.subject_ext_workload,
-                        weekly_periods: curr.weekly_periods,
+                        subject_teach_workload: curr.subject.subject_teach_workload,
+                        subject_remote_workload: curr.subject.subject_remote_workload,
+                        subject_ext_workload: curr.subject.subject_ext_workload,
+                        weekly_periods: curr.subject.weekly_periods,
                         period: curr.period,
-                        pre_requisits: curr.pre_requisits.map((preReq: any) => {
+                        pre_requisits: curr.subject.pre_requisits.map((preReq: any) => {
                             return preReq.id
                         })
                     }
                 })
-            })
+            }
+
+            setPPC(nextPPCState)
             setCurriculum(groupSubjectsByPeriod(res.data.curriculum))
             setCourse(res.data.course.name)
+            setInitialEditPayload(JSON.stringify({
+                ppcId: currentPPCId,
+                title: nextPPCState.title,
+                course: nextPPCState.course,
+                curriculum: nextPPCState.curriculum,
+                courseName: res.data.course.name,
+                visualCurriculum: groupSubjectsByPeriod(res.data.curriculum),
+            }))
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message)
@@ -284,9 +469,9 @@ const PPCForm = () => {
     }
 
     const deletePeriod = async (periodNumber: number) => {
-        if (!(PPC.curriculum instanceof File)) {
+        if (!(PPC.curriculum instanceof File) && currentPPCId) {
             try {
-                const res = await PPCService.deletePeriod(state, periodNumber)
+                const res = await PPCService.deletePeriod(currentPPCId, periodNumber)
     
                 setPPC({...PPC, curriculum: PPC.curriculum.filter((subject) => subject.period !== periodNumber)})
                 setCurriculum(curriculum.filter((curriculum) => !curriculum.period.includes(`${periodNumber}º Período`)))
@@ -307,11 +492,11 @@ const PPCForm = () => {
 
         if (validateForm()) {
             toast.promise(
-                state ?
-                PPCService.edit(state, PPC) :
+                currentPPCId ?
+                PPCService.edit(currentPPCId, PPC) :
                 PPCService.create(PPC),
                 {
-                    pending: state ? 'Salvando alterações...' : 'Cadastrando PPC...',
+                    pending: currentPPCId ? 'Salvando alterações...' : 'Cadastrando PPC...',
                     success: {
                         render({data}) {
                             return data.data.message
@@ -321,6 +506,11 @@ const PPCForm = () => {
                 }
             ).then((res) => {
                     if (res.status === 201 || res.status === 200) {
+                        if (!currentPPCId) {
+                            clearDraft()
+                        } else {
+                            clearEditDraft()
+                        }
                         setTimeout(() => {
                             redirect(`/session/admin/ppcs/`);
                         }, 2000);
@@ -357,16 +547,40 @@ const PPCForm = () => {
     }, [PPC.curriculum])
 
     useEffect(() => {
+        if (!currentPPCId) {
+            saveDraft()
+            return
+        }
+
+        saveEditDraft()
+    }, [currentPPCId, uploadPPC, PPC.title, PPC.course, PPC.curriculum, course, curriculum])
+
+    useEffect(() => {
         setCourseOptions([])
         setSearched(false)
     }, [PPC.course])
+
+    useEffect(() => {
+        if (!currentPPCId) {
+            loadDraft()
+        }
+    }, [currentPPCId])
     
     useEffect(() => {
-        if (state) fetchPPC()
-    }, [state])
+        if (!currentPPCId) return
+
+        const hasEditDraft = localStorage.getItem(PPC_EDIT_DRAFT_KEY)
+
+        if (hasEditDraft) {
+            loadEditDraft()
+            return
+        }
+
+        fetchPPC()
+    }, [currentPPCId])
 
     return (
-        <FormContainer title={state ? 'Editar PPC' : 'Cadastrar PPC'} width={uploadPPC ? '40%' : '60%'} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize a barra de pesquisa para buscar/vincular o curso so PPC\n\nUtilize o botão de '+' para adicionar novos períodos ao PPC.\n\nClique no respectivo período para editá-lo"}>
+        <FormContainer title={currentPPCId ? 'Editar PPC' : 'Cadastrar PPC'} width={uploadPPC ? '40%' : '60%'} formTip={"Preencha os campos obrigatórios (*)\n\nUtilize a barra de pesquisa para buscar/vincular o curso so PPC\n\nUtilize o botão de '+' para adicionar novos períodos ao PPC.\n\nClique no respectivo período para editá-lo"}>
             <form className={styles.form} onSubmit={handleSubmit}
                 onKeyDown={(e) => {
                     if (e.key === 'Enter') {
@@ -390,6 +604,10 @@ const PPCForm = () => {
                             <CustomSearch
                                 onSearch={fetchCourses}
                                 value={course}
+                                onBlur={() => {
+                                    setCourseOptions([])
+                                    setSearched(false)
+                                }}
                                 setSearch={(param) => {
                                     setCourse(param)
                                     if (param.length === 0) {
@@ -574,7 +792,7 @@ const PPCForm = () => {
                                                         }}
                                                     >
                                                         <CurriculumTable
-                                                            state={state}
+                                                            state={currentPPCId}
                                                             title={periodTitle}
                                                             period={Number(periodNumber)}
                                                             curriculum={!(PPC.curriculum instanceof File) ? PPC.curriculum.filter((c) => c.period === periodNumber) : []}
@@ -653,7 +871,7 @@ const PPCForm = () => {
                         </p>
                     </div>
                     <div className={styles.buttonContainer}>
-                        <CustomButton text={state ? 'Salvar alterações' : 'Cadastrar'} type={'submit'}/>
+                        <CustomButton text={currentPPCId ? 'Salvar alterações' : 'Cadastrar'} type={'submit'}/>
                     </div>
                 </div>
             </form>
@@ -671,6 +889,29 @@ const PPCForm = () => {
                             setPeriodIsOpen([])
                             setUploadPPC(true)
                             setShowImportConfirm(false)
+                        }}/>
+                    </div>
+                </FormContainer>
+            </Modal>
+        )}
+        {showDraftModal && !currentPPCId && (
+            <Modal setIsOpen={(open) => {
+                if (!open) setShowDraftModal(false)
+            }}>
+                <FormContainer title='Rascunho de PPC encontrado' width='35%'>
+                    <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#767676' }}>
+                        Há um progresso salvo do PPC. Deseja retomar a criação ou apagar esse rascunho?
+                    </p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                        <CustomButton type='button' text='Retomar' onClick={() => {
+                            setShowDraftModal(false)
+                        }}/>
+                        <CustomButton type='button' text='Apagar' variant='gray' onClick={() => {
+                            clearDraft()
+                            setShowDraftModal(false)
+                            setPPC({ title: '', course: '', curriculum: [] })
+                            setCurriculum([])
+                            setCourse('')
                         }}/>
                     </div>
                 </FormContainer>

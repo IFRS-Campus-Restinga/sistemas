@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import Permission, Group
 from .serializer import PermissionSerializer
 from rest_framework.pagination import PageNumberPagination
+from hub_academic.utils.query_fields import optimize_queryset
 
 class PermissionPagination(PageNumberPagination):
     page_size = 10
@@ -12,6 +13,7 @@ class PermissionService:
     @staticmethod
     def list(request):
         permissions = Permission.objects.all()
+        permissions = optimize_queryset(permissions, request.GET.get('fields', 'id'))
 
         if not permissions.exists():
             paginator = PermissionPagination()
@@ -32,6 +34,7 @@ class PermissionService:
         assigned_permissions = group.permissions.all()
 
         permissions = Permission.objects.exclude(id__in=assigned_permissions.values_list('id', flat=True))
+        permissions = optimize_queryset(permissions, request.GET.get('fields', 'id'))
 
         if not permissions.exists():
             paginator = PermissionPagination()
@@ -50,6 +53,7 @@ class PermissionService:
         group = get_object_or_404(Group, uuid_map__uuid=group_uuid)
 
         permissions = group.permissions.all()
+        permissions = optimize_queryset(permissions, request.GET.get('fields', 'id'))
 
         if not permissions.exists():
             paginator = PermissionPagination()

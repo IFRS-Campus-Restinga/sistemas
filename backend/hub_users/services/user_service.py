@@ -8,6 +8,7 @@ from django.contrib.auth.models import Group
 from django.db import transaction
 from rest_framework.pagination import PageNumberPagination
 from ..models import Password
+from hub_academic.utils.query_fields import optimize_queryset
 
 class UserPagination(PageNumberPagination):
     page_size = 10
@@ -61,7 +62,8 @@ class UserService:
 
     @staticmethod
     def get(request, user_id):
-        user = get_object_or_404(CustomUser, pk=uuid.UUID(user_id))
+        users = optimize_queryset(CustomUser.objects.filter(pk=uuid.UUID(user_id)), request.GET.get('fields', 'id'))
+        user = get_object_or_404(users)
 
         serializer = CustomUserSerializer(user, context={'request': request})
 
@@ -79,18 +81,19 @@ class UserService:
 
     @staticmethod
     def build_user_data(user: CustomUser, picture=None):
+        additional_infos = getattr(user, 'additional_infos', None)
+
         data = {
             'id': str(user.id),
             'username': user.username,
             'groups': [group.name for group in user.groups.all()],
             'access_profile': user.access_profile,
+            'is_abstract': user.is_abstract,
+            'additional_infos': str(additional_infos.id) if additional_infos else None,
         }
 
         if user.first_login:
             data['first_login'] = user.first_login
-
-        if not user.is_abstract:
-            data['is_abstract'] = user.is_abstract
 
         if picture:
             data['profile_picture'] = picture
@@ -110,6 +113,8 @@ class UserService:
             users = CustomUser.objects.get_by_group_and_param(group_name, search_param, is_active)
         else:
             users = CustomUser.objects.get_by_group(group_name, is_active)
+
+        users = optimize_queryset(users, request.GET.get('fields', 'id'))
 
         if not users.exists():
             paginator = UserPagination()
@@ -137,6 +142,8 @@ class UserService:
         else:
             users = CustomUser.objects.get_by_access_profile(access_profile_name, is_active)
 
+        users = optimize_queryset(users, request.GET.get('fields', 'id'))
+
         if not users.exists():
             paginator = UserPagination()
             paginated_result = paginator.paginate_queryset([], request)
@@ -152,6 +159,7 @@ class UserService:
     @staticmethod
     def get_requests(request):
         requests = CustomUser.objects.filter(pending_request=True)
+        requests = optimize_queryset(requests, request.GET.get('fields', 'id'))
 
         if not requests.exists():
             paginator = UserPagination()

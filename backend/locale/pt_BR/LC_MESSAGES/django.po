@@ -120,6 +120,18 @@ msgstr "Pode excluir curso"
 msgid "Can view course"
 msgstr "Pode visualizar curso"
 
+msgid "Can add curriculum"
+msgstr "Pode adicionar currículo"
+
+msgid "Can change curriculum"
+msgstr "Pode alterar currículo"
+
+msgid "Can delete curriculum"
+msgstr "Pode excluir currículo"
+
+msgid "Can view curriculum"
+msgstr "Pode visualizar currículo"
+
 msgid "Can add ppc"
 msgstr "Pode adicionar PPC"
 

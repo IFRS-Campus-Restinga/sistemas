@@ -6,6 +6,7 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.pagination import PageNumberPagination
+from hub_academic.utils.query_fields import optimize_queryset
 
 class AdditionalInfosPagination(PageNumberPagination):
     page_size = 10
@@ -29,7 +30,11 @@ class AdditionalInfosService:
     
     @staticmethod
     def get(request, user_id):
-        user_infos = get_object_or_404(AdditionalInfos, user_id=uuid.UUID(user_id))
+        infos = optimize_queryset(
+            AdditionalInfos.objects.filter(user_id=uuid.UUID(user_id)),
+            request.GET.get('fields', 'id'),
+        )
+        user_infos = get_object_or_404(infos)
 
         serializer = AdditionalInfosSerializer(instance=user_infos, context={'request': request})
 

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 interface CRUDActions {
     canView: boolean
     canEdit: boolean
+    onEdit?: (id: string) => void
     onDelete?: (id: string) => void
 }
 
@@ -189,9 +190,14 @@ const Table = ({
                                                         src={editIcon}
                                                         alt="editar"
                                                         className={styles.action}
-                                                        onClick={() =>
+                                                        onClick={() => {
+                                                            if (crudActions.onEdit) {
+                                                                crudActions.onEdit(item.id)
+                                                                return
+                                                            }
+
                                                             redirectAction(item.id, 'edit')
-                                                        }
+                                                        }}
                                                     />
                                                 )}
                                             </>

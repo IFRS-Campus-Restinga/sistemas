@@ -8,6 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from hub_calendars.services.event_service import EventService
 from django.db import transaction
 from hub_calendars.enums.calendar_status import CalendarStatus
+from hub_academic.utils.query_fields import optimize_queryset
 
 class CalendarPagination(PageNumberPagination):
     page_size = 10
@@ -54,6 +55,8 @@ class CalendarService:
 
         if status:
             calendars = calendars.filter(status=status)
+
+        calendars = optimize_queryset(calendars, request.GET.get('fields', 'id'))
         
         if not calendars.exists():
             paginator = CalendarPagination()
@@ -69,7 +72,8 @@ class CalendarService:
 
     @staticmethod
     def get_calendar(request, calendar_id):
-        calendar = get_object_or_404(Calendar, pk=uuid.UUID(calendar_id))
+        calendars = optimize_queryset(Calendar.objects.filter(pk=uuid.UUID(calendar_id)), request.GET.get('fields', 'id'))
+        calendar = get_object_or_404(calendars)
 
         serializer = CalendarSerializer(instance=calendar, context={'request': request})
 

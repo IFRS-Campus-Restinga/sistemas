@@ -6,6 +6,7 @@ from ..models.subject import Subject
 from ..models.ppc import Curriculum
 from ..serializers.subject_serializer import SubjectSerializer
 from rest_framework.pagination import PageNumberPagination
+from ..utils.query_fields import optimize_queryset
 
 class SubjectPagination(PageNumberPagination):
     page_size = 10
@@ -24,7 +25,8 @@ class SubjectService:
 
     @staticmethod
     def get(request, subject_id):
-        subject = get_object_or_404(Subject, pk=uuid.UUID(subject_id))
+        subjects = optimize_queryset(Subject.objects.filter(pk=uuid.UUID(subject_id)), request.GET.get('fields', 'id'))
+        subject = get_object_or_404(subjects)
 
         serializer = SubjectSerializer(instance=subject, context={'request': request})
 
@@ -36,6 +38,7 @@ class SubjectService:
             ppc__ppc__course=uuid.UUID(course_id),
             name__icontains=request.GET.get('search', '')
         ).distinct()
+        subjects = optimize_queryset(subjects, request.GET.get('fields', 'id'))
 
         paginator = SubjectPagination()
         paginator.page_size = 10 
@@ -51,6 +54,7 @@ class SubjectService:
             Q (name__icontains=request.GET.get('search', '')) |
             Q (code__icontains=request.GET.get('search', ''))
         )
+        subjects = optimize_queryset(subjects, request.GET.get('fields', 'id'))
 
         if not subjects.exists():
             paginator = SubjectPagination()

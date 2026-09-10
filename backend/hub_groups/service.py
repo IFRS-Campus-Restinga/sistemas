@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from .serializer import GroupSerializer, format_string
 from rest_framework.pagination import PageNumberPagination
+from hub_academic.utils.query_fields import optimize_queryset
 
 class GroupPagination(PageNumberPagination):
     page_size = 10
@@ -69,6 +70,7 @@ class GroupService:
     def list(request):
         search = request.GET.get('search', '')
         groups = Group.objects.filter(name__icontains=search)
+        groups = optimize_queryset(groups, request.GET.get('fields', 'id'))
 
         paginator = GroupPagination()
         paginated_result = paginator.paginate_queryset(groups, request)
@@ -79,6 +81,7 @@ class GroupService:
     @staticmethod
     def list_available(request, user_id):    
         groups = Group.objects.exclude(user__id=uuid.UUID(user_id))
+        groups = optimize_queryset(groups, request.GET.get('fields', 'id'))
 
         paginator = GroupPagination()
         paginated_result = paginator.paginate_queryset(groups, request)
@@ -88,7 +91,11 @@ class GroupService:
 
     @staticmethod
     def get_group_data(group_id: str, request):
-        group = get_object_or_404(Group, uuid_map__uuid=uuid.UUID(group_id))
+        groups = optimize_queryset(
+            Group.objects.filter(uuid_map__uuid=uuid.UUID(group_id)),
+            request.GET.get('fields', 'id'),
+        )
+        group = get_object_or_404(groups)
         serializer = GroupSerializer(instance=group, context={'request': request})
         return serializer.data
 

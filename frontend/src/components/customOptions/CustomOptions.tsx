@@ -26,6 +26,8 @@ const CustomOptions = <Key extends string, Extra extends object = {}>({
         options.map((option) => (
           <li
             key={option.id}
+            data-custom-option="true"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={() => onSelect(option)}
             className={styles.customOption}
           >

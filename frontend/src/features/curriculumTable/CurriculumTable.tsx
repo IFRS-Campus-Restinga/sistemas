@@ -80,6 +80,7 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
+                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -89,7 +90,8 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
     const fetchSubjects = async (index: number) => {
         try {
-            const res = await SubjectService.list(1, subjects[index].name, 'id, name, code')
+            const searchTerm = subjects[index]?.name ?? ''
+            const res = await SubjectService.list(1, searchTerm, 'id, name, code')
 
             setSubjectOptions((prev) => {
                 const updated = [...prev]
@@ -103,10 +105,64 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
 
                 return updated
             })
+
+            setSubjectSearched((prev) => {
+                const updated = [...prev]
+                updated[index] = true
+                return updated
+            })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
+                        autoClose: 2000,
+                        position: 'bottom-center'
+                    }
+                )
+            }
+        }
+    }
+
+    const hydrateSubjectDetails = async (index: number, subjectId: string, selectedName: string) => {
+        try {
+            const res = await SubjectService.get(
+                subjectId,
+                'id, name, code, subject_teach_workload, subject_ext_workload, subject_remote_workload, weekly_periods, pre_requisits.id, pre_requisits.name, pre_requisits.code'
+            )
+
+            const subjectData = res.data
+            const updatedCurriculum = [...curriculum]
+            const selectedPreReqs = subjectData.pre_requisits ?? []
+            const subjectDisplayName = subjectData.name && subjectData.code
+                ? `${subjectData.name} (${subjectData.code})`
+                : (subjectData.name ?? selectedName)
+
+            updatedCurriculum[index] = {
+                ...updatedCurriculum[index],
+                subject: subjectData.id ?? subjectId,
+                subject_teach_workload: subjectData.subject_teach_workload ?? '',
+                subject_ext_workload: subjectData.subject_ext_workload ?? '',
+                subject_remote_workload: subjectData.subject_remote_workload ?? '',
+                weekly_periods: subjectData.weekly_periods ?? '',
+                pre_requisits: selectedPreReqs.map((preReq: any) => preReq.id ?? preReq.subject ?? preReq)
+            }
+            setCurriculum(updatedCurriculum)
+
+            const updatedSubjects = [...subjects]
+            updatedSubjects[index] = {
+                name: subjectDisplayName,
+                preRequisits: selectedPreReqs.map((preReq: any) => ({
+                    id: preReq.id,
+                    code: preReq.code,
+                    name: preReq.name,
+                }))
+            }
+            setSubjects(updatedSubjects)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message,
+                    {
+                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -125,12 +181,14 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             setSubjects(updatedSubjects)
 
             toast.success('Disciplina removida com sucesso', {
+                autoClose: 2000,
                 position: 'bottom-center'
             })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
+                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -150,12 +208,14 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
             updatedSubjects[index].preRequisits = subjects[index].preRequisits.filter((_, i) => i !== pIndex)
 
             toast.success('Pré requisito removido com sucesso', {
+                autoClose: 2000,
                 position: 'bottom-center'
             })
         } catch (error) {
             if (error instanceof AxiosError) {
                 toast.error(error.response?.data.message,
                     {
+                        autoClose: 2000,
                         position: 'bottom-center'
                     }
                 )
@@ -208,243 +268,126 @@ const CurriculumTable = ({state, title, curriculum, setCurriculum, subjects, set
                                         </tr>
                                     </thead>
                                     <tbody className={tableStyles.tbody}>
-                                        {
-                                            curriculum.map((curriculumData, index) => (
-                                                <tr className={tableStyles.tr} style={{transform: 'none'}}>
-                                                    {
-                                                        (Object.entries(curriculumData) as [keyof CurriculumInterface, any][]).map(([key]) => {
-                                                            if (key === 'id') return null
+                                        {curriculum.map((curriculumData, index) => {
+                                            const selectedSubject = subjects[index] ?? { name: '', preRequisits: [] }
+                                            const selectedPreReqs = selectedSubject.preRequisits ?? []
 
-                                                            if (key === 'subject') {
-                                                                return (
-                                                                // Troca o id da disciplina pelo nome que está no state subjects[index].name
-                                                                <td className={tableStyles.td} style={{ maxWidth: '100px' }}>
-                                                                    <div className={styles.searchContainer}>
-                                                                        {/* Passa o nome para o campo de pesquisa */}
-                                                                        <CustomSearch
-                                                                            value={subjects[index].name}
-                                                                            onSearch={() => fetchSubjects(index)}
-                                                                            setSearch={(param) => {
-                                                                                if (param.trim() === '') {
-                                                                                    const updatedSubjectOptions = [...subjectOptions]
-                                                                                    updatedSubjectOptions[index] = []
-                                                                                    setSubjectOptions(updatedSubjectOptions)
-                                                                                }
+                                            return (
+                                                <tr key={`${curriculumData.subject || 'new'}-${index}`} className={tableStyles.tr} style={{ transform: 'none' }}>
+                                                    <td className={tableStyles.td} style={{ maxWidth: '100px' }}>
+                                                        <div className={styles.searchContainer}>
+                                                            <CustomSearch
+                                                                value={selectedSubject.name}
+                                                                onSearch={() => fetchSubjects(index)}
+                                                                onBlur={() => {
+                                                                    const updatedSubjectOptions = [...subjectOptions]
+                                                                    updatedSubjectOptions[index] = []
+                                                                    setSubjectOptions(updatedSubjectOptions)
 
-                                                                                const updated = [...subjects]
+                                                                    setSubjectSearched((prev) => {
+                                                                        const next = [...prev]
+                                                                        next[index] = false
+                                                                        return next
+                                                                    })
+                                                                }}
+                                                                setSearch={(param) => {
+                                                                    const updated = [...subjects]
+                                                                    updated[index] = {
+                                                                        ...selectedSubject,
+                                                                        name: param,
+                                                                    }
+                                                                    setSubjects(updated)
 
-                                                                                updated[index].name = param
+                                                                    if (param.trim() === '') {
+                                                                        const updatedSubjectOptions = [...subjectOptions]
+                                                                        updatedSubjectOptions[index] = []
+                                                                        setSubjectOptions(updatedSubjectOptions)
+                                                                        setSubjectSearched((prev) => {
+                                                                            const next = [...prev]
+                                                                            next[index] = false
+                                                                            return next
+                                                                        })
+                                                                    }
+                                                                }}
+                                                            />
+                                                            <CustomOptions
+                                                                renderKey='name'
+                                                                options={subjectOptions[index] ?? []}
+                                                                searched={subjectSearched[index] ?? false}
+                                                                onSelect={async (option) => {
+                                                                    const alreadySelected = curriculum.some(
+                                                                        (item, i) => i !== index && item.subject === option.id
+                                                                    )
 
-                                                                                setSubjects(updated)
-                                                                            }}
-                                                                        />
-                                                                        <CustomOptions
-                                                                            renderKey='name'
-                                                                            options={subjectOptions[index]}
-                                                                            searched={subjectSearched[index]}
-                                                                            onSelect={(option) => {
-                                                                                 const alreadySelected = curriculum.some(
-                                                                                    (item, i) => i !== index && item.subject === option.id
-                                                                                );
+                                                                    if (alreadySelected) return
 
-                                                                                if (alreadySelected) return;
-                                                                            
-                                                                                const updatedCurriculum = [...curriculum];
-                                                                                updatedCurriculum[index].subject = option.id;
-                                                                                setCurriculum(updatedCurriculum);
+                                                                    const updated = [...subjects]
+                                                                    updated[index] = {
+                                                                        name: option.name,
+                                                                        preRequisits: [],
+                                                                    }
+                                                                    setSubjects(updated)
 
-                                                                                const updatedSubjects = [...subjects];
-                                                                                updatedSubjects[index].name = option.name;
-                                                                                setSubjects(updatedSubjects);
+                                                                    await hydrateSubjectDetails(index, option.id, option.name)
 
-                                                                                // Limpa apenas a posição atual
-                                                                                const updatedSubjectOptions = [...subjectOptions];
-                                                                                updatedSubjectOptions[index] = [];
-                                                                                setSubjectOptions(updatedSubjectOptions);
+                                                                    const updatedSubjectOptions = [...subjectOptions]
+                                                                    updatedSubjectOptions[index] = []
+                                                                    setSubjectOptions(updatedSubjectOptions)
 
-                                                                                const updatedSubjectSearched = [...subjectSearched];
-                                                                                updatedSubjectSearched[index] = false;
-                                                                                setSubjectSearched(updatedSubjectSearched);
-                                                                            }}
-                                                                        />
-                                                                    </div>
-                                                                </td>
-                                                                )
-                                                            }
+                                                                    const updatedSubjectSearched = [...subjectSearched]
+                                                                    updatedSubjectSearched[index] = false
+                                                                    setSubjectSearched(updatedSubjectSearched)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </td>
 
-                                                            if (key === 'pre_requisits' && period > 1) {
-                                                                return (
-                                                                    <td className={tableStyles.td} style={{ maxWidth: '80px' }}>
-                                                                        <div className={styles.searchContainer}>
-                                                                            <CustomSearch
-                                                                                value={preReqSearch[index] ?? ''}
-                                                                                onSearch={() => fetchPreRequisits(index)}
-                                                                                setSearch={(param) => {
-                                                                                    if (param.trim() === '') {
-                                                                                        const updatedPreReqOptions = [...preReqOptions]
-                                                                                        updatedPreReqOptions[index] = []
-                                                                                        setPreReqOptions(updatedPreReqOptions)
-                                                                                    }
-
-                                                                                    setPreReqSearch((prev) => {
-                                                                                        const updated = [...prev]
-
-                                                                                        updated[index] = param
-
-                                                                                        return updated
-                                                                                    })
-                                                                                }}
-                                                                            />
-                                                                            <CustomOptions
-                                                                                renderKey='name'
-                                                                                options={preReqOptions[index]}
-                                                                                searched={preReqSearched[index]}
-                                                                                onSelect={(option) => {
-                                                                                    // Atualiza subjects (usado para exibir os nomes na UI)
-                                                                                    const updatedPreReq = [...subjects];
-                                                                                    updatedPreReq[index].preRequisits.push({
-                                                                                        id: option.id,
-                                                                                        code: option.code,
-                                                                                        name: option.name
-                                                                                    });
-                                                                                    setSubjects(updatedPreReq);
-
-                                                                                    const updatedCurriculum = [...curriculum];
-                                                                                    const subject = { ...updatedCurriculum[index] };
-
-                                                                                    const currentPreReqs = subject.pre_requisits ?? [];
-
-                                                                                    const alreadyAdded = currentPreReqs.some(pr =>
-                                                                                        typeof pr === 'object' ? pr.subject === option.id : pr === option.id
-                                                                                    );
-                                                                                    if (alreadyAdded) return; // ou um toast
-
-                                                                                    subject.pre_requisits = [...currentPreReqs, option.id];
-                                                                                    updatedCurriculum[index] = subject;
-
-                                                                                    setCurriculum(updatedCurriculum);
-
-                                                                                    // Limpa somente a posição index dos estados
-                                                                                    const updatedPreReqOptions = [...preReqOptions];
-                                                                                    updatedPreReqOptions[index] = [];
-                                                                                    setPreReqOptions(updatedPreReqOptions);
-
-                                                                                    const updatedPreReqSearched = [...preReqSearched];
-                                                                                    updatedPreReqSearched[index] = false;
-                                                                                    setPreReqSearched(updatedPreReqSearched);
-
-                                                                                    const updatedPreReqSearch = [...preReqSearch];
-                                                                                    updatedPreReqSearch[index] = '';
-                                                                                    setPreReqSearch(updatedPreReqSearch);
-                                                                                }}
-                                                                            />
+                                                    <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
+                                                        {curriculumData.subject_teach_workload || '—'}
+                                                    </td>
+                                                    <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
+                                                        {curriculumData.subject_ext_workload || '—'}
+                                                    </td>
+                                                    <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
+                                                        {curriculumData.subject_remote_workload || '—'}
+                                                    </td>
+                                                    <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
+                                                        {curriculumData.weekly_periods || '—'}
+                                                    </td>
+                                                    {period > 1 ? (
+                                                        <td className={tableStyles.td} style={{ minWidth: '80px' }}>
+                                                            {selectedPreReqs.length > 0 ? (
+                                                                <div className={styles.preReqContainer}>
+                                                                    {selectedPreReqs.map((preReq, pIndex) => (
+                                                                        <div key={`${preReq.id || preReq.code || preReq.name || 'pr'}-${pIndex}`} className={styles.preReq}>
+                                                                            {preReq.code || preReq.name || '—'}
                                                                         </div>
-                                                                        {
-                                                                            curriculumData.pre_requisits.length > 0 ? (
-                                                                                <div className={styles.preReqContainer}>
-                                                                                    {
-                                                                                        curriculumData.pre_requisits.map((preReq, pIndex) => (
-                                                                                        <div key={pIndex} className={styles.preReq}>
-                                                                                                {subjects[index].preRequisits[pIndex].code}
-                                                                                                <img 
-                                                                                                src={typeof preReq !== 'string' ? deleteIcon : clear} 
-                                                                                                className={tableStyles.action} 
-                                                                                                alt=""
-                                                                                                onClick={() => {
-                                                                                                    if (typeof preReq !== 'string') {
-                                                                                                        deletePreReq(index, pIndex, curriculumData.subject, preReq.subject)
-                                                                                                    } else {
-                                                                                                    // Atualiza visual dos nomes dos pré-requisitos (subjects)
-                                                                                                        const updatedSubjects = [...subjects];
-                
-                                                                                                        // Cópia segura da disciplina (subject) com nome de exibição de pré-requisitos
-                                                                                                        const updatedDisplaySubject = { ...updatedSubjects[index] };
-                
-                                                                                                        // Remove o pré-requisito visual com base no índice
-                                                                                                        updatedDisplaySubject.preRequisits = updatedDisplaySubject.preRequisits.filter((_, i) => i !== pIndex);
-                
-                                                                                                        // Atualiza o subject no array
-                                                                                                        updatedSubjects[index] = updatedDisplaySubject;
-                
-                                                                                                        // Atualiza o estado visual
-                                                                                                        setSubjects(updatedSubjects);
-                
-                                                                                                        // Atualiza o estado do curriculum real (curriculum)
-                                                                                                        const updatedCurriculum = [...curriculum];
-                                                                                                        const updatedCurriculumSubject = { ...updatedCurriculum[index] };
-                
-                                                                                                        updatedCurriculumSubject.pre_requisits = updatedCurriculumSubject.pre_requisits.filter((_, i) => i !== pIndex);
-                                                                                                        updatedCurriculum[index] = updatedCurriculumSubject;
-                
-                                                                                                        // Atualiza o estado do period
-                                                                                                        setCurriculum(updatedCurriculum);
-                                                                                                    }}
-                                                                                                }/>
-                                                                                            </div>
-                                                                                        ))
-                                                                                    }
-                                                                                </div>
-                                                                            ) : null
-                                                                        }
-                                                                    </td>
-                                                                )
-                                                            }
-                                                            
-                                                            if (textFields.includes(key as keyof CurriculumInterface)) {
-                                                                return (
-                                                                    <td className={tableStyles.td} style={{ maxWidth: '35px' }}>
-                                                                        <CustomInput
-                                                                            type="text"
-                                                                            value={String(curriculumData[key as keyof CurriculumInterface]) ?? ''}
-                                                                            onChange={(e) => {
-                                                                                const inputValue = e.target.value;
-                                                                                const isNumeric = !isNaN(Number(inputValue));
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                '—'
+                                                            )}
+                                                        </td>
+                                                    ) : null}
 
-                                                                                if (isNumeric) {
-                                                                                    const updatedCurriculum = [...curriculum];
-                                                                                    const updatedSubject = { ...updatedCurriculum[index] }; // mantém todos os campos obrigatórios
-
-                                                                                    switch (key) {
-                                                                                        case "period":
-                                                                                            updatedSubject[key] = Number(inputValue);
-                                                                                            break;
-                                                                                        case "subject_teach_workload":
-                                                                                        case "subject_ext_workload":
-                                                                                        case "subject_remote_workload":
-                                                                                        case "weekly_periods":
-                                                                                            updatedSubject[key] = inputValue;
-                                                                                            break;
-                                                                                    }
-
-                                                                                    updatedCurriculum[index] = updatedSubject; // agora é do tipo correto
-                                                                                    setCurriculum(updatedCurriculum);
-                                                                                }
-                                                                            }}
-                                                                        />
-                                                                    </td>
-                                                                )
-                                                            }
-                                                        })
-                                                    }
-                                                <td className={tableStyles.tdDualAction}>
-                                                    <img 
-                                                        src={curriculumData.id ? deleteIcon : clear} 
-                                                        className={tableStyles.action} 
-                                                        alt=""
-                                                        onClick={() => {
-                                                            if (curriculumData.id) {
-                                                                deleteSubject(index, curriculumData.subject)
-                                                            } else {
-                                                                const updatedCurriculum = curriculum.filter((_, i) => i !== index)
-
-                                                                setCurriculum(updatedCurriculum)
-                                                            }
-                                                        }}
-                                                    />
-                                                </td>
-                                            </tr>
-                                            ))
-                                        }
+                                                    <td className={tableStyles.tdDualAction}>
+                                                        <img
+                                                            src={curriculumData.id ? deleteIcon : clear}
+                                                            className={tableStyles.action}
+                                                            alt=""
+                                                            onClick={() => {
+                                                                if (curriculumData.id) {
+                                                                    deleteSubject(index, curriculumData.subject)
+                                                                } else {
+                                                                    const updatedCurriculum = curriculum.filter((_, i) => i !== index)
+                                                                    setCurriculum(updatedCurriculum)
+                                                                }
+                                                            }}
+                                                        />
+                                                    </td>
+                                                </tr>
+                                            )
+                                        })}
                                     </tbody>
                                 </table>
                             </div>

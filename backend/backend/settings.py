@@ -21,6 +21,7 @@ GOOGLE_OAUTH2_CLIENT_ID = env("GOOGLE_OAUTH2_CLIENT_ID", default="")
 GOOGLE_OAUTH2_CLIENT_SECRET = env("GOOGLE_OAUTH2_CLIENT_SECRET", default="")
 REDIRECT_URI = env("REDIRECT_URI", default="")
 BASE_SYSTEM_URL = env("BASE_SYSTEM_URL", default="http://localhost:8000")
+CAMPUS_CODE = env("CAMPUS_CODE", default="IFR").upper()
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
@@ -99,6 +100,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "backend.wsgi.application"
+ASGI_APPLICATION = "backend.asgi.application"
 
 # ------------------------------------------------------------------------------
 # DATABASE

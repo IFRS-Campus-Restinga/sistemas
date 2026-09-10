@@ -65,16 +65,18 @@ class PPCSerializer(serializers.ModelSerializer):
         for item in curriculum_data:
             subject = item.pop('subject')
             pre_req_ids = item.pop('pre_requisits', [])
+            period = item.pop('period')
 
+            Subject.objects.filter(id=subject.id).update(**item)
             curriculum = Curriculum.objects.create(
                 ppc=ppc,
                 subject=subject,
-                **item
+                period=period
             )
 
             # Relaciona os pré-requisitos
             if pre_req_ids:
-                curriculum.pre_requisits.set(
+                subject.pre_requisits.set(
                     Subject.objects.filter(id__in=pre_req_ids)
                 )
 
@@ -110,15 +112,17 @@ class PPCSerializer(serializers.ModelSerializer):
             other_fields.pop('pre_requisits', None)
 
             subject = subject_obj if isinstance(subject_obj, Subject) else Subject.objects.get(id=subject_obj)
+            period = other_fields.pop('period')
+            Subject.objects.filter(id=subject.id).update(**other_fields)
 
             curriculum = Curriculum.objects.create(
                 ppc=instance,
                 subject=subject,
-                **other_fields
+                period=period
             )
 
             if pre_req_ids:
-                curriculum.pre_requisits.set(
+                subject.pre_requisits.set(
                     Subject.objects.filter(id__in=pre_req_ids)
                 )
 

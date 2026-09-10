@@ -1,6 +1,7 @@
 # services/ppc_service.py
 import uuid
 from django.db import transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from ..models.ppc import PPC, Curriculum
@@ -8,6 +9,7 @@ from ..models.subject import Subject
 from ..serializers.ppc_serializer import PPCSerializer
 from rest_framework.pagination import PageNumberPagination
 from ..services.file_service import FileService
+from ..utils.query_fields import optimize_queryset
 
 
 class PPCPagination(PageNumberPagination):
@@ -41,13 +43,17 @@ class PPCService:
     
     @staticmethod
     def get(request, ppc_id):
-        ppc = get_object_or_404(PPC, pk=uuid.UUID(ppc_id))
+        ppcs = optimize_queryset(PPC.objects.filter(pk=uuid.UUID(ppc_id)), request.GET.get('fields', 'id'))
+        ppc = get_object_or_404(ppcs)
         serializer = PPCSerializer(instance=ppc, context={'request': request})
         return serializer.data
 
     @staticmethod
     def list(request):
-        queryset = PPC.objects.filter(title__icontains=request.GET.get('search', ''))
+        queryset = PPC.objects.filter(
+            title__icontains=request.GET.get('search', '')
+        ).order_by('-created_at', '-id')
+        queryset = optimize_queryset(queryset, request.GET.get('fields', 'id'))
         paginator = PPCPagination()
         paginated = paginator.paginate_queryset(queryset, request)
         serializer = PPCSerializer(paginated, many=True, context={'request': request})
@@ -79,7 +85,12 @@ class PPCService:
     def delete_subject(ppc_id, subject_id):
         ppc = get_object_or_404(PPC, pk=uuid.UUID(ppc_id))
 
-        curriculum = get_object_or_404(Curriculum, ppc_id=ppc.id, subject_id=uuid.UUID(subject_id))
+        curriculum = Curriculum.objects.filter(
+            ppc_id=ppc.id,
+            subject_id=uuid.UUID(subject_id),
+        )
+        if not curriculum.exists():
+            raise Http404
 
         curriculum.delete()
 
@@ -91,4 +102,4 @@ class PPCService:
 
         pre_requisit = get_object_or_404(Subject, id=uuid.UUID(pre_requisit_id))
 
-        curriculum.pre_requisits.remove(pre_requisit)
+        curriculum.subject.pre_requisits.remove(pre_requisit)

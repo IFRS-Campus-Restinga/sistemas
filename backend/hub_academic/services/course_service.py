@@ -6,6 +6,7 @@ from ..models.course import Course
 from ..serializers.course_serializer import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
 from .course_class_service import CourseClassService
+from ..utils.query_fields import optimize_queryset
 
 class CoursePagination(PageNumberPagination):
     page_size = 10
@@ -34,7 +35,8 @@ class CourseService:
 
     @staticmethod
     def get(request, course_id):
-        course = get_object_or_404(Course, pk=uuid.UUID(course_id))
+        courses = optimize_queryset(Course.objects.filter(pk=uuid.UUID(course_id)), request.GET.get('fields', 'id'))
+        course = get_object_or_404(courses)
 
         serializer = CourseSerializer(instance=course, context={'request': request})
 
@@ -48,6 +50,8 @@ class CourseService:
 
         if category:
             courses = courses.filter(category=category)
+
+        courses = optimize_queryset(courses, request.GET.get('fields', 'id'))
 
         if not courses.exists():
             paginator = CoursePagination()

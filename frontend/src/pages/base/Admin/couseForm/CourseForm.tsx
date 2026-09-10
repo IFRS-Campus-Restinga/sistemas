@@ -293,6 +293,10 @@ const CourseForm = () => {
                                     <CustomSearch
                                         onSearch={fetchCoord}
                                         value={coordSearch}
+                                        onBlur={() => {
+                                            setCoordOptions([])
+                                            setSearched(false)
+                                        }}
                                         setSearch={(param) => {
                                             setCoordSearch(param)
                                             if (param.length === 0) {

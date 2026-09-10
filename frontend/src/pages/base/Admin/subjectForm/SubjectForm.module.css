@@ -18,3 +18,32 @@
     display: flex;
     justify-content: center;
 }
+
+.searchContainer {
+    position: relative;
+    width: 100%;
+}
+
+.preReqContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-top: 8px;
+}
+
+.preReq {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: max-content;
+    padding: 5px 8px;
+    border: 1px solid #767676;
+    border-radius: 20px;
+    background-color: #e4e4e4;
+}
+
+.preReq img {
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}

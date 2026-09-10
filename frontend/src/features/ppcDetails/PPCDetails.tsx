@@ -16,21 +16,24 @@ import CustomTextArea from '../../components/customTextArea/CustomTextArea'
 interface CurriculumSubject {
     id: string
     name: string
+    code: string
 }
 
 interface CurriculumInterface {
-    subject: CurriculumSubject
-    subject_teach_workload: string;
-    subject_remote_workload: string;
-    subject_ext_workload: string;
-    weekly_periods: string
+    subject: CurriculumSubject & {
+        subject_teach_workload: string;
+        subject_remote_workload: string;
+        subject_ext_workload: string;
+        weekly_periods: string;
+        pre_requisits: { id: string; code: string }[];
+    }
     period: string;
-    pre_requisits: { id: string; code: string }[];
 }
 
 interface GroupedSubject {
     id: string;
     name: string;
+    code: string;
     subject_teach_workload: string;
     subject_remote_workload: string;
     subject_ext_workload: string;
@@ -62,11 +65,12 @@ export function groupSubjectDatabyPeriod(curriculum: CurriculumInterface[]): Gro
     grouped[period].push({
       id: item.subject.id,
       name: item.subject.name,
-      subject_teach_workload: item.subject_teach_workload,
-      subject_remote_workload: item.subject_remote_workload,
-      subject_ext_workload: item.subject_ext_workload,
-      weekly_periods: item.weekly_periods,
-      preRequisits: item.pre_requisits || []
+      code: item.subject.code ?? '',
+      subject_teach_workload: item.subject.subject_teach_workload,
+      subject_remote_workload: item.subject.subject_remote_workload,
+      subject_ext_workload: item.subject.subject_ext_workload,
+      weekly_periods: item.subject.weekly_periods,
+      preRequisits: item.subject.pre_requisits || []
     });
   });
 
@@ -96,13 +100,14 @@ const PPCDetails = () => {
                     course.name,
                     curriculum.subject.id,
                     curriculum.subject.name,
-                    curriculum.subject_teach_workload,
-                    curriculum.subject_remote_workload,
-                    curriculum.subject_ext_workload,
-                    curriculum.weekly_periods,
+                    curriculum.subject.code,
+                    curriculum.subject.subject_teach_workload,
+                    curriculum.subject.subject_remote_workload,
+                    curriculum.subject.subject_ext_workload,
+                    curriculum.subject.weekly_periods,
                     curriculum.period,
-                    curriculum.pre_requisits.id,
-                    curriculum.pre_requisits.code,
+                    curriculum.subject.pre_requisits.id,
+                    curriculum.subject.pre_requisits.code,
                 `
             )
 
@@ -124,7 +129,7 @@ const PPCDetails = () => {
 
     const fetchSubject = async (subjId: string) => {
         try {
-            const res = await SubjectService.get(subjId, 'name, code, menu, objective')
+            const res = await SubjectService.get(subjId, 'name, code, menu, objective, subject_teach_workload, subject_remote_workload, subject_ext_workload, weekly_periods, pre_requisits.id, pre_requisits.code')
 
             setSubject(res.data)
         } catch (error) {
@@ -196,7 +201,7 @@ const PPCDetails = () => {
                                                                 <td className={tableStyles.td}>
                                                                     <span className={styles.subjectContainer}>
                                                                         <p className={styles.subjectName}>
-                                                                            {subject.name}
+                                                                            {subject.code ? `${subject.name} (${subject.code})` : subject.name}
                                                                         </p>
                                                                         <button className={styles.detailsIcon} onClick={() => fetchSubject(subject.id)}>?</button>
                                                                     </span>
@@ -281,6 +286,56 @@ const PPCDetails = () => {
                                 />
                             </CustomLabel>
                         </div>
+                        <div className={styles.sectionGroup}>
+                            <CustomLabel title='Carga Horária Ensino'>
+                                <CustomInput
+                                    type='text'
+                                    value={subject.subject_teach_workload || ''}
+                                    onChange={(_) =>  {}}
+                                    disabled={true}
+                                />
+                            </CustomLabel>
+                            <CustomLabel title='Carga Horária Remota'>
+                                <CustomInput
+                                    type='text'
+                                    value={subject.subject_remote_workload || ''}
+                                    onChange={(_) =>  {}}
+                                    disabled={true}
+                                />
+                            </CustomLabel>
+                        </div>
+                        <div className={styles.sectionGroup}>
+                            <CustomLabel title='Carga Horária Extensão'>
+                                <CustomInput
+                                    type='text'
+                                    value={subject.subject_ext_workload || ''}
+                                    onChange={(_) =>  {}}
+                                    disabled={true}
+                                />
+                            </CustomLabel>
+                            <CustomLabel title='Períodos Semanais'>
+                                <CustomInput
+                                    type='text'
+                                    value={subject.weekly_periods || ''}
+                                    onChange={(_) =>  {}}
+                                    disabled={true}
+                                />
+                            </CustomLabel>
+                        </div>
+                        {subject.pre_requisits && subject.pre_requisits.length > 0 ? (
+                            <div className={styles.sectionGroup}>
+                                <CustomLabel title='Pré-requisitos'>
+                                    <div className={styles.preRequisitesContainer}>
+                                        {subject.pre_requisits.map((preReq: { id: string; code: string }) => (
+                                            <span key={preReq.id} className={styles.preRequisiteTag}>
+                                                {preReq.code}
+                                                <button className={styles.detailsIcon} onClick={() => fetchSubject(preReq.id)}>?</button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                </CustomLabel>
+                            </div>
+                        ) : null}
                     </section>
                         </FormContainer>
                     </Modal>

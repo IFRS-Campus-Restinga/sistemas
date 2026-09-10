@@ -1,13 +1,13 @@
 import re
 import fitz
 import uuid
-import random
 import logging
 from typing import IO, Tuple, Optional
 from ..models.course import Course
 from ..models.subject import Subject
 from ..models.ppc import PPC, Curriculum
 from rest_framework import serializers
+from ..utils.subject_code import generate_subject_code
 
 logger = logging.getLogger(__name__)
 
@@ -290,6 +290,11 @@ class FileService:
                 curriculum_list.append(subject)
 
         final_curriculum_list = []
+        subjects_by_name = {}
+        subject_occurrence_indexes = {}
+
+        for subject in subjects_list:
+            subjects_by_name.setdefault(subject.name, []).append(subject)
 
         for curriculum in curriculum_list:
             # Substitui pré-requisitos por IDs
@@ -300,7 +305,14 @@ class FileService:
                     pre_req_ids.append(str(match_subj.id))
 
             # Substitui o próprio "nome" da disciplina pelo ID
-            match_subj = next((s for s in subjects_list if s.name == curriculum['name']), None)
+            subject_occurrences = subjects_by_name.get(curriculum['name'], [])
+            occurrence_index = subject_occurrence_indexes.get(curriculum['name'], 0)
+            match_subj = (
+                subject_occurrences[occurrence_index]
+                if 0 <= occurrence_index < len(subject_occurrences)
+                else None
+            )
+            subject_occurrence_indexes[curriculum['name']] = occurrence_index + 1
             subject_id = str(match_subj.id) if match_subj else None
 
             # Cria dicionário final apenas com os campos necessários
@@ -320,17 +332,9 @@ class FileService:
     def persist_subject(subject: dict):
         """
         Busca ou cria uma disciplina com base em nome, ementa e objetivo.
-        Gera um código aleatório único de 8 dígitos.
+        Gera um código único no padrão do código de disciplinas.
         """
         try:
-
-            # Função interna para gerar código aleatório
-            def generate_unique_code():
-                while True:
-                    code = str(random.randint(10000000, 99999999))  # 8 dígitos
-                    if not Subject.objects.filter(code=code).exists():
-                        return code
-
             subj = Subject.objects.get(
                 name=subject['name'],
                 menu=subject['menu'],
@@ -344,7 +348,11 @@ class FileService:
                     name=subject['name'],
                     menu=subject['menu'],
                     objective=subject['objective'],
-                    code=generate_unique_code()
+                    code=generate_subject_code(subject['name']),
+                    subject_teach_workload=subject['subject_teach_workload'],
+                    subject_ext_workload=subject['subject_ext_workload'],
+                    subject_remote_workload=subject['subject_remote_workload'],
+                    weekly_periods=subject['weekly_periods'],
                 )
 
                 return subj

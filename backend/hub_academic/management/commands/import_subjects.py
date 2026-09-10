@@ -1,8 +1,8 @@
-import random
 import re
 import fitz  # PyMuPDF
 from django.core.management.base import BaseCommand
 from ...models.subject import Subject
+from ...utils.subject_code import generate_subject_code
 
 
 class Command(BaseCommand):
@@ -93,13 +93,6 @@ class Command(BaseCommand):
 
         return subjects
 
-    def generate_unique_code(self):
-        """Gera um código único de até 5 dígitos."""
-        while True:
-            code = str(random.randint(1, 99999)).zfill(5)
-            if not Subject.objects.filter(code=code).exists():
-                return code
-
     def save_subject_to_db(self, subj):
         """
         Salva a disciplina no banco.
@@ -118,7 +111,7 @@ class Command(BaseCommand):
             ))
             return False
 
-        code = self.generate_unique_code()
+        code = generate_subject_code(subj["name"])
         Subject.objects.create(
             name=subj["name"].strip(),
             code=code,

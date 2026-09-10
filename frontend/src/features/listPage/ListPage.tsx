@@ -4,6 +4,10 @@ import SearchBar from "../../components/searchBar/SearchBar"
 import Table from "../../components/table/tablesComponents/Table"
 import styles from './ListPage.module.css'
 import { useNavigate } from "react-router-dom"
+import Modal from "../../components/modal/Modal"
+import CustomButton from "../../components/customButton/CustomButton"
+
+const PPC_DRAFT_KEY = 'ppcDraft'
 
 interface ListPageProps {
     title: string
@@ -12,10 +16,11 @@ interface ListPageProps {
     canEdit: boolean
     canView: boolean
     translations: Record<string, string>
+    onEdit?: (itemId: string) => void
 }
 
 
-const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translations }: ListPageProps) => {
+const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translations, onEdit }: ListPageProps) => {
     const navigate = useNavigate()
     const [listData, setListData] = useState<Record<string, any>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
@@ -23,6 +28,29 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
     const [nextPage, setNextPage] = useState<number | null>(null)
     const [previousPage, setPreviousPage] = useState<number | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [showDraftModal, setShowDraftModal] = useState<boolean>(false)
+
+    const openDraftDecision = () => {
+        const hasDraft = !!localStorage.getItem(PPC_DRAFT_KEY)
+
+        if (!hasDraft) {
+            navigate(registerUrl ?? '/')
+            return
+        }
+
+        setShowDraftModal(true)
+    }
+
+    const handleResumeDraft = () => {
+        localStorage.removeItem(PPC_DRAFT_KEY)
+        navigate(registerUrl ?? '/')
+    }
+
+    const handleClearDraft = () => {
+        localStorage.removeItem(PPC_DRAFT_KEY)
+        setShowDraftModal(false)
+        navigate(registerUrl ?? '/')
+    }
     const handleSearch = async (page: number, param: string) => {
         setIsLoading(true)
 
@@ -65,7 +93,7 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
                 />
                 {
                     registerUrl ? (
-                        <div className={styles.addIcon} onClick={() => navigate(registerUrl)}>+</div>
+                        <div className={styles.addIcon} onClick={openDraftDecision}>+</div>
                     ) : null
                 }
             </div>
@@ -80,10 +108,31 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
                     crudActions={{
                         canEdit: canEdit,
                         canView: canView,
+                        onEdit,
                     }}
                     searchParam={searchParam}
                     translations={translations}
                 />
+                {showDraftModal && (
+                    <Modal setIsOpen={(open) => {
+                        if (!open) setShowDraftModal(false)
+                    }}>
+                        <FormContainer title='Rascunho de PPC encontrado' width='35%'>
+                            <p style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#767676' }}>
+                                Há um cadastro de PPC em andamento. Você quer retomar o progresso ou apagar esse rascunho?
+                            </p>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                                <CustomButton type='button' text='Retomar' onClick={() => {
+                                    setShowDraftModal(false)
+                                    navigate(registerUrl ?? '/')
+                                }}/>
+                                <CustomButton type='button' text='Apagar' variant='gray' onClick={() => {
+                                    handleClearDraft()
+                                }}/>
+                            </div>
+                        </FormContainer>
+                    </Modal>
+                )}
         </FormContainer>
     )
 }

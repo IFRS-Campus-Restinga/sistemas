@@ -5,7 +5,7 @@
   "workspaceFolder": "/workspace",
   "runServices": ["backend", "frontend"],
   "shutdownAction": "stopCompose",
-  "initializeCommand": "docker network inspect ifrs-dev-network >/dev/null 2>&1 || docker network create ifrs-dev-network",
+  "initializeCommand": "docker network inspect ifrs-dev-network >NUL 2>&1 || docker network create ifrs-dev-network",
   "forwardPorts": [3000, 8000],
   "portsAttributes": {
     "3000": {

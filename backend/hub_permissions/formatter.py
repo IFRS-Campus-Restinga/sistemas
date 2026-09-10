@@ -1,7 +1,26 @@
 from django.utils.translation import gettext as _
 from .models import PermissionUUIDMap, Permission
 
+
 class URLFieldsParser:
+    @staticmethod
+    def get_permission_name(instance):
+        value = getattr(instance, "name", None)
+        if value:
+            return _(value)
+
+        codename = getattr(instance, "codename", "") or ""
+        if not codename:
+            return ""
+
+        parts = codename.split("_", 1)
+        if len(parts) != 2:
+            return ""
+
+        action, model = parts
+        inferred_name = f"Can {action} {model.replace('_', ' ')}"
+        return _(inferred_name)
+
     @staticmethod
     def build_field_map(fields: list[str]) -> dict:
         field_map: dict = {}
@@ -29,8 +48,7 @@ class URLFieldsParser:
                 result[field] = value
                 continue
             if isinstance(instance, Permission) and field == "name":
-                value = getattr(instance, field, None)
-                result[field] = _(value) if value else value
+                result[field] = URLFieldsParser.get_permission_name(instance)
                 continue
 
             if not hasattr(instance, field):

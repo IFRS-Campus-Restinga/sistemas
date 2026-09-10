@@ -7,6 +7,7 @@ export interface UserState {
     access_profile: string | null;
     profile_picture?: string | null;
     is_abstract: boolean | null;
+    additional_infos: boolean | null;
     groups: string[] | null;
 }
 
@@ -16,6 +17,7 @@ const initialState: UserState = {
     access_profile: null,
     groups: null,
     is_abstract: null,
+    additional_infos: null,
     username: null,
     profile_picture: null
 };
@@ -31,6 +33,7 @@ export const userSlice = createSlice({
                 first_login: null,
                 access_profile: null,
                 is_abstract: null,
+                additional_infos: null,
                 groups: null,
                 username: null,
                 profile_picture: null

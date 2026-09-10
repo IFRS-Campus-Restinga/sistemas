@@ -9,6 +9,7 @@ from hub_systems.models import System
 from rest_framework.response import Response
 from rest_framework import serializers, status
 from rest_framework.pagination import PageNumberPagination
+from hub_academic.utils.query_fields import optimize_queryset
 
 class SystemPagination(PageNumberPagination):
     page_size = 10
@@ -30,7 +31,8 @@ class SystemService:
     
     @staticmethod
     def get_data(request, system_id):
-        system = get_object_or_404(System, pk=uuid.UUID(system_id))
+        systems = optimize_queryset(System.objects.filter(pk=uuid.UUID(system_id)), request.GET.get('fields', 'id'))
+        system = get_object_or_404(systems)
 
         serializer = SystemSerializer(instance=system, context={'request': request})
 
@@ -43,6 +45,7 @@ class SystemService:
     @staticmethod
     def list(request):
         systems = System.objects.all()
+        systems = optimize_queryset(systems, request.GET.get('fields', 'id'))
 
         if not systems:
             return Response({'results': []}, status=status.HTTP_200_OK)
