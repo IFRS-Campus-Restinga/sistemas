@@ -135,12 +135,31 @@ class PPCSerializer(serializers.ModelSerializer):
         if not curriculum:
             raise serializers.ValidationError({"Disciplina":"O currículo deve conter pelo menos uma disciplina."})
 
-        # 2. Nenhuma disciplina do primeiro período deve ter pré-requisitos
+        # 2. Uma disciplina só pode aparecer uma vez no mesmo PPC. A checagem
+        # por nome também cobre disciplinas duplicadas criadas durante a leitura do PDF.
+        subject_keys = set()
+        subject_names = set()
+        for item in curriculum:
+            subject = item.get('subject')
+            if not subject:
+                continue
+
+            subject_key = str(subject.pk)
+            subject_name = ' '.join(subject.name.split()).casefold()
+            if subject_key in subject_keys or subject_name in subject_names:
+                raise serializers.ValidationError({
+                    "Disciplina": "Uma mesma disciplina não pode ser cadastrada mais de uma vez no PPC."
+                })
+
+            subject_keys.add(subject_key)
+            subject_names.add(subject_name)
+
+        # 3. Nenhuma disciplina do primeiro período deve ter pré-requisitos
         for item in curriculum:
             if item['period'] == 1 and item.get('pre_requisits'):
                 raise serializers.ValidationError({"Pré Requisitos": "Disciplinas do 1º período não podem ter pré-requisitos."})
 
-        # 3. Verifica se disciplinas de períodos posteriores são pré-requisitos de períodos anteriores
+        # 4. Verifica se disciplinas de períodos posteriores são pré-requisitos de períodos anteriores
         period_map = {item['subject']: item['period'] for item in curriculum}
         for item in curriculum:
             current_period = item['period']
@@ -150,7 +169,7 @@ class PPCSerializer(serializers.ModelSerializer):
                     if pre_req_period >= current_period:
                         raise serializers.ValidationError({"Pré Requisito":"Disciplinas de períodos posteriores não podem ser pré-requisitos de períodos anteriores."})
 
-        # 4. Validação da carga horária
+        # 5. Validação da carga horária
         total_teach = sum(item['subject_teach_workload'] for item in curriculum)
         total_ext = sum(item['subject_ext_workload'] for item in curriculum)
         total_remote = sum(item['subject_remote_workload'] for item in curriculum)

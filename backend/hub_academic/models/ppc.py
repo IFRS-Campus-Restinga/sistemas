@@ -17,3 +17,11 @@ class Curriculum(models.Model):
     ppc = models.ForeignKey(PPC, on_delete=models.CASCADE, related_name='curriculum', verbose_name="PPC")
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='ppc', verbose_name="Disciplina")
     period = models.IntegerField(verbose_name="Período")
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ppc', 'subject'],
+                name='unique_subject_per_ppc',
+            ),
+        ]
