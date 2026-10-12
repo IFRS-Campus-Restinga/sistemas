@@ -21,7 +21,7 @@ class CommonLogin:
 
     @staticmethod
     def login(email: str, password: str) -> tuple[any, RefreshToken, AccessToken]:
-        user = get_object_or_404(CustomUser, email=email)
+        user = get_object_or_404(User, email=email)
 
         CommonLogin.check_login(user)
         

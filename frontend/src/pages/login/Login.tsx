@@ -14,6 +14,7 @@ import UserService, {type visitorAccountProps} from "../../services/userService"
 import { SystemService } from "../../services/systemService"
 import { AxiosError } from "axios"
 import CustomButton from "../../components/customButton/CustomButton"
+import Modal from "../../components/modal/Modal"
 
 export interface visitorAccountErrorProps {
     first_name: string | null
@@ -42,6 +43,9 @@ const Login = () => {
     const [createAccount, setCreateAccount] = useState<boolean>(false)
     const [isDisabled, setIsDisabled] = useState<boolean>(false)
     const [accessRequested, setAccessRequested] = useState<boolean>(false)
+    const [confirmationId, setConfirmationId] = useState<string | null>(null)
+    const [confirmationCode, setConfirmationCode] = useState<string>('')
+    const [confirmationModalOpen, setConfirmationModalOpen] = useState<boolean>(false)
     const [visitorAccountData, setVisitorAccountData] = useState<visitorAccountProps | visitorLoginProps>({
         email: '',
         first_name: '',
@@ -106,8 +110,7 @@ const Login = () => {
                         const groups = res.data.user.groups
     
                         for (let group of groups) {
-                            if (group === 'admin') redirect(`/session/admin/home`)
-                            if (group === 'user') redirect(`/session/user/home`)
+                            if (group === 'admin' || group === 'user') redirect(`/session/home`)
                         }
                     }
                 } 
@@ -131,35 +134,80 @@ const Login = () => {
         toast.error('Não foi possível realizar o login com o Google. Tente novamente.');
     };
 
-    const handleCreateAccount = (e: React.FormEvent) => {
+    const handleCreateAccount = async (e: React.FormEvent) => {
         e.preventDefault()
 
         setIsDisabled(true)
 
-        if (!validateRegisterForm()) return
+        if (!validateRegisterForm()) {
+            setIsDisabled(false)
+            return
+        }
 
         if ('first_name' in visitorAccountData) {
-            const req = UserService.createAccount(visitorAccountData)
-
-            toast.promise(
-                (async () => {
-                    try {
-                        await req;
-
-                        setAccessRequested(true)
-                    } finally {
-                        setIsDisabled(false);
-                    }
-                })(),
-                {
-                    success: 'Conta criada com sucesso',
-                    error: {
-                        render({ data }: any) {
-                            if (data instanceof AxiosError) return data.response?.data.message[0]
-                        }
-                    }
+            try {
+                const response = await UserService.createAccount(visitorAccountData)
+                setConfirmationId(response.data.confirmation_id)
+                setConfirmationCode('')
+                setConfirmationModalOpen(true)
+                toast.success(response.data.message)
+            } catch (error) {
+                if (error instanceof AxiosError) {
+                    const message = error.response?.data?.message
+                    toast.error(Array.isArray(message) ? message[0] : message || 'Ocorreu um erro')
+                } else {
+                    console.error(error)
                 }
-            )
+            } finally {
+                setIsDisabled(false)
+            }
+        }
+    }
+
+    const handleConfirmEmail = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!confirmationId || !/^\d{6}$/.test(confirmationCode)) {
+            toast.error('Informe o código de confirmação de 6 dígitos.')
+            return
+        }
+
+        setIsDisabled(true)
+        try {
+            const response = await UserService.confirmEmail(confirmationId, confirmationCode)
+            toast.success(response.data.message)
+            setConfirmationId(null)
+            setConfirmationCode('')
+            setConfirmationModalOpen(false)
+            setAccessRequested(true)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const message = error.response?.data?.message
+                toast.error(Array.isArray(message) ? message[0] : message || 'Ocorreu um erro')
+            } else {
+                console.error(error)
+            }
+        } finally {
+            setIsDisabled(false)
+        }
+    }
+
+    const handleRegenerateConfirmation = async () => {
+        if (!confirmationId) return
+
+        setIsDisabled(true)
+        try {
+            const response = await UserService.regenerateEmailConfirmation(confirmationId)
+            setConfirmationCode('')
+            toast.success(response.data.message)
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                const message = error.response?.data?.message
+                toast.error(Array.isArray(message) ? message[0] : message || 'Ocorreu um erro')
+            } else {
+                console.error(error)
+            }
+        } finally {
+            setIsDisabled(false)
         }
     }
 
@@ -198,8 +246,7 @@ const Login = () => {
                             const groups = res.data.user.groups
     
                             for (let group of groups) {
-                                if (group === 'admin') redirect(`/session/admin/home`)
-                                if (group === 'user') redirect(`/session/user/home`)
+                                if (group === 'admin' || group === 'user') redirect(`/session/home`)
                             }
                         }
                     } 
@@ -283,6 +330,16 @@ const Login = () => {
         return Object.values(newErrors).every((error) => error === null)
     }
 
+    const fetchUserData = async () => {
+        try {
+            const res = await UserService.getData()
+
+            setUser(res.data)
+        } catch (error) {
+            if (!(error instanceof AxiosError)) console.error(error)
+        }
+    }
+
     const fetchSystem = async () => {
         try {
             const res = await SystemService.getUrl(systemId!, 'system_url')
@@ -294,19 +351,12 @@ const Login = () => {
         }
     }
  
-    const fetchUserData = async () => {
-        try {
-            const res = await UserService.getData()
-
-            setUser(res.data)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
     const resetLogin = () => {
         setAccessRequested(false)
         setCreateAccount(false)
+        setConfirmationId(null)
+        setConfirmationCode('')
+        setConfirmationModalOpen(false)
         setVisitorAccountData({
         email: '',
         first_name: '',
@@ -318,18 +368,54 @@ const Login = () => {
     useEffect(() => {
         if (systemId) fetchSystem()
     }, [systemId])
-    
+
     useEffect(() => {
         fetchUserData()
     }, [])
-
+    
     useEffect(() => {
-        if (user.groups?.includes("admin")) redirect("/session/admin/home")
-        if (user.groups?.includes("user")) redirect("/session/user/home")
+        if (user.groups?.includes("admin") || user.groups?.includes("user")) redirect("/session/home")
     }, [user])
 
     return (
         <Base navBar={<></>}>
+            {
+                confirmationId && confirmationModalOpen ? (
+                    <Modal setIsOpen={setConfirmationModalOpen}>
+                        <form className={styles.confirmationForm} onSubmit={handleConfirmEmail}>
+                            <h2 className={styles.h2}>Confirme seu email</h2>
+                            <p className={styles.p}>
+                                Informe o código de seis dígitos. Ele expira em 10 minutos.
+                                Como o envio de email ainda não está configurado, solicite o código ao responsável pelo sistema.
+                            </p>
+                            <label className={styles.confirmationLabel}>
+                                Código de confirmação
+                                <input
+                                    className={styles.confirmationInput}
+                                    type="text"
+                                    inputMode="numeric"
+                                    autoComplete="one-time-code"
+                                    maxLength={6}
+                                    value={confirmationCode}
+                                    onChange={(event) => setConfirmationCode(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                                />
+                            </label>
+                            <CustomButton
+                                text="Confirmar email"
+                                type="submit"
+                                disabled={isDisabled}
+                            />
+                            <CustomButton
+                                text="Gerar novo código"
+                                type="button"
+                                variant="gray"
+                                onClick={handleRegenerateConfirmation}
+                                disabled={isDisabled}
+                            />
+                        </form>
+                    </Modal>
+                ) : null
+            }
             {
                 invalidSystem ? (
                     <section className={styles.sectionMessage}>
@@ -339,7 +425,19 @@ const Login = () => {
                         </p>
                     </section>
                 ) : (
-                    accessRequested ? (
+                    confirmationId ? (
+                        <section className={styles.sectionMessage}>
+                            <h2 className={styles.h2} style={{ textAlign: 'center' }}>Confirmação de email pendente</h2>
+                            <p className={styles.p} style={{ textAlign: 'center' }}>
+                                Confirme seu email para continuar. O código expira em 10 minutos.
+                            </p>
+                            <CustomButton
+                                text="Informar código"
+                                type="button"
+                                onClick={() => setConfirmationModalOpen(true)}
+                            />
+                        </section>
+                    ) : accessRequested ? (
                         <section className={styles.sectionMessage}>
                             <h2 className={styles.h2} style={{ textAlign: 'center' }}>Acesso Solicitado com Sucesso!</h2>
                             <p className={styles.p} style={{ textAlign: 'center' }}>

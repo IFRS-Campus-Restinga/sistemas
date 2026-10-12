@@ -1,13 +1,31 @@
+import re
+
 from django.utils.translation import gettext as _
+
 from .models import PermissionUUIDMap, Permission
 
 
 class URLFieldsParser:
     @staticmethod
+    def normalize_permission_name(value):
+        if not isinstance(value, str):
+            return value
+
+        text = value.strip()
+        match = re.match(r"^Can\s+(add|change|delete|view)\s+(.*)$", text, flags=re.IGNORECASE)
+        if not match:
+            return text
+
+        action, target = match.groups()
+        normalized_target = re.sub(r"\s+", " ", target.strip())
+        return f"Can {action.lower()} {normalized_target.lower()}"
+
+    @staticmethod
     def get_permission_name(instance):
         value = getattr(instance, "name", None)
         if value:
-            return _(value)
+            normalized_value = URLFieldsParser.normalize_permission_name(value)
+            return _(normalized_value)
 
         codename = getattr(instance, "codename", "") or ""
         if not codename:

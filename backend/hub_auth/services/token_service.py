@@ -3,7 +3,7 @@ import jwt
 from django.shortcuts import get_object_or_404
 from jwt.exceptions import InvalidTokenError
 from datetime import datetime, timedelta, timezone
-from hub_users.models import CustomUser
+from hub_users.models import User
 from django.conf import settings
 
 class TokenValidationError(Exception):
@@ -11,37 +11,37 @@ class TokenValidationError(Exception):
 
 class TokenMetadataService:
     @staticmethod
-    def get(user: CustomUser) -> dict:
+    def get(user: User) -> dict:
         
         return {
             'groups': [group.name for group in user.groups.all()],
-            'permissions': CustomUser.objects.get_permissions(str(user.id))
+            'permissions': User.objects.get_permissions(str(user.id))
         }
     
 class TokenValidationService:
     @staticmethod
-    def validate_groups(user: CustomUser, token_groups: set[str]):
+    def validate_groups(user: User, token_groups: set[str]):
         groups = set(group.name for group in user.groups.all())
 
         if not token_groups.issubset(groups):
             raise TokenValidationError("Grupos inválidos")
 
     @staticmethod
-    def validate_permissions(user: CustomUser, token_permissions: list[str]):
-        permissions = set(CustomUser.objects.get_permissions(str(user.id)))
+    def validate_permissions(user: User, token_permissions: list[str]):
+        permissions = set(User.objects.get_permissions(str(user.id)))
 
         if permissions != token_permissions:
             raise TokenValidationError("Permissões inválidas")
 
     @staticmethod
-    def validate(payload) -> CustomUser:
+    def validate(payload) -> User:
         """Verifica se os dados do token constam no banco de dados"""
         token = payload
 
         try:
             user_id = uuid.UUID(token["user_id"])
 
-            user = get_object_or_404(CustomUser, pk=user_id)
+            user = get_object_or_404(User, pk=user_id)
 
         except (KeyError, ValueError, TypeError):
             raise TokenValidationError("Usuário inválido no token")
@@ -56,12 +56,12 @@ class TokenValidationService:
 
 class TokenService:
     @staticmethod
-    def pair_token(user: str | CustomUser) -> tuple[str, str, CustomUser]:        
+    def pair_token(user: str | User) -> tuple[str, str, User]:        
         now = datetime.now(timezone.utc)        
         refresh_exp = now + timedelta(days=7)
 
-        if not isinstance(user, CustomUser):
-            user = get_object_or_404(CustomUser, pk=uuid.UUID(user))
+        if not isinstance(user, User):
+            user = get_object_or_404(User, pk=uuid.UUID(user))
 
             refresh_exp = now + timedelta(days=1)
         
@@ -87,7 +87,7 @@ class TokenService:
         return str(access_token), str(refresh_token)
 
     @staticmethod
-    def refresh_token(refresh_token: str) -> tuple[str, CustomUser]:
+    def refresh_token(refresh_token: str) -> tuple[str, User]:
         """Cria um JWT assinado com a `secret_key` do sistema de destino."""
         
         secret = settings.SECRET_KEY

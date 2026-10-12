@@ -1,0 +1,54 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sectionTitle {
+    margin: 0;
+    color: #767676;
+    font-size: 18px;
+    text-align: center;
+}
+
+.formGroup {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.formGroupColumn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.groupTable {
+    border-collapse: collapse;
+    min-width: 280px;
+    color: #767676;
+    text-align: center;
+}
+
+.groupTable th,
+.groupTable td {
+    border: 1px solid #767676;
+    padding: 8px 12px;
+}
+
+.groupTable th {
+    background-color: #006b3f;
+    color: white;
+}
+
+.emptyValue {
+    color: #767676;
+    text-align: center;
+}

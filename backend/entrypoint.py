@@ -3,6 +3,31 @@ import subprocess
 import sys
 import django
 
+
+def get_non_admin_group_permissions(permissions):
+    restricted_view_codenames = {
+        "view_group",
+        "view_permission",
+        "view_accessrequest",
+        "view_password",
+        "view_user",
+    }
+    return (
+        permissions.filter(codename__startswith="view_").exclude(
+            codename__in=restricted_view_codenames
+        )
+        | permissions.filter(
+            codename__in={
+                "add_additionalinfos",
+                "add_personalinfos",
+                "add_accountinfos",
+                "change_personalinfos",
+                "change_accountinfos",
+            }
+        )
+    )
+
+
 def run_command(command: list[str]):
     """Executa um comando e exibe a saída em tempo real."""
     print(f"\n👉 Rodando comando: {' '.join(command)}")
@@ -12,14 +37,13 @@ def run_command(command: list[str]):
         sys.exit(result.returncode)
 
 
-def ensure_initial_superuser(CustomUser, admin_group, email: str):
-    user, created = CustomUser.objects.get_or_create(
+def ensure_initial_superuser(User, admin_group, email: str):
+    user, created = User.objects.get_or_create(
         email=email,
         defaults={
             "username": "",
             "access_profile": "servidor",
             "is_active": True,
-            "pending_request": False,
             "is_staff": True,
             "is_superuser": True,
         },
@@ -27,7 +51,6 @@ def ensure_initial_superuser(CustomUser, admin_group, email: str):
 
     user.access_profile = "servidor"
     user.is_active = True
-    user.pending_request = False
     user.is_staff = True
     user.is_superuser = True
     user.groups.add(admin_group)
@@ -47,14 +70,19 @@ def main():
 
     from django.contrib.auth.models import Group, Permission
     from django.contrib.contenttypes.models import ContentType
-    from hub_users.models import CustomUser
     from django.db import transaction
+
+    from hub_permissions.formatter import URLFieldsParser
+    from hub_users.models import User
 
     with transaction.atomic():
         allowed_models = {
-            ("hub_users", "customuser"),
+            ("hub_users", "user"),
             ("hub_users", "password"),
-            ("hub_users", "additionalinfos"),
+            ("hub_users", "personalinfos"),
+            ("hub_users", "accountinfos"),
+            ("hub_users", "accessrequest"),
+            ("hub_users", "bindrequest"),
             ("hub_systems", "system"),
             ("auth", "group"),
             ("auth", "permission"),
@@ -110,18 +138,21 @@ def main():
                 print(f"ℹ️ Grupo '{nome_grupo}' já existia.")
 
         # --- Permissões ---
-        for permission in Permission.objects.filter(name=""):
-            inferred_name = f"Can {permission.codename.replace('_', ' ')}"
-            permission.name = inferred_name
-            permission.save(update_fields=["name"])
-            print(f"🛠️ Permissão '{permission.codename}' teve nome restaurado para '{inferred_name}'.")
+        for permission in Permission.objects.all():
+            normalized_name = URLFieldsParser.normalize_permission_name(permission.name)
+            if permission.name != normalized_name and normalized_name:
+                permission.name = normalized_name
+                permission.save(update_fields=["name"])
+                print(f"🛠️ Permissão '{permission.codename}' teve nome normalizado para '{normalized_name}'.")
+
+            if not permission.name:
+                inferred_name = f"Can {permission.codename.replace('_', ' ')}"
+                permission.name = inferred_name
+                permission.save(update_fields=["name"])
+                print(f"🛠️ Permissão '{permission.codename}' teve nome restaurado para '{inferred_name}'.")
 
         todas_permissoes = Permission.objects.all()
-        permissoes_view = todas_permissoes.filter(
-            codename__startswith="view_"
-        ) | todas_permissoes.filter(
-            codename="add_additionalinfos"
-        )
+        permissoes_grupo = get_non_admin_group_permissions(todas_permissoes)
 
         # Admin recebe todas as permissões
         admin_group = Group.objects.get(name="admin")
@@ -129,30 +160,36 @@ def main():
         admin_group.save()
         print(f"🔐 Grupo 'admin' recebeu {todas_permissoes.count()} permissões.")
 
-        # User recebe apenas as permissões de visualização
+        # User recebe permissões de visualização permitidas e pode alterar suas informações.
         user_group = Group.objects.get(name="user")
-        user_group.permissions.set(permissoes_view)
+        user_group.permissions.set(permissoes_grupo)
         user_group.save()
         user_group.permissions.remove(
             Permission.objects.filter(codename='delete_curriculum').first()
         )
-        print(f"👁️ Grupo 'user' recebeu {permissoes_view.count()} permissões (apenas view_).")
+        print(
+            f"👁️ Grupo 'user' recebeu {permissoes_grupo.count()} permissões "
+            "(visualização permitida e alteração de informações pessoais/da conta)."
+        )
 
-        # Coord recebe apenas visualização e não a permissão de exclusão de currículo
+        # Coord recebe as mesmas permissões permitidas para o grupo user.
         coord_group = Group.objects.get(name="coord")
-        coord_group.permissions.set(permissoes_view)
+        coord_group.permissions.set(permissoes_grupo)
         coord_group.save()
         coord_group.permissions.remove(
             Permission.objects.filter(codename='delete_curriculum').first()
         )
-        print(f"🧭 Grupo 'coord' recebeu {permissoes_view.count()} permissões sem delete_curriculum.")
+        print(
+            f"🧭 Grupo 'coord' recebeu {permissoes_grupo.count()} permissões "
+            "sem as visualizações restritas."
+        )
 
         # --- Garantir superusuário inicial ---
         try:
             if initial_user_email:
-                ensure_initial_superuser(CustomUser, admin_group, initial_user_email)
+                ensure_initial_superuser(User, admin_group, initial_user_email)
             else:
-                user = CustomUser.objects.first()
+                user = User.objects.first()
                 if user:
                     user.access_profile = 'servidor'
                     user.is_active = True
@@ -170,9 +207,23 @@ def main():
     # --- Subir servidor ASGI compatível com async/await ---
     runserver_host = os.getenv("RUNSERVER_HOST", "127.0.0.1")
     runserver_port = os.getenv("RUNSERVER_PORT", "8000")
+    runserver_reload = os.getenv("RUNSERVER_RELOAD", "false").lower() in {"1", "true", "yes"}
 
     print(f"🌍 Subindo servidor ASGI em {runserver_host}:{runserver_port} ...")
-    run_command([sys.executable, "-m", "uvicorn", "backend.asgi:application", "--host", runserver_host, "--port", runserver_port])
+    uvicorn_command = [
+        sys.executable,
+        "-m",
+        "uvicorn",
+        "backend.asgi:application",
+        "--host",
+        runserver_host,
+        "--port",
+        runserver_port,
+    ]
+    if runserver_reload:
+        uvicorn_command.append("--reload")
+
+    run_command(uvicorn_command)
 
 
 if __name__ == "__main__":

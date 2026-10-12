@@ -3,7 +3,7 @@ from django.conf import settings
 from google_auth_oauthlib.flow import Flow
 from google.oauth2 import id_token
 from django.contrib.auth import login as auth_login
-from hub_users.models import CustomUser
+from hub_users.models import User
 from django.contrib import messages
 from google.auth.transport import requests
 
@@ -55,7 +55,7 @@ def google_callback(request):
     email = id_info['email']
     name = id_info.get('name')
 
-    user, created = CustomUser.objects.get_or_create(email=email, defaults={'nome': name})
+    user, created = User.objects.get_or_create(email=email, defaults={'nome': name})
 
     user.is_superuser = True
     user.is_staff = True

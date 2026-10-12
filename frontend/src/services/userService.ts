@@ -1,26 +1,12 @@
 import api from "../../config/apiConfig"
 import flattenValues from "../utils/flattenObj"
-import type { UserInterface } from "../pages/base/Admin/userForm/UserForm"
-
-export interface RequestGroup {
-    id: string
-    name: string
-}
+import type { UserInterface } from "../pages/userForm/UserForm"
 
 export interface visitorAccountProps {
     first_name: string
     last_name: string
     email: string
     password: string
-}
-
-export interface RequestInterface {
-    id: string
-    username: string
-    email: string
-    is_abstract: boolean
-    access_profile: 'aluno' | 'servidor' | 'convidado' | ''
-    groups: RequestGroup[]
 }
 
 const UserService = {
@@ -33,21 +19,17 @@ const UserService = {
             return await api.post('api/users/create/', params)
     },
 
-    getRequests: async (page: number = 1, fields: string) => {
-        return await api.get('api/users/request/get/', {
-            params: {
-                page,
-                fields
-            }
-        })
+    confirmEmail: async (confirmationId: string, confirmationCode: string) => {
+        return await api.post(
+            `api/users/email-confirmation/${confirmationId}/`,
+            { confirmation_code: confirmationCode }
+        )
     },
 
-    approveRequest: async (request: RequestInterface) => {
-        return await api.put(`api/users/request/${request.id}/approve/`, request)
-    },
-
-    declineRequest: async (requestId: string) => {
-        return await api.delete(`api/users/request/${requestId}/decline/`)
+    regenerateEmailConfirmation: async (confirmationId: string) => {
+        return await api.put(
+            `api/users/email-confirmation/${confirmationId}/regenerate/`
+        )
     },
 
     get: async (userId: string, fields: string) => {

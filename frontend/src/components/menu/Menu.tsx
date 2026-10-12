@@ -81,6 +81,8 @@ const Menu = () => {
         fetchSystems()
     }, [currentPage])
 
+    if (!user.permissions.includes('view_system')) return null
+
     if (isLoading) return (
         <div style={{margin: 'auto'}}>
             <CustomLoading/>
@@ -89,12 +91,19 @@ const Menu = () => {
 
     return (
         <>
-            <h2 className={styles.h2}>Sistemas</h2>
-            {
-                user.groups?.includes('admin') ? (
-                    <Link to={'/session/admin/sistemas/cadastro'} className={styles.addButton}>+</Link>
-                ) : null
-            }
+            <div className={styles.menuHeader}>
+                <h2 className={styles.h2}>Sistemas do Campus</h2>
+                {
+                    user.permissions.includes('add_system') ? (
+                        <span className={styles.addButtonSpace}>
+                            <Link to={'/session/sistemas/cadastro'} className={styles.addButton}>
+                                <span aria-hidden="true">+</span>
+                                <span className={styles.addButtonLabel}>Novo Sistema</span>
+                            </Link>
+                        </span>
+                    ) : null
+                }
+            </div>
             <section className={styles.menu}>
                 {
                     prev ? (
@@ -116,7 +125,7 @@ const Menu = () => {
                                             collapseActionsIcon={x} 
                                             itemId={system.id}
                                             onView={() => fetchAPIKey(system.id)}
-                                            onEdit={user.groups?.includes('admin') ? () => redirect(`/session/admin/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
+                                            onEdit={user.permissions.includes('change_system') ? () => redirect(`/session/sistemas/${system.id}/edit/`, {state: system.id}) : undefined}
                                         />
                                     ) : null
                                 }

@@ -132,7 +132,8 @@ Callback do OAuth (usado pelo Django Admin).
 Base: `/api/users/`
 
 ## POST `create/`
-Cria conta de visitante (ou aluno, se via Google).
+Cria uma conta de visitante. O cadastro de aluno ou servidor ocorre por outros
+fluxos de autenticacao e nao por este endpoint.
 
 Body:
 ```json
@@ -140,23 +141,83 @@ Body:
   "email": "user@email.com",
   "first_name": "Nome",
   "last_name": "Sobrenome",
-  "accessProfile": "convidado|aluno|servidor",
-  "password": "opcional (apenas para convidado)"
+  "password": "senha-do-convidado"
 }
 ```
 
 Resposta `201`:
 ```json
-{ "message": "Conta criada com sucesso" }
+{
+  "message": "Conta criada com sucesso",
+  "confirmation_id": "uuid-da-confirmacao"
+}
 ```
 
+O cadastro de convidado por email e senha cria um código de confirmação de seis
+dígitos com validade de 10 minutos. O envio de email ainda não está configurado;
+o código não é incluído na resposta. A conta e criada com perfil `convidado`,
+inativa e com `email_verified` falso, e recebe uma solicitacao de acesso.
+`accessProfile` nao e usado por este endpoint.
+
+## POST `email-confirmation/<confirmation_id>/`
+Confirma o email de um cadastro de convidado. Não requer autenticação nem
+permissões.
+
+Body:
+```json
+{
+  "confirmation_code": "123456"
+}
+```
+
+Resposta `200`:
+```json
+{ "message": "Email confirmado com sucesso" }
+```
+
+O código expirado ou incorreto retorna `400`; uma confirmação inexistente ou já
+utilizada retorna `404`. A confirmação não ativa a conta: o convidado continua
+aguardando aprovação administrativa.
+
+## PUT `email-confirmation/<confirmation_id>/regenerate/`
+Gera outro código para a confirmação pendente identificada pelo ID, substitui o
+código anterior e renova sua expiração por 10 minutos. Não requer autenticação
+nem permissões e não recebe corpo na requisição.
+
+Resposta `200`:
+```json
+{
+  "message": "Um novo código foi gerado e tem validade de 10 minutos. O envio de email ainda não está configurado."
+}
+```
+
+Uma confirmação inexistente ou já utilizada retorna `404`. O novo código não é
+incluído na resposta.
+
 ## GET `get/data/`
-Retorna dados do usuario da sessao (cookie `access_token`).
+Retorna os dados predefinidos do usuario autenticado pelo cookie `access_token`.
+Nao recebe `fields` nem exige a permissao `view_user`; requer uma credencial de
+acesso valida.
 
-Query params:
-- `fields` (obrigatorio)
+Exemplo de resposta:
+```json
+{
+  "id": "uuid-do-usuario",
+  "username": "Nome Sobrenome",
+  "groups": ["user"],
+  "permissions": ["change_personalinfos"],
+  "access_profile": "aluno",
+  "is_abstract": false,
+  "personal_infos": "uuid-dos-dados-pessoais",
+  "account_infos": "uuid-dos-dados-da-conta",
+  "first_login": true
+}
+```
 
-Permissao: `view_customuser`
+`personal_infos` e `account_infos` podem ser `null` se ainda nao estiverem
+associados. `first_login` so aparece quando seu valor e verdadeiro.
+`permissions` e a lista sem duplicatas dos codenames concedidos pelos grupos do
+usuario.
 
 ## GET `get/<user_id>/`
 Retorna dados do usuario.
@@ -164,7 +225,30 @@ Retorna dados do usuario.
 Query params:
 - `fields` (obrigatorio)
 
-Permissao: `view_customuser`
+Permissao: `view_user`
+
+Os campos selecionaveis correspondem ao modelo `User` e suas relacoes. Campos
+principais:
+
+| Campo | Tipo / descricao |
+| --- | --- |
+| `id` | UUID do usuario. |
+| `username` | Nome exibido (ate 100 caracteres). |
+| `email` | Email unico, usado como identificador de login. |
+| `access_profile` | Perfil: `aluno`, `servidor` ou `convidado`. |
+| `is_active` | Indica se a conta esta ativa; novas contas de convidado aguardam aprovacao. |
+| `email_verified` | Indica se o email foi confirmado. |
+| `is_abstract` | Indica conta do tipo Departamento; o padrao e `false`. |
+| `first_login` | Indica primeiro acesso; o padrao e `true`. |
+| `date_joined` | Data e hora de criacao da conta. |
+| `is_staff`, `is_superuser` | Indicadores de acesso administrativo herdados de `AbstractUser`. |
+| `personal_infos` | FK anulavel para `PersonalInfos`; selecione subcampos com `personal_infos.<campo>`. |
+| `account_infos` | FK anulavel para `AccountInfos`; selecione subcampos com `account_infos.<campo>`. |
+| `groups` | Grupos do usuario; `groups.id` retorna o UUID publico do `GroupUUIDMap`. |
+
+O model `User` usa `email` como identificador e nao armazena a senha nesse
+registro. A senha de convidados e mantida separadamente no model `Password`,
+que possui `id` (UUID), `password` e uma relacao um-para-um com `User`.
 
 ## GET `get/group/<group_name>/`
 Lista usuarios por grupo.
@@ -175,7 +259,7 @@ Query params:
 - `status` (opcional): `Ativo` ou `Inativo`
 - `page`, `page_size` (opcional)
 
-Permissao: `view_customuser`
+Permissao: `view_user`
 
 ## GET `get/access_profile/<access_profile_name>/`
 Lista usuarios por perfil (`aluno`, `servidor`, `convidado`).
@@ -186,19 +270,19 @@ Query params:
 - `status` (opcional): `Ativo` ou `Inativo`
 - `page`, `page_size` (opcional)
 
-Permissao: `view_customuser`
+Permissao: `view_user`
 
 ## PUT `edit/<user_id>/`
 Edita usuario.
 
-Permissao: `change_customuser`
+Permissao: `change_user`
 
 Body (exemplo):
 ```json
 {
   "username": "Nome Completo",
   "email": "user@email.com",
-  "access_profile": "aluno|servidor|convidado",
+  "access_profile": "aluno",
   "groups": [
     { "id": "uuid-do-grupo" }
   ],
@@ -208,22 +292,35 @@ Body (exemplo):
 ```
 
 Observacao:
-- `groups[].id` deve ser o UUID do `GroupUUIDMap`.
-- Regras: admin nao pode ser combinado com user; convidado nao pode ter coord.
+- Envie `groups` como uma lista; `groups[].id` deve ser o UUID publico do
+  `GroupUUIDMap`, nao o ID numerico interno do Django.
+- `username`, `email` e `access_profile` sao campos do usuario. `access_profile`
+  aceita `aluno`, `servidor` ou `convidado`.
+- Regras de grupo/perfil: `admin` nao pode ser combinado com `user`; perfis
+  `aluno` e `convidado` nao podem ter `admin`; perfil `convidado` nao pode ter
+  `coord`.
+- Contas `convidado` devem ser do tipo pessoal (`is_abstract: false`).
+- Nao e permitido alterar `is_abstract` depois que o usuario possui dados
+  pessoais ou dados da conta associados.
 
-## GET `request/get/`
-Lista requisicoes de acesso pendentes (usuarios com `first_login=true`).
+## GET `/api/requests/get/`
+Lista os usuarios associados a registros de `AccessRequest`. Novas contas de
+servidor ou convidado criadas pelos fluxos de cadastro recebem um registro de
+solicitacao. O campo `id` de cada resultado e o ID da solicitacao, usado nos
+endpoints de aprovacao e rejeicao; `user_id` identifica o usuario associado.
 
 Query params:
 - `fields` (obrigatorio)
 - `page`, `page_size` (opcional)
 
-Permissao: `view_customuser`
+Permissao: `view_user`
 
-## PUT `request/<user_id>/approve/`
-Aprova requisicao de acesso.
+## PUT `/api/requests/<request_id>/approve/`
+Aprova a requisicao identificada por `request_id`, buscando o usuario pela
+relacao da solicitacao. A aprovacao ativa o usuario e remove o registro de
+`AccessRequest`.
 
-Permissao: `change_customuser`
+Permissao: `change_user`
 
 Body:
 ```json
@@ -235,45 +332,177 @@ Body:
 }
 ```
 
-## DELETE `request/<user_id>/decline/`
-Recusa requisicao e remove o usuario.
+## DELETE `/api/requests/<request_id>/decline/`
+Recusa a requisicao identificada por `request_id`, remove o registro de
+`AccessRequest` e exclui o usuario vinculado.
 
-Permissao: `delete_customuser`
+Permissao: `delete_user`
 
-## POST `additional_infos/create/`
-Cria informacoes adicionais do usuario.
+## Requisicoes de vinculo de dados pessoais
 
-Permissao: `add_additionalinfos`
+### GET `/api/requests/bind/count/`
+Retorna a quantidade de solicitacoes `BindRequest` pendentes para os dados
+pessoais associados a conta autenticada:
+
+```json
+{
+  "count": 3
+}
+```
+
+### GET `/api/requests/bind/pending/`
+Informa se a conta autenticada possui uma solicitacao de vinculo pessoal
+aguardando aprovacao:
+
+```json
+{
+  "pending": true
+}
+```
+
+### GET `/api/requests/bind/`
+Lista as solicitacoes `BindRequest` relacionadas ao registro `PersonalInfos`
+da conta autenticada. Cada item retorna o nome, email e perfil de acesso do usuario
+solicitante:
+
+```json
+{
+  "id": "uuid-da-solicitacao",
+  "username": "Nome do solicitante",
+  "email": "usuario@exemplo.com",
+  "access_profile": "aluno"
+}
+```
+
+### PUT `/api/requests/bind/<request_id>/approve/`
+Aprova a solicitacao somente se ela estiver relacionada aos dados pessoais da
+conta autenticada. Associa esses dados ao usuario solicitante e remove a
+solicitacao. Nao altera nem ativa a conta solicitante.
+
+### DELETE `/api/requests/bind/<request_id>/reject/`
+Rejeita a solicitacao somente se ela estiver relacionada aos dados pessoais da
+conta autenticada. Remove a solicitacao, desvincula os dados pessoais e de
+conta do solicitante e restaura `first_login` para que ele preencha os dados
+novamente. Um registro de dados de conta compartilhado com outros usuarios
+nao e removido.
+
+## POST `personal_account_infos/create/`
+Cria ou associa os dados pessoais e os dados da conta de um usuario em uma
+requisicao. Ambos os objetos aninhados sao obrigatorios e validados antes da
+gravacao, que ocorre em uma transacao atomica.
+
+Permissoes: `add_personalinfos` e `add_accountinfos`
 
 Body:
 ```json
 {
-  "birth_date": "YYYY-MM-DD",
-  "telephone_number": "DDDNnnnnnnnn",
-  "registration": "opcional",
-  "cpf": "11 digitos",
-  "user": "uuid-do-usuario"
+  "user": "uuid-do-usuario",
+  "personal_infos": {
+    "cpf": "52998224725",
+    "birth_date": "1990-01-15"
+  },
+  "account_infos": {
+    "telephone_number": "11912345678",
+    "registration": "1234567"
+  }
 }
 ```
 
-Regras:
-- CPF precisa ser valido.
-- Idade: 14 a 100 anos.
-- `registration` obrigatorio para `aluno` e `servidor`.
-- Apenas admin ou o proprio usuario podem criar.
+O campo `user` e o UUID de `User`. Os objetos `personal_infos` e
+`account_infos` representam os modelos correspondentes:
 
-## GET `additional_infos/get/<user_id>/`
-Retorna informacoes adicionais.
+- `PersonalInfos`: `id` (UUID), `cpf` (unico, ate 11 caracteres) e `birth_date`
+  (data).
+- `AccountInfos`: `id` (UUID), `registration` (unica, anulavel, ate 11
+  caracteres) e `telephone_number` (ate 13 caracteres).
+
+`User.personal_infos` e `User.account_infos` sao FKs anulaveis com
+`on_delete=SET_NULL`; cada registro pode ser referenciado por mais de um
+usuario. O modelo `Password` e independente e se relaciona com `User` por
+`OneToOneField`.
+
+Se o CPF ja estiver cadastrado com a mesma data de nascimento, o sistema cria
+uma solicitacao `BindRequest` e nao vincula imediatamente os dados pessoais ao
+usuario. Solicitacoes repetidas para o mesmo usuario e registro pessoal sao
+deduplicadas. Se CPF e data de nascimento forem inconsistentes com o registro
+existente, a validacao falha.
+
+Validacoes de `PersonalInfos`:
+
+- `cpf` deve conter 11 digitos e passar na validacao de CPF.
+- A idade calculada a partir de `birth_date` deve estar entre 14 e 100 anos.
+- Contas do tipo Departamento (`is_abstract: true`) nao podem ter estes dados
+  associados.
+
+Validacoes de `AccountInfos`:
+
+- `telephone_number` deve conter DDD e numero (8 ou 9 digitos) ou estar no
+  formato `+55` seguido de DDD e numero.
+- `registration` e opcional para os demais grupos, mas obrigatorio para usuarios
+  nos grupos `aluno` ou `servidor`.
+- Para o grupo `aluno`, a matricula pode ter no maximo 10 caracteres; para o
+  grupo `servidor`, a matricula SIAPE deve conter exatamente 7 digitos.
+- A matricula e unica. Se ja existir, o telefone informado deve corresponder
+  ao telefone associado a ela.
+
+O endpoint reutiliza registros existentes: dados pessoais sao localizados por
+CPF e dados da conta por matricula. Sem matricula, procura-se um registro sem
+matricula pelo telefone. O usuario autenticado so pode cadastrar os proprios
+dados; o grupo `admin` pode cadastrar para outro usuario. Credenciais de sistema
+nao podem ser usadas para esta operacao.
+
+Se o cadastro for feito pelo proprio usuario autenticado, `first_login` passa
+a `false`.
+
+## GET `personal_account_infos/get/<user_id>/`
+Retorna os objetos `personal_infos` e `account_infos` associados ao usuario,
+mantendo-os aninhados. Se nenhum dos dois estiver associado, retorna `404`.
 
 Query params:
-- `fields` (obrigatorio)
+- `fields` (obrigatorio). Use nomes qualificados para selecionar campos dos
+  dois objetos, por exemplo:
+  `personal_infos.id,personal_infos.cpf,personal_infos.birth_date,account_infos.id,account_infos.registration,account_infos.telephone_number`.
 
-Permissao: `view_additionalinfos`
+Permissoes: `view_personalinfos` e `view_accountinfos`. Alem dessas permissoes,
+o usuario autenticado so pode consultar dados vinculados aos seus proprios
+registros pessoais e de conta. Membros do grupo `admin` podem consultar dados
+de qualquer usuario.
 
-## PUT `additional_infos/edit/<user_id>/`
-Edita informacoes adicionais.
+Exemplo de resposta para a selecao de campos acima:
+```json
+{
+  "personal_infos": {
+    "id": "uuid-dos-dados-pessoais",
+    "cpf": "52998224725",
+    "birth_date": "1990-01-15"
+  },
+  "account_infos": {
+    "id": "uuid-dos-dados-da-conta",
+    "registration": "1234567",
+    "telephone_number": "11912345678"
+  }
+}
+```
 
-Permissao: `change_additionalinfos`
+## PUT `personal_account_infos/edit/<user_id>/`
+Atualiza os dados pessoais e da conta do usuario. O corpo deve conter os
+objetos `personal_infos` e `account_infos` no mesmo formato aninhado do POST,
+alem de `user` com o mesmo UUID indicado na URL. `telephone_number` e
+obrigatorio. `registration` pode ser omitido para usuarios fora dos grupos
+`aluno` e `servidor`; nesses casos, sua omissao remove a matricula existente.
+Para `aluno` e `servidor`, a matricula continua obrigatoria. CPF e data de
+nascimento podem ser omitidos quando ja existem dados pessoais vinculados ou
+uma solicitacao `BindRequest` pendente.
+
+Usuarios autenticados podem alterar somente os proprios dados; membros de
+`admin` podem alterar dados de qualquer usuario. Credenciais de sistema nao
+podem editar estes dados.
+
+Como os registros podem ser compartilhados, atualizar um registro existente
+tambem altera os dados vistos pelos outros usuarios associados a ele. Se o CPF
+informado pertencer a outro registro e a data de nascimento corresponder, cria
+uma `BindRequest` em vez de associar esse registro automaticamente; os dados
+pessoais do solicitante ficam sem vinculo ate a aprovacao.
 
 ---
 

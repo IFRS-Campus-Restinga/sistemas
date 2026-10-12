@@ -29,6 +29,7 @@ urlpatterns = [
     path('django-admin/', include('hub_auth.urls')),
     path('session/', include('hub_auth.urls')),
     path('api/users/', include('hub_users.urls')),
+    path('api/requests/', include('hub_users.request_urls')),
     path('api/groups/', include('hub_groups.urls')),
     path('api/permissions/', include('hub_permissions.urls')),
     path('api/systems/', include('hub_systems.urls')),

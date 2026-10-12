@@ -1,4 +1,5 @@
 import FormTip from '../formTip/FormTip'
+import NotificationBadge from '../notificationBadge/NotificationBadge'
 import styles from './FormContainer.module.css'
 
 interface FormContainerProps {
@@ -6,9 +7,10 @@ interface FormContainerProps {
     formTip?: string
     children: React.ReactNode
     width?: string
+    notificationCount?: number
 }
 
-const FormContainer = ({ title, formTip, children, width }: FormContainerProps) => {
+const FormContainer = ({ title, formTip, children, width, notificationCount }: FormContainerProps) => {
 
     return (
         <section className={styles.section} style={{width: width}}>
@@ -19,6 +21,9 @@ const FormContainer = ({ title, formTip, children, width }: FormContainerProps) 
                         <FormTip tip={formTip} />
                     ) : null
                 }
+                {notificationCount && notificationCount > 0 ? (
+                    <NotificationBadge count={notificationCount} />
+                ) : null}
             </div>
             <hr className={styles.formLine} />
             <div className={styles.formContainer}>

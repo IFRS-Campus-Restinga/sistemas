@@ -1,0 +1,29 @@
+.menuButton {
+    width: 150px;
+    height: 150px;
+    padding: 8px;
+    aspect-ratio: 1 / 1;
+    border-radius: 8px;
+    background-color: #006b3f;
+    color: white;
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    gap: 5px;
+
+    &:hover {
+        cursor: pointer;
+        transform: scale(1.05);
+        transition: all ease-in-out 0.3s;
+    }
+}
+
+.menuIcon {
+    width: 100px;
+    height: 100px;
+    transform: scale(var(--menu-icon-scale, 1));
+}

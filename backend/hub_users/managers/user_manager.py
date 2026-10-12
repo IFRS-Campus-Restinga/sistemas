@@ -2,7 +2,7 @@ import uuid
 from django.db.models import Q
 from django.contrib.auth.models import BaseUserManager, Permission
     
-class CustomUserManager(BaseUserManager):
+class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('O email deve ser fornecido')
@@ -15,7 +15,6 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('pending_request', False)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser precisa ter is_staff=True.')

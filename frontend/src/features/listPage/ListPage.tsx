@@ -6,6 +6,7 @@ import styles from './ListPage.module.css'
 import { useNavigate } from "react-router-dom"
 import Modal from "../../components/modal/Modal"
 import CustomButton from "../../components/customButton/CustomButton"
+import { useUser } from "../../store/userHooks"
 
 const PPC_DRAFT_KEY = 'ppcDraft'
 
@@ -13,15 +14,15 @@ interface ListPageProps {
     title: string
     fetchData: (currentPage: number, searchParam: string) => Promise<{ next: number, previous: number, data: Record<string, any>[] }>
     registerUrl?: string
-    canEdit: boolean
-    canView: boolean
+    permissionEntity: string
     translations: Record<string, string>
     onEdit?: (itemId: string) => void
 }
 
 
-const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translations, onEdit }: ListPageProps) => {
+const ListPage = ({ title, fetchData, registerUrl, permissionEntity, translations, onEdit }: ListPageProps) => {
     const navigate = useNavigate()
+    const { permissions } = useUser()
     const [listData, setListData] = useState<Record<string, any>[]>([])
     const [searchParam, setSearchParam] = useState<string>('')
     const [currentPage, setCurrentPage] = useState<number>(1)
@@ -29,6 +30,9 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
     const [previousPage, setPreviousPage] = useState<number | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [showDraftModal, setShowDraftModal] = useState<boolean>(false)
+    const canAdd = permissions.includes(`add_${permissionEntity}`)
+    const canView = permissions.includes(`view_${permissionEntity}`)
+    const canEdit = permissions.includes(`change_${permissionEntity}`)
 
     const openDraftDecision = () => {
         const hasDraft = !!localStorage.getItem(PPC_DRAFT_KEY)
@@ -92,7 +96,7 @@ const ListPage = ({ title, fetchData, registerUrl, canEdit, canView, translation
                     searchParam={searchParam}
                 />
                 {
-                    registerUrl ? (
+                    registerUrl && canAdd ? (
                         <div className={styles.addIcon} onClick={openDraftDecision}>+</div>
                     ) : null
                 }

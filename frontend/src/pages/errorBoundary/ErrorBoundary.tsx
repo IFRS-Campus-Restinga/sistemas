@@ -13,8 +13,7 @@ const ErrorBoundary = () => {
     const redirect = useNavigate()
 
     const handleRedirect = () => {
-        if (user.groups?.includes("user")) redirect('/session/user/home')
-        if (user.groups?.includes("admin")) redirect('/session/admin/home')
+        if (user.groups?.includes("user") || user.groups?.includes("admin")) redirect('/session/home')
         else redirect('/session')
     }
 

@@ -140,7 +140,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-AUTH_USER_MODEL = "hub_users.CustomUser"
+AUTH_USER_MODEL = "hub_users.User"
 FS_AUTH_SYSTEM_MODEL = "hub_systems.System"
 AUTH_COOKIE_NAME = env("AUTH_COOKIE_NAME", default="access_token")
 REFRESH_COOKIE_NAME = env("REFRESH_COOKIE_NAME", default="refresh_token")

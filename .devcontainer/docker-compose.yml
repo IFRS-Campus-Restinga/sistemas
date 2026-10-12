@@ -6,10 +6,13 @@ services:
       context: ..
       dockerfile: .devcontainer/backend.Dockerfile
     working_dir: /workspace/backend
-    env_file: ../backend/.env
+    env_file:
+      - path: ../backend/.env
+        format: raw
     environment:
       ENVIRONMENT: "dev"
       RUNSERVER_HOST: "0.0.0.0"
+      RUNSERVER_RELOAD: "true"
     volumes:
       - ..:/workspace:cached
     ports:
@@ -31,10 +34,15 @@ services:
       context: ../frontend
       dockerfile: Dockerfile
     working_dir: /workspace/frontend
-    env_file: ../frontend/.env
+    env_file:
+      - path: ../frontend/.env
+        format: raw
     volumes:
       - ..:/workspace:cached
       - hub_node_modules:/workspace/frontend/node_modules
+    command: >-
+      sh -c "if [ ! -x node_modules/.bin/vite ]; then npm ci --no-audit --no-fund; fi
+      && exec npx vite --host 0.0.0.0 --port 3000"
     ports:
       - "3000:3000"
     depends_on:

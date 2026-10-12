@@ -17,6 +17,8 @@ interface CRUDActions {
 interface DualActions {
     onApprove: (obj: Record<string, any>) => void
     onDecline: (id: string) => void
+    canApprove: boolean
+    canDecline: boolean
 }
 
 interface TableProps {
@@ -203,22 +205,26 @@ const Table = ({
                                             </>
                                         ) : dualActions ? (
                                             <>
-                                                <img
-                                                    src={check}
-                                                    alt="aprovar"
-                                                    className={styles.action}
-                                                    onClick={() =>
-                                                        dualActions.onApprove(item)
-                                                    }
-                                                />
-                                                <img
-                                                    src={x}
-                                                    alt="rejeitar"
-                                                    className={styles.action}
-                                                    onClick={() =>
-                                                        dualActions.onDecline(item.id)
-                                                    }
-                                                />
+                                                {dualActions.canApprove && (
+                                                    <img
+                                                        src={check}
+                                                        alt="aprovar"
+                                                        className={styles.action}
+                                                        onClick={() =>
+                                                            dualActions.onApprove(item)
+                                                        }
+                                                    />
+                                                )}
+                                                {dualActions.canDecline && (
+                                                    <img
+                                                        src={x}
+                                                        alt="rejeitar"
+                                                        className={styles.action}
+                                                        onClick={() =>
+                                                            dualActions.onDecline(item.id)
+                                                        }
+                                                    />
+                                                )}
                                             </>
                                         ) : null}
                                     </div>

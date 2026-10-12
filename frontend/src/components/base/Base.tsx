@@ -13,10 +13,8 @@ interface BaseProps {
 }
 
 const HOME_PATHS = [
-    '/session/admin/home',
-    '/session/admin/home/',
-    '/session/user/home',
-    '/session/user/home/',
+    '/session/home',
+    '/session/home/',
     '/session/',
     '/session',
     '/',
@@ -35,8 +33,7 @@ const getHistory = (): string[] => {
 }
 
 const getHomePath = (pathname: string): string => {
-    if (pathname.includes('/admin/')) return '/session/admin/home/'
-    if (pathname.includes('/user/')) return '/session/user/home/'
+    if (pathname.startsWith('/session/')) return '/session/home/'
     return '/'
 }
 

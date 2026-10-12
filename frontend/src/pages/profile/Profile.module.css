@@ -1,0 +1,185 @@
+.section {
+    width: 60%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 30px;
+    gap: 25px;
+    background-color: white;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+    margin: auto;
+    border-radius: 8px;
+}
+
+.tabs {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    border-bottom: 1px solid #d0d0d0;
+}
+
+.tab,
+.activeTab {
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: #767676;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+    padding: 10px 14px;
+}
+
+.activeTab {
+    border-bottom-color: #006b3f;
+    color: #006b3f;
+}
+
+.bindRequests {
+    width: 100%;
+    min-height: 150px;
+}
+
+.profileHeader {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.identity {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    gap: 8px;
+}
+
+.profilePicture {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.3);
+    flex: 0 0 100px;
+}
+
+.profileContainer {
+    display: flex;
+}
+
+.sectionGroup {
+    display: flex;
+    width: 100%;
+    gap: 30px;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+}
+
+.h2 {
+    font-family: 'Roboto';
+    font-size: 16px;
+    color: #767676;
+    font-weight: 500;
+    margin: 0;
+    text-align: left;
+    width: 100%;
+    overflow-wrap: anywhere;
+}
+
+.label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    color: #aaa;
+    font-family: 'Roboto';
+    font-size: 16px;
+    font-weight: 700;
+    width: 100%;
+}
+
+.profileBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background: white;
+    color: #767676;
+    font-family: 'Roboto';
+    font-size: 16px;
+    font-weight: 600;
+    cursor: default;
+}
+
+.profileBadgeIcon {
+    width: 32px;
+    height: 32px;
+}
+
+.accountContent {
+    display: flex;
+    flex: 1;
+    align-items: flex-start;
+    padding-top: 12px;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+}
+
+.fieldsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.pendingBindCard {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid #d9b95b;
+    border-radius: 8px;
+    background-color: #fff8df;
+    color: #665313;
+    font-family: 'Roboto';
+    font-size: 14px;
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 700px) {
+    .section {
+        width: 90%;
+    }
+
+    .profileHeader {
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .identity {
+        min-width: 0;
+    }
+
+    .label {
+        flex-wrap: wrap;
+    }
+
+    .fieldsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+}

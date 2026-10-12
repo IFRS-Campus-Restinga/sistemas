@@ -3,38 +3,32 @@ import { createBrowserRouter } from 'react-router-dom'
 import Login from './pages/login/Login'
 
 // Admin
-import BaseAdmin from './pages/base/Admin/BaseAdmin'
-import HomeAdmin from './pages/base/Admin/home/HomeAdmin'
-import SystemForm from './pages/base/Admin/systemForm/SystemForm'
-import UserList from './pages/base/Admin/userList/UserList'
-import GroupList from './pages/base/Admin/groupList/GroupList'
-import GroupForm from './pages/base/Admin/groupForm/GroupForm'
-import CalendarList from './pages/base/Admin/calendarList/CalendarList'
-import CalendarForm from './pages/base/Admin/calendarForm/CalendarForm'
-import Calendar from './pages/base/Admin/calendar/Calendar'
-import EventForm from './pages/base/Admin/eventForm/EventForm'
-import CourseList from './pages/base/Admin/courseList/CourseList'
-import CourseForm from './pages/base/Admin/couseForm/CourseForm'
-import SubjectList from './pages/base/Admin/subjectList/SubjectList'
-import SubjectForm from './pages/base/Admin/subjectForm/SubjectForm'
-import PPCList from './pages/base/Admin/ppcList/PPCList'
-import PPCForm from './pages/base/Admin/ppcForm/PPCForm'
-import UserForm from './pages/base/Admin/userForm/UserForm'
+import Base from './pages/Base'
+import AuthHome from './pages/authHome/AuthHome'
+import SystemForm from './pages/systemForm/SystemForm'
+import UserList from './pages/userList/UserList'
+import GroupList from './pages/groupList/GroupList'
+import GroupForm from './pages/groupForm/GroupForm'
+import GroupDetails from './pages/groupDetails/GroupDetails'
+import CalendarList from './pages/calendarList/CalendarList'
+import CalendarForm from './pages/calendarForm/CalendarForm'
+import Calendar from './pages/calendar/Calendar'
+import EventForm from './pages/eventForm/EventForm'
+import CourseList from './pages/courseList/CourseList'
+import CourseForm from './pages/couseForm/CourseForm'
+import SubjectList from './pages/subjectList/SubjectList'
+import SubjectForm from './pages/subjectForm/SubjectForm'
+import PPCList from './pages/ppcList/PPCList'
+import PPCForm from './pages/ppcForm/PPCForm'
+import UserForm from './pages/userForm/UserForm'
+import UserDetails from './pages/userDetails/UserDetails'
+import CourseDetailsAdmin from './pages/courseDetails/CourseDetails'
+import EventDetailsAdmin from './pages/eventDetails/EventDetails'
+import SubjectDetailsAdmin from './pages/subjectDetails/SubjectDetails'
+import ProfileAdmin from './pages/profile/Profile'
+import ProfileFormAdmin from './pages/profileForm/ProfileForm'
 
-// User
-import BaseUser from './pages/base/User/BaseUser'
-import HomeUser from './pages/base/User/home/HomeUser'
-import CalendarUser from './pages/base/User/calendar/Calendar'
-import CalendarListUser from './pages/base/User/calendarList/CalendarList'
-import CourseListUser from './pages/base/User/courseList/CourseList'
-import PPCListUser from './pages/base/User/ppcList/PPCList'
-import SubjectListUser from './pages/base/User/subjectList/SubjectList'
-import CourseDetails from './pages/base/User/courseDetails/CourseDetails'
-import EventDetails from './pages/base/User/eventDetails/EventDetails'
-import ProfileForm from './pages/base/User/profileForm/ProfileForm'
-import SubjectDetails from './pages/base/User/subjectDetails/SubjectDetails'
 import PPCDetails from './features/ppcDetails/PPCDetails'
-import Profile from './pages/base/User/profile/Profile'
 import ErrorBoundary from './pages/errorBoundary/ErrorBoundary'
 import Home from './pages/home/Home'
 
@@ -44,185 +38,199 @@ const routes = createBrowserRouter([
         element: <Home/>
     },
     {
-        path: 'session/',
-        element: <Login />
-    },
-    {
-        path: '/session/admin/',
-        element: <BaseAdmin />,
+        path: '/session/',
+        element: <Base />,
         children: [
-            {
-                path: 'home/',
-                element: <HomeAdmin />
+            { 
+                index: true, 
+                element: <Login /> 
             },
-            {
-                path: 'alunos/',
-                element: <UserList />
+            { 
+                path: 'home/', 
+                element: <AuthHome /> 
             },
-            {
-                path: 'servidores/',
-                element: <UserList />
+            { 
+                path: 'sistemas/cadastro/', 
+                element: <SystemForm />, 
+                handle: { permissions: ['add_system'] } 
             },
-            {
-                path: 'convidados/',
-                element: <UserList />
+            { 
+                path: 'sistemas/:systemId/edit/', 
+                element: <SystemForm />, 
+                handle: { permissions: ['change_system'] } 
             },
-            {
-                path: 'grupos/create/',
-                element: <GroupForm/>
+            { 
+                path: 'alunos/', 
+                element: <UserList />, 
+                handle: { permissions: ['view_user'] }
             },
-            {
-                path: 'grupos/',
-                element: <GroupList/>
+            { 
+                path: 'servidores/', 
+                element: <UserList />, 
+                handle: { permissions: ['view_user'] }
             },
-            {
-                path: 'grupos/:groupId/edit/',
-                element: <GroupForm/>
+            { 
+                path: 'convidados/', 
+                element: <UserList />, 
+                handle: { permissions: ['view_user'] }
             },
-            {
-                path: 'sistemas/cadastro/',
-                element: <SystemForm />
+            { 
+                path: 'grupos/', 
+                element: <GroupList />, 
+                handle: { permissions: ['view_group'] } 
             },
-            {
-                path: 'sistemas/:systemId/edit/',
-                element: <SystemForm/>
+            { 
+                path: 'grupos/create/', 
+                element: <GroupForm />, 
+                handle: { permissions: ['add_group'] } 
             },
-            {
-                path: 'calendarios/',
-                element: <CalendarList/>
+            { 
+                path: 'grupos/:groupId/', 
+                element: <GroupDetails />, 
+                handle: { permissions: ['view_group'] } 
             },
-            {
-                path: 'calendarios/create/',
-                element: <CalendarForm/>
+            { 
+                path: 'grupos/:groupId/edit/', 
+                element: <GroupForm />, 
+                handle: { permissions: ['change_group'] } 
             },
-            {
-                path: 'calendarios/:calendarId/',
-                element: <Calendar/>
+            { 
+                path: 'calendarios/', 
+                element: <CalendarList />, 
+                handle: { permissions: ['view_calendar'] } 
             },
-            {
-                path: 'calendarios/:calendarId/edit/',
-                element: <CalendarForm/>
+            { 
+                path: 'calendarios/create/', 
+                element: <CalendarForm />, 
+                handle: { permissions: ['add_calendar'] } 
             },
-            {
-                path: 'calendarios/:calendarId/eventos/create/',
-                element: <EventForm/>
+            { 
+                path: 'calendarios/:calendarId/', 
+                element: <Calendar />, 
+                handle: { permissions: ['view_calendar'] } 
             },
-            {
-                path: 'calendarios/:calendarId/eventos/:eventId/edit/',
-                element: <EventForm/>
+            { 
+                path: 'calendarios/:calendarId/edit/', 
+                element: <CalendarForm />, 
+                handle: { permissions: ['change_calendar'] } 
             },
-            {
-                path: 'cursos/',
-                element: <CourseList/>
+            { 
+                path: 'calendarios/:calendarId/eventos/create/', 
+                element: <EventForm />, 
+                handle: { permissions: ['add_event'] } 
             },
-            {
-                path: 'cursos/create/',
-                element: <CourseForm/>
+            { 
+                path: 'calendarios/:calendarId/eventos/:eventId/edit/', 
+                element: <EventForm />, 
+                handle: { permissions: ['change_event'] } 
             },
-            {
-                path: 'cursos/:cursoId/edit/',
-                element: <CourseForm/>
+            { 
+                path: 'cursos/', 
+                element: <CourseList />, 
+                handle: { permissions: ['view_course', 'view_courseclass'] } 
             },
-            {
-                path: 'disciplinas/',
-                element: <SubjectList/>
+            { 
+                path: 'cursos/create/', 
+                element: <CourseForm />, 
+                handle: { permissions: ['add_course', 'add_courseclass'] } 
             },
-            {
-                path: 'disciplinas/create/',
-                element: <SubjectForm/>,
+            { 
+                path: 'cursos/:cursoId/edit/', 
+                element: <CourseForm />, 
+                handle: { permissions: ['change_course', 'change_courseclass'] } 
             },
-            {
-                path: 'disciplinas/:disciplinaId/edit/',
-                element: <SubjectForm/>
+            { 
+                path: 'cursos/:cursoId/', 
+                element: <CourseDetailsAdmin />, 
+                handle: { permissions: ['view_course', 'view_courseclass'] } 
             },
-            {
-                path: 'ppcs/',
-                element: <PPCList/>
+            { 
+                path: 'disciplinas/', 
+                element: <SubjectList />, 
+                handle: { permissions: ['view_subject'] } 
             },
-            {
-                path: 'ppcs/:ppcId/',
-                element: <PPCDetails/>
+            { 
+                path: 'disciplinas/create/', 
+                element: <SubjectForm />, 
+                handle: { permissions: ['add_subject'] } 
             },
-            {
-                path: 'ppcs/create/',
-                element: <PPCForm/>
+            { 
+                path: 'disciplinas/:disciplinaId/edit/', 
+                element: <SubjectForm />, 
+                handle: { permissions: ['change_subject'] } 
             },
-            {
-                path: 'ppcs/:ppcId/edit/',
-                element: <PPCForm/>
+            { 
+                path: 'disciplinas/:subjectId/', 
+                element: <SubjectDetailsAdmin />, 
+                handle: { permissions: ['view_subject'] } 
             },
-            {
-                path: 'alunos/:alunoId/edit/',
-                element: <UserForm/>
+            { 
+                path: 'ppcs/', 
+                element: <PPCList />, 
+                handle: { permissions: ['view_ppc', 'view_subject', 'view_course'] } 
             },
-            {
-                path: 'servidores/:servidorId/edit/',
-                element: <UserForm/>
+            { 
+                path: 'ppcs/:ppcId/', 
+                element: <PPCDetails />, 
+                handle: { permissions: ['view_ppc', 'view_subject', 'view_course'] } 
             },
-            {
-                path: 'convidados/:convidadoId/edit/',
-                element: <UserForm/>
+            { 
+                path: 'ppcs/create/', 
+                element: <PPCForm />, 
+                handle: { permissions: ['add_ppc'] } 
+            },
+            { 
+                path: 'ppcs/:ppcId/edit/', 
+                element: <PPCForm />, 
+                handle: { permissions: ['change_ppc'] } 
+            },
+            { 
+                path: 'alunos/:alunoId/edit/', 
+                element: <UserForm />, 
+                handle: { permissions: ['change_user'] }
+            },
+            { 
+                path: 'alunos/:userId/', 
+                element: <UserDetails />, 
+                handle: { permissions: ['view_user'] }
+            },
+            { 
+                path: 'servidores/:servidorId/edit/', 
+                element: <UserForm />, 
+                handle: { permissions: ['change_user'] }
+            },
+            { 
+                path: 'servidores/:userId/', 
+                element: <UserDetails />, 
+                handle: { permissions: ['view_user'] }
+            },
+            { 
+                path: 'convidados/:convidadoId/edit/', 
+                element: <UserForm />, 
+                handle: { permissions: ['change_user'] }
+            },
+            { 
+                path: 'convidados/:userId/', 
+                element: <UserDetails />, 
+                handle: { permissions: ['view_user'] }
+            },
+            { 
+                path: 'calendarios/:calendarId/eventos/:eventId/', 
+                element: <EventDetailsAdmin />, 
+                handle: { permissions: ['view_event'] } 
+            },
+            { 
+                path: 'first-login', 
+                element: <ProfileFormAdmin /> 
+            },
+            { 
+                
+                path: 'profile', 
+                element: <ProfileAdmin /> 
             },
         ]
     },
-    {
-        path: '/session/user',
-        element: <BaseUser />,
-        children: [
-            {
-                path: 'home',
-                element: <HomeUser />
-            },
-            {
-                path: 'first-login',
-                element: <ProfileForm/>
-            },
-            {
-                path: 'calendarios/',
-                element: <CalendarListUser/>
-            },
-            {
-                path: 'calendarios/:calendarioId/',
-                element: <CalendarUser/>
-            },
-            {
-                path: 'calendarios/:calendarioId/eventos/:eventoId/',
-                element: <EventDetails/>
-            },
-            {
-                path: 'cursos/',
-                element: <CourseListUser/>
-            },
-            {
-                path: 'cursos/:cursoId/',
-                element: <CourseDetails/>
-            },
-            {
-                path: 'ppcs/',
-                element: <PPCListUser/>
-            },
-            {
-                path: 'ppcs/:ppcId/',
-                element: <PPCDetails/>
-            },
-            {
-                path: 'disciplinas/',
-                element: <SubjectListUser/>,
-            },
-            {
-                path: 'disciplinas/:subjectId/',
-                element: <SubjectDetails/>
-            },
-            {
-                path: 'profile',
-                element: <Profile/>
-            }
-        ]
-    },
-    {
-        path: '*',
-        element: <ErrorBoundary/>
-    }
+    { path: '*', element: <ErrorBoundary/> }
 ])
 
 export default routes

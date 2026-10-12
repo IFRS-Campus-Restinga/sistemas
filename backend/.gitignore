@@ -139,6 +139,11 @@ credentials/
 data_to_import/
 **/migrations/*.py
 !**/migrations/__init__.py
+!hub_users/migrations/0002_split_additional_infos.py
+!hub_users/migrations/0003_accessrequest_remove_pending_request.py
+!hub_users/migrations/0004_alter_accessrequest_options.py
+!hub_users/migrations/0005_emailconfirmation_emailverified.py
+!hub_users/migrations/0006_bindrequest.py
 
 # Spyder project settings
 .spyderproject

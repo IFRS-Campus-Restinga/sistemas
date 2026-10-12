@@ -24,18 +24,6 @@ msgstr "Pode excluir grupo"
 msgid "Can view group"
 msgstr "Pode visualizar grupo"
 
-msgid "Can add custom user"
-msgstr "Pode adicionar usuário"
-
-msgid "Can change custom user"
-msgstr "Pode alterar usuário"
-
-msgid "Can delete custom user"
-msgstr "Pode excluir usuário"
-
-msgid "Can view custom user"
-msgstr "Pode visualizar usuário"
-
 msgid "Can add password"
 msgstr "Pode adicionar senha"
 
@@ -48,17 +36,53 @@ msgstr "Pode excluir senha"
 msgid "Can view password"
 msgstr "Pode visualizar senha"
 
-msgid "Can add additional infos"
-msgstr "Pode adicionar informações adicionais"
+msgid "Can add personal infos"
+msgstr "Pode adicionar informações pessoais"
 
-msgid "Can change additional infos"
-msgstr "Pode alterar informações adicionais"
+msgid "Can change personal infos"
+msgstr "Pode alterar informações pessoais"
 
-msgid "Can delete additional infos"
-msgstr "Pode excluir informações adicionais"
+msgid "Can delete personal infos"
+msgstr "Pode excluir informações pessoais"
 
-msgid "Can view additional infos"
-msgstr "Pode visualizar informações adicionais"
+msgid "Can view personal infos"
+msgstr "Pode visualizar informações pessoais"
+
+msgid "Can add account infos"
+msgstr "Pode adicionar informações da conta"
+
+msgid "Can change account infos"
+msgstr "Pode alterar informações da conta"
+
+msgid "Can delete account infos"
+msgstr "Pode excluir informações da conta"
+
+msgid "Can view account infos"
+msgstr "Pode visualizar informações da conta"
+
+msgid "Can add access request"
+msgstr "Pode adicionar Solicitações de Acesso"
+
+msgid "Can change access request"
+msgstr "Pode alterar Solicitações de Acesso"
+
+msgid "Can delete access request"
+msgstr "Pode excluir Solicitações de Acesso"
+
+msgid "Can view access request"
+msgstr "Pode visualizar Solicitações de Acesso"
+
+msgid "Can add bind request"
+msgstr "Pode adicionar Vínculo de Informações"
+
+msgid "Can change bind request"
+msgstr "Pode alterar Vínculo de Informações"
+
+msgid "Can delete bind request"
+msgstr "Pode excluir Vínculo de Informações"
+
+msgid "Can view bind request"
+msgstr "Pode visualizar Vínculo de Informações"
 
 msgid "Can add system"
 msgstr "Pode adicionar sistema"
